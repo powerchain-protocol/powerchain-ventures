@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "build": "node ../../scripts/run-next.mjs backend build",
     "typecheck": "tsc --noEmit",
-    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev -p 3001",
-    "start": "NEXT_TELEMETRY_DISABLED=1 next start -p 3001",
+    "dev": "node ../../scripts/run-next.mjs backend dev",
+    "start": "node ../../scripts/run-next.mjs backend start",
     "predev": "node ../../scripts/check-dev-start.mjs backend && pnpm -C ../.. build:packages"
   },
   "dependencies": {

@@ -53,6 +53,13 @@ if (!hasRootEnv) {
   console.warn("Create one with: cp .env.development.example .env.local");
 }
 
+const appDir = path.join(root, "apps", app);
+const routerCandidates = ["app", "pages", "src/app", "src/pages"];
+if (!routerCandidates.some((candidate) => fs.existsSync(path.join(appDir, candidate)))) {
+  console.error(`[PowerChain] ${app} has no app/pages router under ${appDir}.`);
+  process.exit(1);
+}
+
 const port = apps[app].port;
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   console.error(`[PowerChain] Invalid ${app} port: ${port}`);

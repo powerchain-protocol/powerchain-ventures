@@ -102,7 +102,6 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   ...(!isVercel ? { output: "standalone" as const } : {}),
   outputFileTracingRoot: monorepoRoot,
-  turbopack: { root: monorepoRoot },
   transpilePackages: ["@powerchain/launchpad-config", "@powerchain/utils", "@powerchain/integrations"],
   async rewrites() {
     return [{ source: "/api/v1/:path*", destination: `${backendOrigin}/api/v1/:path*` }];

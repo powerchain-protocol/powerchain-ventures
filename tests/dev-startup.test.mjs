@@ -29,8 +29,13 @@ test("frontend startup keeps fixed ports and direct diagnostics", () => {
 
   const root = json("package.json");
   assert.equal(root.packageManager, "pnpm@11.21.0");
-  assert.equal(root.scripts["dev:frontend:direct"], "pnpm -C apps/frontend exec next dev --port 3000");
+  assert.equal(root.devEngines, undefined, "devEngines.runtime must not install npm-distributed Node");
+  assert.equal(root.scripts["dev:frontend:direct"], "node scripts/run-next.mjs frontend dev");
   assert.equal(root.scripts["clean:frontend"], "node scripts/clean-next-cache.mjs frontend");
+  assert.equal(root.scripts.preinstall, "node scripts/check-install-runtime.mjs");
+  const runner = read("scripts/run-next.mjs");
+  assert.match(runner, /const args = \[nextCli, command, appDir\]/);
+  assert.match(runner, /apps\/frontend/);
 });
 
 test("test and validate build generated workspace outputs before dist imports", () => {

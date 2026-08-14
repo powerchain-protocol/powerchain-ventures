@@ -78,8 +78,9 @@
     "clean:backend": "node scripts/clean-next-cache.mjs backend",
     "preflight:frontend": "node scripts/check-dev-start.mjs frontend",
     "preflight:backend": "node scripts/check-dev-start.mjs backend",
-    "dev:frontend:direct": "pnpm -C apps/frontend exec next dev --port 3000",
-    "dev:backend:direct": "pnpm -C apps/backend exec next dev --port 3001"
+    "dev:frontend:direct": "node scripts/run-next.mjs frontend dev",
+    "dev:backend:direct": "node scripts/run-next.mjs backend dev",
+    "preinstall": "node scripts/check-install-runtime.mjs"
   },
   "devDependencies": {
     "next": "16.2.12",
@@ -89,17 +90,5 @@
     "@types/react-dom": "^19",
     "prisma": "7.9.1"
   },
-  "type": "module",
-  "devEngines": {
-    "runtime": {
-      "name": "node",
-      "version": ">=24 <25",
-      "onFail": "download"
-    },
-    "packageManager": {
-      "name": "pnpm",
-      "version": "11.21.0",
-      "onFail": "download"
-    }
-  }
+  "type": "module"
 }

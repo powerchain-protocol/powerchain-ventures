@@ -32,7 +32,6 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   ...(!isVercel ? { output: "standalone" as const } : {}),
   outputFileTracingRoot: monorepoRoot,
-  turbopack: { root: monorepoRoot },
   outputFileTracingIncludes: { "/api/v1/openapi": ["./openapi/powerchain-launchpad.openapi.yaml"] },
   transpilePackages: ["@powerchain/solana", "@powerchain/launchpad-config", "@powerchain/utils", "@powerchain/integrations", "@powerchain/launchpad-program-client"],
   async headers() {

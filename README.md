@@ -56,6 +56,10 @@ Production-oriented, PowerChain-only token-sale application for Solana Token-202
 
 ```bash
 corepack prepare pnpm@11.21.0 --activate
+
+# If upgrading from the earlier devEngines.runtime build, remove the stale
+# npm-distributed Node runtime before reinstalling. Your nvm Node remains intact.
+rm -rf node_modules
 pnpm install
 pnpm doctor:runtime
 pnpm dev:all

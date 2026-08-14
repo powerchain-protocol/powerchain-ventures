@@ -1,12 +1,14 @@
 # Changelog
 
+- Fixed pnpm Node-runtime bootstrap: removed `devEngines.runtime`, which caused pnpm 11.21.0 to install the `node` npm package and fail under `strictDepBuilds`; Node 24 is now enforced with `engines`, `.nvmrc`, `.node-version`, and the dev preflight.
+- Hardened Next startup by passing `apps/frontend` / `apps/backend` explicitly to the Next CLI from a monorepo-root wrapper, and removed the unnecessary custom `turbopack.root` override.
+
 - Hardened local Next.js startup: frontend/backend configs now load canonical monorepo-root `.env*` files through `@next/env`, derive the root from the config file path rather than `process.cwd()`, preflight Node 24 and ports 3000/3001, and provide direct Next/cache diagnostic commands.
 
 ### Runtime toolchain
 
 - Standardized the monorepo on Node.js 24.x (`>=24 <25`).
 - Updated Corepack/package-manager pinning to pnpm 11.21.0.
-- Added pnpm 11 `devEngines.runtime` and `devEngines.packageManager` policies.
 - Updated Docker images from Node 22 Alpine to Node 24 Alpine.
 - Updated `@types/node` to the Node 24 type line.
 - Added `.nvmrc` and `.node-version` with Node 24.

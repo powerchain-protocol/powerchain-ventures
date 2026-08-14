@@ -71,10 +71,9 @@ for (const [name, { dir, pkg }] of packages) {
 const rootPkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (rootPkg.version !== VERSION) failures.push(`root package version must remain ${VERSION}`);
 if (rootPkg.packageManager !== 'pnpm@11.21.0') failures.push('root packageManager must be pnpm@11.21.0');
+if (rootPkg.devEngines?.runtime) failures.push('root devEngines.runtime must not install a second Node runtime; use .nvmrc/engines/preflight');
 if (rootPkg.engines?.node !== '>=24 <25') failures.push('root Node engine must be >=24 <25');
 if (rootPkg.engines?.pnpm !== '>=11.21.0 <12') failures.push('root pnpm engine must be >=11.21.0 <12');
-if (rootPkg.devEngines?.runtime?.name !== 'node' || rootPkg.devEngines?.runtime?.version !== '>=24 <25') failures.push('root devEngines.runtime must pin Node 24');
-if (rootPkg.devEngines?.packageManager?.name !== 'pnpm' || rootPkg.devEngines?.packageManager?.version !== '11.21.0') failures.push('root devEngines.packageManager must pin pnpm 11.21.0');
 for (const script of ['doctor:workspace', 'doctor:types', 'doctor:pnpm', 'doctor:runtime', 'typecheck:packages', 'typecheck:apps', 'build:packages']) {
   if (!rootPkg.scripts?.[script]) failures.push(`root script ${script} is required`);
 }
