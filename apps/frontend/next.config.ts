@@ -11,6 +11,15 @@ const monorepoRoot = path.resolve(appRoot, "../..");
 // Existing app/process variables keep precedence; root values fill gaps.
 loadEnvConfig(monorepoRoot, process.env.NODE_ENV !== "production");
 
+// Keep local development zero-config even when a developer has not created
+// .env.local yet. These values are public and intentionally non-secret.
+// Production/Vercel remains strict below and does not receive these defaults.
+if (process.env.NODE_ENV !== "production") {
+  process.env.NEXT_PUBLIC_APP_URL ||= "http://localhost:3000";
+  process.env.NEXT_PUBLIC_SOLANA_CLUSTER ||= "devnet";
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||= "https://api.devnet.solana.com";
+}
+
 const isProduction = process.env.NODE_ENV === "production";
 const isVercel = process.env.VERCEL === "1";
 const strictBuildEnv = process.env.POWERCHAIN_STRICT_BUILD_ENV === "1" || isVercel;

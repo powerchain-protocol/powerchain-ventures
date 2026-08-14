@@ -13,13 +13,49 @@ type PublicEnv = {
   readonly NEXT_PUBLIC_SOLANA_RPC_URL?: string;
 };
 
-function required(source: PublicEnv, name: keyof PublicEnv): string {
-  const value = source[name]?.trim();
-  if (!value) throw new Error(`[PowerChain] ${String(name)} is required`);
+const DEVELOPMENT_DEFAULTS = Object.freeze({
+  NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+  NEXT_PUBLIC_SOLANA_CLUSTER: "devnet",
+  NEXT_PUBLIC_SOLANA_RPC_URL: "https://api.devnet.solana.com",
+} satisfies Required<Pick<PublicEnv,
+  | "NEXT_PUBLIC_APP_URL"
+  | "NEXT_PUBLIC_SOLANA_CLUSTER"
+  | "NEXT_PUBLIC_SOLANA_RPC_URL"
+>>);
+
+function isProduction(source: PublicEnv): boolean {
+  return source.NODE_ENV === "production";
+}
+
+function valueOrDevelopmentDefault(
+  source: PublicEnv,
+  name:
+    | "NEXT_PUBLIC_APP_URL"
+    | "NEXT_PUBLIC_SOLANA_CLUSTER"
+    | "NEXT_PUBLIC_SOLANA_RPC_URL",
+): string | undefined {
+  const configured = source[name]?.trim();
+  if (configured) return configured;
+  if (!isProduction(source)) return DEVELOPMENT_DEFAULTS[name];
+  return undefined;
+}
+
+function required(
+  source: PublicEnv,
+  name:
+    | "NEXT_PUBLIC_APP_URL"
+    | "NEXT_PUBLIC_SOLANA_CLUSTER"
+    | "NEXT_PUBLIC_SOLANA_RPC_URL",
+): string {
+  const value = valueOrDevelopmentDefault(source, name);
+  if (!value) throw new Error(`[PowerChain] ${name} is required`);
   return value;
 }
 
-function absoluteHttpUrl(source: PublicEnv, name: "NEXT_PUBLIC_APP_URL" | "NEXT_PUBLIC_SOLANA_RPC_URL"): string {
+function absoluteHttpUrl(
+  source: PublicEnv,
+  name: "NEXT_PUBLIC_APP_URL" | "NEXT_PUBLIC_SOLANA_RPC_URL",
+): string {
   const value = required(source, name);
   let url: URL;
   try {
@@ -33,7 +69,7 @@ function absoluteHttpUrl(source: PublicEnv, name: "NEXT_PUBLIC_APP_URL" | "NEXT_
   if (url.username || url.password) {
     throw new Error(`[PowerChain] ${name} must not contain URL credentials`);
   }
-  if (source.NODE_ENV === "production" && url.protocol !== "https:") {
+  if (isProduction(source) && url.protocol !== "https:") {
     throw new Error(`[PowerChain] ${name} must use https in production`);
   }
   return url.toString().replace(/\/$/, "");
@@ -49,6 +85,9 @@ function solanaCluster(source: PublicEnv): SolanaCluster {
 
 /**
  * Browser-only public runtime parser.
+ *
+ * Development is zero-config by design and falls back to localhost/devnet.
+ * Production remains strict and requires all public runtime variables.
  *
  * Keep this module local to the frontend. It deliberately has no dependency on
  * workspace barrels, server-only modules, Node APIs, databases, or secrets.

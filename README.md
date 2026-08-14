@@ -213,6 +213,10 @@ The repository root intentionally keeps only three Markdown files: `README.md`, 
 
 The web apps load the canonical `.env*` files from the monorepo root. App-local
 environment values, shell variables, and deployment variables keep precedence.
+The repository ships a non-secret `.env.development` so local development is
+zero-config for the frontend URL and Solana devnet RPC. Use `.env.local` only
+when you need to override those development defaults. Production does not use
+these fallbacks and still requires explicit environment configuration.
 
 Before starting the frontend:
 

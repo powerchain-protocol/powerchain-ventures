@@ -183,3 +183,10 @@ All notable changes to PowerChain Launchpad™ are documented here. The release/
 - Fixed the Next.js 16/Turbopack frontend runtime crash where `getPublicRuntimeConfig` could resolve to an undefined workspace export; client runtime config is now locally parsed, immutable, and browser-only.
 - Added explicit `@powerchain/launchpad-config/constants`, `/public`, `/server`, and `/runtime` exports and upgraded frontend resolution/validation guards.
 - Added clean-checkout environment templates and made source validation understand generated package `dist` imports before build output exists.
+
+## Development environment startup hardening
+
+- Added committed non-secret `.env.development` defaults for local frontend/backend development.
+- Frontend public runtime parsing now defaults to `http://localhost:3000`, Solana `devnet`, and the public Solana devnet RPC only outside production.
+- Production remains fail-closed and still requires explicit public runtime environment values.
+- Frontend `next.config.ts` injects the same public development defaults after loading root `.env*`, preventing undefined `NEXT_PUBLIC_*` values during Turbopack compilation.

@@ -43,3 +43,19 @@ test("test and validate build generated workspace outputs before dist imports", 
   assert.match(root.scripts.test, /^pnpm build:packages && node --test/);
   assert.match(root.scripts.validate, /sync-openapi\.mjs --check && pnpm build:packages && node --test/);
 });
+
+
+test("frontend development runtime has safe defaults while production stays strict", () => {
+  const envFile = read(".env.development");
+  const parser = read("apps/frontend/lib/env/public.ts");
+  const config = read("apps/frontend/next.config.ts");
+
+  assert.match(envFile, /NEXT_PUBLIC_APP_URL=http:\/\/localhost:3000/);
+  assert.match(envFile, /NEXT_PUBLIC_SOLANA_CLUSTER=devnet/);
+  assert.match(envFile, /NEXT_PUBLIC_SOLANA_RPC_URL=https:\/\/api\.devnet\.solana\.com/);
+  assert.match(parser, /DEVELOPMENT_DEFAULTS/);
+  assert.match(parser, /if \(!isProduction\(source\)\) return DEVELOPMENT_DEFAULTS\[name\]/);
+  assert.match(parser, /if \(!value\) throw new Error\(`\[PowerChain\] \$\{name\} is required`\)/);
+  assert.match(config, /process\.env\.NEXT_PUBLIC_APP_URL \|\|= "http:\/\/localhost:3000"/);
+  assert.match(config, /process\.env\.NEXT_PUBLIC_SOLANA_CLUSTER \|\|= "devnet"/);
+});

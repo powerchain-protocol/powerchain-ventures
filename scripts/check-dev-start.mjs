@@ -49,8 +49,8 @@ const rootEnvCandidates = [
 ];
 const hasRootEnv = rootEnvCandidates.some((name) => fs.existsSync(path.join(root, name)));
 if (!hasRootEnv) {
-  console.warn("[PowerChain] No root .env development file found.");
-  console.warn("Create one with: cp .env.development.example .env.local");
+  console.warn("[PowerChain] No root .env override found; using committed safe development defaults.");
+  console.warn("Optional override: cp .env.development.example .env.local");
 }
 
 const appDir = path.join(root, "apps", app);

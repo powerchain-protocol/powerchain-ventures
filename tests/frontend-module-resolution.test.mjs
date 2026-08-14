@@ -20,11 +20,13 @@ test("PowerChain workspace packages export compiled dist artifacts", () => {
   }
 });
 
-test("Next Turbopack roots are monorepo-aware", () => {
+test("Next configs use monorepo tracing without forcing a custom Turbopack root", () => {
   const frontend = fs.readFileSync("apps/frontend/next.config.ts", "utf8");
   const backend = fs.readFileSync("apps/backend/next.config.ts", "utf8");
-  assert.match(frontend, /turbopack:\s*\{\s*root:\s*monorepoRoot\s*\}/);
-  assert.match(backend, /turbopack:\s*\{\s*root:\s*monorepoRoot\s*\}/);
+  assert.match(frontend, /outputFileTracingRoot:\s*monorepoRoot/);
+  assert.match(backend, /outputFileTracingRoot:\s*monorepoRoot/);
+  assert.doesNotMatch(frontend, /turbopack:\s*\{\s*root:/);
+  assert.doesNotMatch(backend, /turbopack:\s*\{\s*root:/);
 });
 
 

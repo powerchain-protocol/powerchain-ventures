@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":["file:///Users/miko/github/powerchain/powerchain-launchpad/node_modules/.pnpm/next%4016.2.12_%40babel%2Bcore%407.29.7_supports-color%408.1.1__babel-plugin-react-compiler%401.0.0_5990ea76a0cceab74cf81a86d67b2a35/node_modules/next/app.js"],"sourcesContent":["module.exports = require('./dist/pages/_app')\n"],"names":["module","exports"],"mappings":"AAAAA,OAAOC,OAAO","ignoreList":[0]}}]
+}
