@@ -1,10 +1,19 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
+
+const appRoot = path.dirname(fileURLToPath(import.meta.url));
+const monorepoRoot = path.resolve(appRoot, "../..");
+
+// Next normally loads .env* from the app directory. PowerChain keeps one
+// canonical environment file at the monorepo root, so load it explicitly.
+// Existing app/process variables keep precedence; root values fill gaps.
+loadEnvConfig(monorepoRoot, process.env.NODE_ENV !== "production");
 
 const isProduction = process.env.NODE_ENV === "production";
 const isVercel = process.env.VERCEL === "1";
 const strictBuildEnv = process.env.POWERCHAIN_STRICT_BUILD_ENV === "1" || isVercel;
-const monorepoRoot = path.resolve(process.cwd(), "../..");
 
 function normalizeOrigin(value: string): string {
   return value.trim().replace(/\/+$/, "");

@@ -1,5 +1,17 @@
 # Changelog
 
+- Hardened local Next.js startup: frontend/backend configs now load canonical monorepo-root `.env*` files through `@next/env`, derive the root from the config file path rather than `process.cwd()`, preflight Node 24 and ports 3000/3001, and provide direct Next/cache diagnostic commands.
+
+### Runtime toolchain
+
+- Standardized the monorepo on Node.js 24.x (`>=24 <25`).
+- Updated Corepack/package-manager pinning to pnpm 11.21.0.
+- Added pnpm 11 `devEngines.runtime` and `devEngines.packageManager` policies.
+- Updated Docker images from Node 22 Alpine to Node 24 Alpine.
+- Updated `@types/node` to the Node 24 type line.
+- Added `.nvmrc` and `.node-version` with Node 24.
+
+
 ## 1.0.0 — Mobile Expo dependency-resolution hardening
 
 - Pin mobile `react-native-screens` to exactly `4.26.0` for Expo SDK 57 / React Native 0.86 navigation compatibility.
@@ -165,3 +177,7 @@ All notable changes to PowerChain Launchpad™ are documented here. The release/
 - Fixed Expo/React Native Web Pressable style-state typing by forwarding the complete callback state.
 - Aligned Expo dependency range with the installed SDK 57.0.12 patch.
 - Narrowly allowlisted only the legacy transitive `uuid@7.0.3` and `uuid@8.3.2` deprecation warnings without overriding them.
+
+- Fixed the Next.js 16/Turbopack frontend runtime crash where `getPublicRuntimeConfig` could resolve to an undefined workspace export; client runtime config is now locally parsed, immutable, and browser-only.
+- Added explicit `@powerchain/launchpad-config/constants`, `/public`, `/server`, and `/runtime` exports and upgraded frontend resolution/validation guards.
+- Added clean-checkout environment templates and made source validation understand generated package `dist` imports before build output exists.

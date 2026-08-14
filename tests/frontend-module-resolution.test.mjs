@@ -26,3 +26,21 @@ test("Next Turbopack roots are monorepo-aware", () => {
   assert.match(frontend, /turbopack:\s*\{\s*root:\s*monorepoRoot\s*\}/);
   assert.match(backend, /turbopack:\s*\{\s*root:\s*monorepoRoot\s*\}/);
 });
+
+
+test("frontend runtime config is browser-local and shared config exposes safe subpaths", () => {
+  const config = fs.readFileSync("apps/frontend/lib/config.ts", "utf8");
+  const constants = fs.readFileSync("apps/frontend/lib/constants.ts", "utf8");
+  const pkg = readJson("packages/config/package.json");
+
+  assert.doesNotMatch(config, /getPublicRuntimeConfig/);
+  assert.doesNotMatch(config, /from ["']@powerchain\/launchpad-config["']/);
+  assert.match(config, /parseClientRuntimeConfig/);
+  assert.match(config, /const clientConfig/);
+  assert.match(constants, /@powerchain\/launchpad-config\/constants/);
+  const frontendTsconfig = readJson("apps/frontend/tsconfig.json");
+  assert.equal(frontendTsconfig.compilerOptions.paths["@powerchain/launchpad-config"], undefined);
+  for (const subpath of ["./constants", "./public", "./server", "./runtime"]) {
+    assert.ok(pkg.exports[subpath], `config package must export ${subpath}`);
+  }
+});

@@ -6,7 +6,8 @@
     "build": "NEXT_TELEMETRY_DISABLED=1 next build",
     "typecheck": "tsc --noEmit",
     "dev": "NEXT_TELEMETRY_DISABLED=1 next dev -p 3001",
-    "start": "NEXT_TELEMETRY_DISABLED=1 next start -p 3001"
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start -p 3001",
+    "predev": "node ../../scripts/check-dev-start.mjs backend && pnpm -C ../.. build:packages"
   },
   "dependencies": {
     "next": "16.2.12",
@@ -25,11 +26,16 @@
     "@powerchain/launchpad-program-client": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@next/env": "16.2.12",
+    "@types/node": "^24",
+    "@types/pg": "8.15.5",
     "@types/react": "^19",
-    "typescript": "5.9.3",
     "@types/react-dom": "^19",
-    "@types/pg": "8.15.5"
+    "typescript": "5.9.3"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11.21.0 <12"
+  }
 }

@@ -1,4 +1,6 @@
-# PowerChain Launchpad™ 1.0.0
+# PowerChain Launchpad
+
+**Runtime:** Node.js 24.x · pnpm 11.21.0™ 1.0.0
 
 Production-oriented, PowerChain-only token-sale application for Solana Token-2022 assets.
 
@@ -53,8 +55,9 @@ Production-oriented, PowerChain-only token-sale application for Solana Token-202
 ## Local development
 
 ```bash
-corepack prepare pnpm@11.20.0 --activate
+corepack prepare pnpm@11.21.0 --activate
 pnpm install
+pnpm doctor:runtime
 pnpm dev:all
 ```
 
@@ -201,3 +204,36 @@ The repository root intentionally keeps only three Markdown files: `README.md`, 
 - Shared package READMEs: [`packages/README.md`](packages/README.md)
 - Solana program README/tests: [`programs/README.md`](programs/README.md)
 - Utility package tests: [`packages/utils/tests/`](packages/utils/tests/)
+
+## Development startup diagnostics
+
+The web apps load the canonical `.env*` files from the monorepo root. App-local
+environment values, shell variables, and deployment variables keep precedence.
+
+Before starting the frontend:
+
+```bash
+nvm use 24
+corepack enable
+corepack prepare pnpm@11.21.0 --activate
+pnpm install
+pnpm preflight:frontend
+pnpm dev:frontend
+```
+
+If pnpm only reports `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL`, run Next directly so
+the original error is not buried by the recursive runner:
+
+```bash
+pnpm dev:frontend:direct
+```
+
+If port 3000 is occupied:
+
+```bash
+lsof -nP -iTCP:3000 -sTCP:LISTEN
+pnpm clean:frontend
+```
+
+`pnpm clean:frontend` only removes the frontend `.next` cache; it does not touch
+source files or installed dependencies.

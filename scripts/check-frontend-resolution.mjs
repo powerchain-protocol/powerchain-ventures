@@ -10,7 +10,7 @@ const req = createRequire(frontendPkg);
 const failures = [];
 
 const targets = [
-  ["PowerChain config", "@powerchain/launchpad-config"],
+  ["PowerChain config constants", "@powerchain/launchpad-config/constants"],
   ["PowerChain utils helpers", "@powerchain/utils/helpers"],
   ["PowerChain utils HTTP", "@powerchain/utils/http"],
   ["ConnectorKit React", "@solana/connector/react"],

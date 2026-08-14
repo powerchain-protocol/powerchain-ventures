@@ -1,0 +1,80 @@
+import fs from "node:fs";
+import net from "node:net";
+import path from "node:path";
+import process from "node:process";
+import { fileURLToPath } from "node:url";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(here, "..");
+const app = process.argv[2];
+
+const apps = {
+  frontend: {
+    port: 3000,
+    env: [
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_SOLANA_CLUSTER",
+      "NEXT_PUBLIC_SOLANA_RPC_URL",
+    ],
+  },
+  backend: {
+    port: 3001,
+    env: [],
+  },
+};
+
+if (!(app in apps)) {
+  console.error("Usage: node scripts/check-dev-start.mjs <frontend|backend>");
+  process.exit(2);
+}
+
+const major = Number(process.versions.node.split(".")[0]);
+if (major !== 24) {
+  console.error(`[PowerChain] Node 24 is required; current runtime is ${process.version}.`);
+  console.error("Run: nvm use 24");
+  process.exit(1);
+}
+
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+if (packageJson.packageManager !== "pnpm@11.21.0") {
+  console.error(`[PowerChain] Expected pnpm@11.21.0, found ${packageJson.packageManager ?? "none"}.`);
+  process.exit(1);
+}
+
+const rootEnvCandidates = [
+  ".env.development.local",
+  ".env.local",
+  ".env.development",
+  ".env",
+];
+const hasRootEnv = rootEnvCandidates.some((name) => fs.existsSync(path.join(root, name)));
+if (!hasRootEnv) {
+  console.warn("[PowerChain] No root .env development file found.");
+  console.warn("Create one with: cp .env.development.example .env.local");
+}
+
+const port = apps[app].port;
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  console.error(`[PowerChain] Invalid ${app} port: ${port}`);
+  process.exit(1);
+}
+
+await new Promise((resolve, reject) => {
+  const server = net.createServer();
+  server.unref();
+  server.once("error", (error) => {
+    if (error?.code === "EADDRINUSE") {
+      console.error(`[PowerChain] Port ${port} is already in use; ${app} cannot start.`);
+      console.error(`Inspect it on macOS with: lsof -nP -iTCP:${port} -sTCP:LISTEN`);
+      console.error(`Or stop the stale process before restarting PowerChain.`);
+      reject(error);
+      return;
+    }
+    reject(error);
+  });
+  server.listen({ host: "127.0.0.1", port }, () => {
+    server.close(resolve);
+  });
+}).catch(() => process.exit(1));
+
+console.log(`[PowerChain] ${app} dev preflight passed (Node ${process.version}, port ${port}).`);

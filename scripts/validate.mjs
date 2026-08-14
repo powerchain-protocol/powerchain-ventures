@@ -30,7 +30,18 @@ for(const guard of ['014_database_access_hardening.sql','launchpad_apply_sale_ac
 // Resolve all relative source imports so packaging errors are caught before release.
 for(const f of files.filter(f=>/\.(ts|tsx|js|mjs)$/.test(f)&&!f.includes('/dist/'))){
  const src=fs.readFileSync(f,'utf8');const re=/(?:from\s+|import\s*\()\s*["'](\.{1,2}\/[^"']+)["']/g;let match;
- while((match=re.exec(src))){const base=path.resolve(path.dirname(f),match[1]);const stripped=/\.js$/.test(base)?base.slice(0,-3):base;const candidates=[base,stripped,...['.ts','.tsx','.js','.mjs','.json'].map(x=>stripped+x),...['.ts','.tsx','.js','.mjs'].map(x=>path.join(stripped,'index'+x))];if(!candidates.some(fs.existsSync))errors.push(`unresolved relative import ${path.relative(root,f)} -> ${match[1]}`)}
+ while((match=re.exec(src))){
+  const base=path.resolve(path.dirname(f),match[1]);
+  const stripped=/\.js$/.test(base)?base.slice(0,-3):base;
+  const candidates=[base,stripped,...['.ts','.tsx','.js','.mjs','.json'].map(x=>stripped+x),...['.ts','.tsx','.js','.mjs'].map(x=>path.join(stripped,'index'+x))];
+  const rel=path.relative(root,base).replaceAll('\\','/');
+  const distMatch=rel.match(/^(packages\/[^/]+)\/dist\/(.+?)(?:\.js)?$/);
+  if(distMatch){
+    const sourceBase=path.join(root,distMatch[1],'src',distMatch[2]);
+    candidates.push(sourceBase,...['.ts','.tsx','.js','.mjs'].map(x=>sourceBase+x),...['.ts','.tsx','.js','.mjs'].map(x=>path.join(sourceBase,'index'+x)));
+  }
+  if(!candidates.some(fs.existsSync))errors.push(`unresolved relative import ${path.relative(root,f)} -> ${match[1]}`);
+ }
 }
 const deliveryMigration=fs.readFileSync(path.join(root,'database/migrations/015_presale_delivery_and_vesting_entitlements.sql'),'utf8');
 for(const guard of ['source_vault_token_account','payment_receiver_wallet','delivery_mode','launchpad_vesting','vestingEntitlementCreated','for update']) if(!deliveryMigration.includes(guard))errors.push(`delivery migration guard missing: ${guard}`);
@@ -72,6 +83,18 @@ for(const guard of ['PowerChainError','parseApiError','RATE_LIMITED','TRANSACTIO
 
 const runtimeConfig=fs.readFileSync(path.join(root,'packages/config/src/runtime.ts'),'utf8');
 for(const guard of ['getPublicRuntimeConfig','getServerRuntimeConfig','mainnet-beta production requires at least two Solana RPC endpoints']) if(!runtimeConfig.includes(guard))errors.push(`runtime config guard missing: ${guard}`);
+const frontendRuntime=fs.readFileSync(path.join(root,'apps/frontend/lib/config.ts'),'utf8');
+if(frontendRuntime.includes('getPublicRuntimeConfig')||frontendRuntime.includes('from "@powerchain/launchpad-config"')||frontendRuntime.includes("from '@powerchain/launchpad-config'"))errors.push('frontend runtime config must not import the shared package root');
+for(const guard of ['parseClientRuntimeConfig','const clientConfig','NEXT_PUBLIC_SOLANA_RPC_URL'])if(!frontendRuntime.includes(guard))errors.push(`frontend runtime config guard missing: ${guard}`);
+const frontendPublicEnv=fs.readFileSync(path.join(root,'apps/frontend/lib/env/public.ts'),'utf8');
+for(const banned of ['DATABASE_URL','SUPABASE_SERVICE_ROLE_KEY','WEBHOOK_SIGNING_SECRET'])if(frontendPublicEnv.includes(banned))errors.push(`frontend public env leaks server-only token: ${banned}`);
+if(/(?:import|from)\s*(?:[^\n]*?)['\"](?:server-only|node:)/.test(frontendPublicEnv))errors.push('frontend public env imports a server-only or Node module');
+const configPackage=JSON.parse(fs.readFileSync(path.join(root,'packages/config/package.json'),'utf8'));
+for(const subpath of ['./constants','./public','./server'])if(!configPackage.exports?.[subpath])errors.push(`config package export missing: ${subpath}`);
+for(const file of files.filter(f=>/\.(ts|tsx)$/.test(f)&&f.includes('/apps/frontend/'))){
+ const source=fs.readFileSync(file,'utf8');
+ if(/^\s*["']use client["'];?/m.test(source)&&source.includes('@powerchain/launchpad-config/server'))errors.push(`client module imports server config: ${path.relative(root,file)}`);
+}
 const httpPolicy=fs.readFileSync(path.join(root,'packages/utils/src/http.ts'),'utf8');
 for(const guard of ['x-request-id','idempotency-key','parseRetryAfterMs','fetchJsonWithPolicy','canRetry']) if(!httpPolicy.includes(guard))errors.push(`HTTP policy guard missing: ${guard}`);
 for(const req of ['docs/RUNTIME.md','scripts/check-vercel-config.mjs','.env.development.example','packages/config/src/runtime.ts','packages/utils/src/http.ts']) if(!fs.existsSync(path.join(root,req)))errors.push(`runtime improvement missing: ${req}`);

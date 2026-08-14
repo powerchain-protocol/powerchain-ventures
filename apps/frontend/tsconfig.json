@@ -13,9 +13,6 @@
       "@/*": [
         "./*"
       ],
-      "@powerchain/launchpad-config": [
-        "../../packages/config/dist/index.d.ts"
-      ],
       "@powerchain/utils": [
         "../../packages/utils/dist/index.d.ts"
       ],
@@ -27,6 +24,9 @@
       ],
       "@powerchain/utils/utils/errors": [
         "../../packages/utils/dist/utils/errors.d.ts"
+      ],
+      "@powerchain/launchpad-config/constants": [
+        "../../packages/config/dist/constants.d.ts"
       ]
     },
     "types": [

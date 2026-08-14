@@ -6,7 +6,7 @@ export {
   POWERCHAIN_VERSION,
   SOLANA_MAINNET_GENESIS_PREFIX,
   SOLANA_TOKEN_2022_PROGRAM_ID,
-} from "@powerchain/launchpad-config";
+} from "@powerchain/launchpad-config/constants";
 
 export const WALLET_CONNECTORS = ["Phantom", "Solflare", "Backpack"] as const;
 export const DEFAULT_PURCHASE_PRESETS_USD = [100, 250, 500, 1000] as const;

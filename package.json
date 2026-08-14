@@ -2,16 +2,17 @@
   "name": "powerchain-launchpad",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@11.20.0",
+  "packageManager": "pnpm@11.21.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=24 <25",
+    "pnpm": ">=11.21.0 <12"
   },
   "scripts": {
     "dev": "pnpm --parallel --filter @powerchain/launchpad-backend --filter @powerchain/launchpad-frontend dev",
     "build": "pnpm build:packages && pnpm prisma:generate && pnpm --filter @powerchain/launchpad-backend build && pnpm --filter @powerchain/launchpad-frontend build",
     "typecheck": "pnpm typecheck:packages && pnpm typecheck:apps",
-    "test": "node --test tests/*.test.mjs && pnpm test:utils",
-    "validate": "node scripts/check-workspace.mjs && node scripts/validate.mjs && node scripts/check-pnpm-policy.mjs && node scripts/check-vercel-config.mjs && node scripts/check-env-example.mjs && node scripts/check-mobile-env-example.mjs && node scripts/check-mobile-native.mjs && node scripts/sync-openapi.mjs --check && node --test tests/*.test.mjs && pnpm test:utils",
+    "test": "pnpm build:packages && node --test tests/*.test.mjs && pnpm test:utils",
+    "validate": "node scripts/check-workspace.mjs && node scripts/validate.mjs && node scripts/check-pnpm-policy.mjs && node scripts/check-vercel-config.mjs && node scripts/check-env-example.mjs && node scripts/check-mobile-env-example.mjs && node scripts/check-mobile-native.mjs && node scripts/sync-openapi.mjs --check && pnpm build:packages && node --test tests/*.test.mjs && pnpm test:utils",
     "dev:all": "pnpm --parallel --filter @powerchain/launchpad-backend --filter @powerchain/launchpad-frontend dev",
     "build:frontend": "pnpm --filter @powerchain/launchpad-frontend build",
     "build:backend": "pnpm --filter @powerchain/launchpad-backend build",
@@ -27,7 +28,7 @@
     "pretypecheck": "node scripts/check-type-deps.mjs",
     "types:frontend": "pnpm --filter @powerchain/launchpad-frontend typecheck",
     "types:backend": "pnpm --filter @powerchain/launchpad-backend typecheck",
-    "corepack:enable": "corepack enable && corepack prepare pnpm@11.20.0 --activate",
+    "corepack:enable": "corepack enable && corepack prepare pnpm@11.21.0 --activate",
     "telemetry:disable": "pnpm --filter @powerchain/launchpad-frontend exec next telemetry disable && pnpm --filter @powerchain/launchpad-backend exec next telemetry disable",
     "build:packages": "pnpm --filter @powerchain/launchpad-config --filter @powerchain/launchpad-domain --filter @powerchain/solana --filter @powerchain/utils --filter @powerchain/integrations --filter @powerchain/launchpad-program-client build",
     "peers:check": "pnpm peers check",
@@ -70,15 +71,35 @@
     "mobile:check:install": "pnpm --filter @powerchain/launchpad-mobile check:install",
     "doctor:frontend": "node scripts/check-frontend-resolution.mjs",
     "repair:workspace": "pnpm install --force --no-frozen-lockfile && pnpm doctor:workspace && pnpm doctor:types && pnpm doctor:frontend",
-    "test:utils": "pnpm --filter @powerchain/utils test"
+    "test:utils": "pnpm --filter @powerchain/utils test",
+    "doctor:runtime": "node scripts/check-runtime-toolchain.mjs",
+    "clean:next": "node scripts/clean-next-cache.mjs all",
+    "clean:frontend": "node scripts/clean-next-cache.mjs frontend",
+    "clean:backend": "node scripts/clean-next-cache.mjs backend",
+    "preflight:frontend": "node scripts/check-dev-start.mjs frontend",
+    "preflight:backend": "node scripts/check-dev-start.mjs backend",
+    "dev:frontend:direct": "pnpm -C apps/frontend exec next dev --port 3000",
+    "dev:backend:direct": "pnpm -C apps/backend exec next dev --port 3001"
   },
   "devDependencies": {
     "next": "16.2.12",
     "typescript": "5.9.3",
-    "@types/node": "^22",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "prisma": "7.9.1"
   },
-  "type": "module"
+  "type": "module",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=24 <25",
+      "onFail": "download"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.21.0",
+      "onFail": "download"
+    }
+  }
 }

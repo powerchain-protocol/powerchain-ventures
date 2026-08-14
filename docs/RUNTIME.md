@@ -15,3 +15,8 @@ Production mutations require an `Origin` header matching `ALLOWED_ORIGINS` or `N
 ## Environment validation
 
 `@powerchain/launchpad-config` exposes separate public and server runtime validators. Mainnet production requires HTTPS endpoints, a valid PowerChain treasury wallet, and at least two server-side Solana RPC endpoints.
+
+
+## Frontend client boundary
+
+`apps/frontend/lib/config.ts` parses only `NEXT_PUBLIC_*` values through the local `lib/env/public.ts` module. The browser runtime does not import the shared config package root, preventing client bundles from traversing server/runtime barrels. Frontend constants use the explicit `@powerchain/launchpad-config/constants` subpath.

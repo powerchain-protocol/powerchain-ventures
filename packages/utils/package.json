@@ -34,5 +34,9 @@
   },
   "devDependencies": {
     "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11.21.0 <12"
   }
 }
