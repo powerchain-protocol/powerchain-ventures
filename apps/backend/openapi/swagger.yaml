@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+  title: PowerChain Launchpad API
+  version: 1.0.0
+  description: Production API for PowerChain Token-2022 sales, checkout, wallet assets, transfers, claims, program operations and verified transaction receipts.
+servers:
+  - url: /api/v1
+tags:
+  - { name: Platform, description: Health, readiness, CORS and API definition }
+  - { name: Auth, description: PowerChain account authentication and secure cookie sessions }
+  - { name: Tokens, description: Token-2022 catalog and market data }
+  - { name: Wallets, description: Non-custodial wallet balances and transfers }
+  - { name: Checkout, description: Sale checkout and SOL payment estimates }
+  - { name: Onramp, description: Coinbase-hosted SOL wallet funding }
+  - { name: Launchpad, description: Sale discovery, quotes and lifecycle }
+  - { name: Transactions, description: Exact reviewed transactions and receipts }
+  - { name: Claims, description: Vesting and claims }
+  - { name: Integrations, description: Helius, Birdeye and PWRC observations }
+  - { name: Program, description: PowerChain Launchpad on-chain program operations }
+paths:
+  /auth/config:
+    get: { tags: [Auth], summary: Account authentication capability status, responses: { '200': { description: Auth configuration } } }
+  /auth/sign-in:
+    post: { tags: [Auth], summary: Sign in with email and password and create an HttpOnly session, responses: { '200': { description: Signed in }, '401': { description: Invalid credentials }, '429': { $ref: '#/components/responses/RateLimited' } } }
+  /auth/sign-up:
+    post: { tags: [Auth], summary: Create a PowerChain account through Supabase Auth, responses: { '201': { description: Account created or email confirmation required }, '429': { $ref: '#/components/responses/RateLimited' } } }
+  /auth/session:
+    get: { tags: [Auth], summary: Validate and refresh the current secure account session, responses: { '200': { description: Session state } } }
+    post: { tags: [Auth], summary: Complete an email token-hash or implicit confirmation session, responses: { '200': { description: Session established } } }
+  /auth/sign-out:
+    post: { tags: [Auth], summary: Revoke refresh capability and clear PowerChain auth cookies, responses: { '200': { description: Signed out } } }
+  /auth/forgot-password:
+    post: { tags: [Auth], summary: Request a password recovery email, responses: { '200': { description: Recovery request accepted }, '429': { $ref: '#/components/responses/RateLimited' } } }
+  /auth/update-password:
+    post: { tags: [Auth], summary: Update password for an authenticated recovery session, responses: { '200': { description: Password updated }, '401': { description: Authentication required } } }
+  /health:
+    get: { tags: [Platform], summary: Liveness probe, responses: { '200': { description: Alive } } }
+  /ready:
+    get: { tags: [Platform], summary: Production dependency readiness, responses: { '200': { description: Ready }, '503': { description: Not ready } } }
+  /version:
+    get: { tags: [Platform], summary: API version, responses: { '200': { description: Version } } }
+  /cors:
+    get: { tags: [Platform], summary: Safe CORS policy summary, responses: { '200': { description: Policy } } }
+    options: { tags: [Platform], summary: CORS preflight, responses: { '204': { description: Accepted } } }
+  /openapi:
+    get: { tags: [Platform], summary: Canonical OpenAPI YAML, responses: { '200': { description: OpenAPI document } } }
+  /tokens:
+    get: { tags: [Tokens], summary: List Token-2022 sale tokens, responses: { '200': { description: Token catalog } } }
+  /tokens/{mint}/market:
+    get:
+      tags: [Tokens, Integrations]
+      summary: Birdeye market data and Helius DAS metadata for a validated mint
+      parameters: [ { in: path, name: mint, required: true, schema: { type: string } } ]
+      responses: { '200': { description: Market snapshot }, '400': { $ref: '#/components/responses/BadRequest' }, '429': { $ref: '#/components/responses/RateLimited' } }
+  /wallets/{wallet}:
+    get:
+      tags: [Wallets]
+      summary: Confirmed SOL/PWRC balances, token account and PWRC-SOL market estimate
+      parameters: [ { in: path, name: wallet, required: true, schema: { type: string } } ]
+      responses: { '200': { description: Wallet asset data }, '400': { $ref: '#/components/responses/BadRequest' } }
+  /transfers/prepare:
+    post: { tags: [Wallets, Transactions], summary: Prepare an exact zero-service-fee SOL or PWRC wallet transfer, responses: { '200': { description: Reviewed transfer transaction }, '409': { description: Live transfer already exists } } }
+  /transfers/confirm:
+    post: { tags: [Wallets, Transactions], summary: Verify exact signed transfer and on-chain delivery, responses: { '200': { description: Transfer confirmed }, '202': { description: Confirmation pending } } }
+  /checkout:
+    get: { tags: [Checkout], summary: Checkout capabilities and canonical flow, responses: { '200': { description: Checkout capabilities } } }
+    post: { tags: [Checkout], summary: Validate checkout and return SOL/PWRC market estimate plus canonical quote/prepare/confirm endpoints, responses: { '201': { description: Checkout bootstrap }, '400': { $ref: '#/components/responses/BadRequest' } } }
+  /onramp/status:
+    get: { tags: [Onramp], summary: Coinbase-hosted Onramp readiness, responses: { '200': { description: Onramp status } } }
+  /onramp/session:
+    post: { tags: [Onramp, Checkout], summary: Create a single-use Coinbase-hosted SOL funding session for the connected wallet, responses: { '201': { description: Hosted session URL }, '429': { $ref: '#/components/responses/RateLimited' } } }
+  /onramp/transactions:
+    get: { tags: [Onramp], summary: Retrieve sanitized Coinbase Onramp funding status for a session reference, responses: { '200': { description: Funding transactions } } }
+  /transactions:
+    get: { tags: [Transactions], summary: Wallet-scoped safe transaction receipts, responses: { '200': { description: Transaction receipts } } }
+  /integrations/health:
+    get: { tags: [Integrations], summary: Helius and Birdeye server integration status, responses: { '200': { description: Status } } }
+  /integrations/pwrc:
+    get: { tags: [Integrations, Tokens], summary: Configured PWRC market and asset data, responses: { '200': { description: PWRC data }, '503': { description: PWRC mint not configured } } }
+  /launchpad/catalog:
+    get: { tags: [Launchpad], summary: Public sale catalog, responses: { '200': { description: Sales } } }
+  /launchpad/config:
+    get: { tags: [Launchpad], summary: Browser-safe Launchpad configuration, responses: { '200': { description: Configuration } } }
+  /launchpad/network:
+    get: { tags: [Launchpad], summary: Verified Solana network identity, responses: { '200': { description: Network }, '503': { description: Unavailable } } }
+  /launchpad/fees:
+    get: { tags: [Launchpad], summary: Canonical PowerChain fee policy, responses: { '200': { description: Fees } } }
+  /launchpad/quote:
+    post: { tags: [Launchpad, Checkout], summary: Create canonical fixed-price sale quote, responses: { '200': { description: Quote }, '429': { $ref: '#/components/responses/RateLimited' } } }
+  /launchpad/purchase/prepare:
+    post: { tags: [Launchpad, Transactions, Checkout], summary: Prepare exact reviewed purchase transaction, responses: { '200': { description: Reviewed transaction }, '409': { description: Existing live review } } }
+  /launchpad/purchase/confirm:
+    post: { tags: [Launchpad, Transactions, Checkout], summary: Verify signature, message, payment, 2.5% fee and token delivery, responses: { '200': { description: Settled }, '202': { description: Pending } } }
+  /launchpad/claim:
+    get: { tags: [Claims], summary: Wallet vesting schedules and claim history, responses: { '200': { description: Claim data } } }
+  /launchpad/claim/prepare:
+    post: { tags: [Claims, Transactions], summary: Prepare zero-service-fee claim transaction, responses: { '200': { description: Reviewed claim } } }
+  /launchpad/claim/confirm:
+    post: { tags: [Claims, Transactions], summary: Verify claim delivery and settle, responses: { '200': { description: Settled }, '202': { description: Pending } } }
+  /launchpad/token-2022/validate:
+    post: { tags: [Tokens, Launchpad], summary: Validate Token-2022 mint, vault, authority and allocation, responses: { '200': { description: Validated } } }
+  /launchpad/program/status:
+    get: { tags: [Program], summary: Launchpad program deployment status, responses: { '200': { description: Status } } }
+  /launchpad/program/operations:
+    post: { tags: [Program, Transactions], summary: Preview exact program instruction/accounts, responses: { '200': { description: Preview } } }
+  /launchpad/program/operations/prepare:
+    post: { tags: [Program, Transactions], summary: Prepare pause, resume or timing operation, responses: { '201': { description: Reviewed operation } } }
+  /launchpad/program/operations/confirm:
+    post: { tags: [Program, Transactions], summary: Verify exact program operation and reconcile state, responses: { '200': { description: Confirmed }, '202': { description: Pending } } }
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            requestId: { type: string }
+  responses:
+    BadRequest: { description: Invalid request, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    RateLimited: { description: Rate limited, headers: { Retry-After: { schema: { type: integer } } } }

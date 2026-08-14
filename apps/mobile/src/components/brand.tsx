@@ -1,0 +1,4 @@
+import { Image, StyleSheet, Text, View } from "react-native";import { usePowerChainTheme } from "@/theme/use-theme";
+export function Brand({compact=false}:{compact?:boolean}){const t=usePowerChainTheme();return <View style={styles.row}><Image source={require("../../assets/logo-green.png")} style={{width:compact?34:44,height:compact?34:44}}/><View><Text style={[styles.name,{color:t.colors.text}]}>PowerChain</Text>{!compact&&<Text style={[styles.sub,{color:t.colors.green}]}>LAUNCHPAD™</Text>}</View></View>}
+export function PwrcCoin({size=52}:{size?:number}){return <Image source={require("../../assets/pwrc.png")} style={{width:size,height:size,borderRadius:size/2}} resizeMode="contain"/>}
+const styles=StyleSheet.create({row:{flexDirection:"row",alignItems:"center",gap:10},name:{fontSize:18,fontWeight:"900",letterSpacing:-.4},sub:{fontSize:10,fontWeight:"900",letterSpacing:2}})

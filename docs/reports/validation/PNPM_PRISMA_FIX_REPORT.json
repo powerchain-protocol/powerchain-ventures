@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "pnpm_policy": "PASS",
+  "strictDepBuilds": true,
+  "allowed_builds": [
+    "@prisma/engines",
+    "bigint-buffer",
+    "bufferutil",
+    "prisma",
+    "sharp",
+    "utf-8-validate"
+  ],
+  "tests": "75/75 PASS",
+  "dependency_install": "NOT RUN: registry.npmjs.org unavailable in artifact runtime"
+}

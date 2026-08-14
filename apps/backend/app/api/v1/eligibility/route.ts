@@ -1,0 +1,3 @@
+import {error,json,readJson} from "../../../../lib/http"; import {isSolanaAddress} from "../../../../lib/policy";
+type Body={wallet?:string;mode?:"public"|"allowlist"|"trusted";listed?:boolean};
+export async function POST(request:Request){try{const b=await readJson<Body>(request);if(!isSolanaAddress(b.wallet))return error("BAD_REQUEST","invalid Solana wallet",400);const mode=b.mode??"public";const eligible=mode==="public"||b.listed===true;return json({ok:true,wallet:b.wallet,mode,eligible,reason:eligible?null:"Wallet is not on the configured sale list"});}catch(e){return error("BAD_REQUEST",e instanceof Error?e.message:"invalid request",400)}}

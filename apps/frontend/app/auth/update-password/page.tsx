@@ -1,0 +1,1 @@
+import {AuthShell}from"../../../components/auth/auth-shell";import{UpdatePasswordForm}from"../../../components/auth/update-password-form";export const metadata={title:"Update password"};export default function Page(){return <AuthShell title="Choose a new password" subtitle="Use a strong password that you do not reuse on other services."><UpdatePasswordForm/></AuthShell>}

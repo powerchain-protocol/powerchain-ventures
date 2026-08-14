@@ -1,0 +1,3 @@
+import {BIRDEYE_API_BASE,HELIUS_MAINNET_RPC_BASE} from "@powerchain/integrations";
+export function integrationConfig(){return {heliusApiKey:process.env.HELIUS_API_KEY?.trim()??"",heliusRpcBase:process.env.HELIUS_RPC_URL?.trim()||HELIUS_MAINNET_RPC_BASE,birdeyeApiKey:process.env.BIRDEYE_API_KEY?.trim()??"",birdeyeBaseUrl:process.env.BIRDEYE_BASE_URL?.trim()||BIRDEYE_API_BASE}}
+export function integrationStatus(){const c=integrationConfig();return {heliusConfigured:Boolean(c.heliusApiKey),birdeyeConfigured:Boolean(c.birdeyeApiKey),heliusRpcBase:new URL(c.heliusRpcBase).origin,birdeyeBaseUrl:new URL(c.birdeyeBaseUrl).origin}}

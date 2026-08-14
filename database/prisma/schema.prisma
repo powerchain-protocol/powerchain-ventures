@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../../generated/prisma"
+}
+
+datasource db { provider = "postgresql" }
+
+model LaunchpadSale {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug String @unique
+  name String
+  mint String
+  symbol String @default("PWRC")
+  decimals Int @default(9)
+  phase String
+  startsAt DateTime @map("starts_at") @db.Timestamptz(6)
+  endsAt DateTime @map("ends_at") @db.Timestamptz(6)
+  claimStartsAt DateTime @map("claim_starts_at") @db.Timestamptz(6)
+  priceUsdMicros BigInt @map("price_usd_micros")
+  allocationBaseUnits Decimal @map("allocation_base_units") @db.Decimal(30,0)
+  soldBaseUnits Decimal @default(0) @map("sold_base_units") @db.Decimal(30,0)
+  serviceFeeBps Int @default(250) @map("service_fee_bps")
+  creatorWallet String? @map("creator_wallet")
+  paymentReceiverWallet String? @map("payment_receiver_wallet")
+  sourceVaultTokenAccount String? @map("source_vault_token_account")
+  sourceVaultAuthority String? @map("source_vault_authority")
+  cluster String @default("mainnet-beta")
+  genesisHash String? @map("genesis_hash")
+  tokenProgram String @map("token_program")
+  feeWallet String @default("FeeszhrKKEsvxr1kg8LDtPx6BLcEbYHiAThYaxajNhqy") @map("fee_wallet")
+  launchpadProgramId String? @map("launchpad_program_id")
+  salePda String? @unique @map("sale_pda")
+  vaultAuthorityPda String? @map("vault_authority_pda")
+  programStateVersion Int @default(1) @map("program_state_version")
+  onchainInitializedAt DateTime? @map("onchain_initialized_at") @db.Timestamptz(6)
+  onchainStatus String? @map("onchain_status")
+  quoteAuthorityWallet String? @map("quote_authority_wallet")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@index([mint,phase])
+  @@map("launchpad_sales")
+}
+
+model LaunchpadPurchase {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleId String @map("sale_id") @db.Uuid
+  wallet String
+  idempotencyKey String @unique @map("idempotency_key")
+  usdMicros BigInt @map("usd_micros")
+  tokenBaseUnits Decimal @map("token_base_units") @db.Decimal(30,0)
+  feeUsdMicros BigInt @map("fee_usd_micros")
+  signature String? @unique
+  status String
+  participantPda String? @map("participant_pda")
+  programPurchaseNonce BigInt? @map("program_purchase_nonce")
+  programOperationVerifiedAt DateTime? @map("program_operation_verified_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@index([saleId,wallet])
+  @@map("launchpad_purchases")
+}
+
+model LaunchpadClaim {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleId String @map("sale_id") @db.Uuid
+  wallet String
+  amountBaseUnits Decimal @map("amount_base_units") @db.Decimal(30,0)
+  signature String? @unique
+  idempotencyKey String @unique @map("idempotency_key")
+  participantPda String? @map("participant_pda")
+  programOperationVerifiedAt DateTime? @map("program_operation_verified_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@index([saleId,wallet])
+  @@map("launchpad_claims")
+}
+
+model LaunchpadTokenMarketSnapshot {
+  id BigInt @id @default(autoincrement())
+  mint String
+  priceUsd Decimal? @map("price_usd") @db.Decimal(38,18)
+  liquidityUsd Decimal? @map("liquidity_usd") @db.Decimal(38,6)
+  marketData Json @default("{}") @map("market_data")
+  assetData Json @default("{}") @map("asset_data")
+  source String @default("birdeye+helius")
+  observedAt DateTime @default(now()) @map("observed_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@index([mint,observedAt(sort: Desc)])
+  @@map("launchpad_token_market_snapshots")
+}
+
+model LaunchpadProgramOperation {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reviewId String? @map("review_id") @db.Uuid
+  saleId String @map("sale_id") @db.Uuid
+  wallet String
+  operation String
+  programId String @map("program_id")
+  salePda String @map("sale_pda")
+  participantPda String? @map("participant_pda")
+  instructionDataBase64 String? @map("instruction_data_base64")
+  signature String? @unique
+  status String @default("prepared")
+  confirmedSlot BigInt? @map("confirmed_slot")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  confirmedAt DateTime? @map("confirmed_at") @db.Timestamptz(6)
+  @@index([saleId,createdAt(sort: Desc)])
+  @@index([wallet,createdAt(sort: Desc)])
+  @@map("launchpad_program_operations")
+}
+
+
+model LaunchpadOnrampSession {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partnerUserRef String @unique @map("partner_user_ref")
+  wallet String
+  saleId String @map("sale_id") @db.Uuid
+  provider String @default("coinbase-hosted")
+  purchaseAsset String @default("SOL") @map("purchase_asset")
+  destinationNetwork String @default("solana") @map("destination_network")
+  paymentCurrency String @default("USD") @map("payment_currency")
+  requestedPaymentAmount Decimal @map("requested_payment_amount") @db.Decimal(30,2)
+  providerStatus String @default("session-created") @map("provider_status")
+  providerTransactionId String? @map("provider_transaction_id")
+  providerTxHash String? @map("provider_tx_hash")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastCheckedAt DateTime? @map("last_checked_at") @db.Timestamptz(6)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  @@index([wallet,createdAt(sort: Desc)])
+  @@index([saleId,createdAt(sort: Desc)])
+  @@map("launchpad_onramp_sessions")
+}
+
+model LaunchpadProfile {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authUserId String @unique @map("auth_user_id") @db.Uuid
+  email String?
+  displayName String? @map("display_name")
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  @@map("launchpad_profiles")
+}

@@ -1,0 +1,28 @@
+FROM node:22-alpine AS deps
+WORKDIR /app
+RUN corepack enable
+COPY package.json pnpm-workspace.yaml ./
+COPY apps/frontend/package.json apps/frontend/package.json
+COPY packages/config/package.json packages/config/package.json
+COPY packages/domain/package.json packages/domain/package.json
+COPY packages/solana/package.json packages/solana/package.json
+RUN corepack prepare pnpm@11.20.0 --activate && pnpm install --filter @powerchain/launchpad-frontend... --no-frozen-lockfile
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/frontend/node_modules ./apps/frontend/node_modules
+COPY . .
+RUN pnpm --filter @powerchain/launchpad-frontend build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
+COPY --from=builder /app/package.json /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/frontend ./apps/frontend
+COPY --from=builder /app/packages ./packages
+EXPOSE 3000
+CMD ["pnpm","--filter","@powerchain/launchpad-frontend","start"]

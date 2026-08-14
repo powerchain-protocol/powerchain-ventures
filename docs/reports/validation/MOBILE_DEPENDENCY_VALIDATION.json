@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "version": "1.0.0",
+  "tests": {
+    "passed": 101,
+    "failed": 0
+  },
+  "mobileTsconfig": {
+    "selfContained": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "Bundler",
+    "alias": "@/* -> ./src/*"
+  },
+  "runtimeDependencies": [
+    "expo",
+    "expo-router",
+    "expo-constants",
+    "react",
+    "react-native"
+  ],
+  "metro": "expo automatic monorepo resolution"
+}

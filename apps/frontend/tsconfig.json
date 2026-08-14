@@ -1,0 +1,44 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@powerchain/launchpad-config": [
+        "../../packages/config/dist/index.d.ts"
+      ],
+      "@powerchain/utils": [
+        "../../packages/utils/dist/index.d.ts"
+      ],
+      "@powerchain/utils/helpers": [
+        "../../packages/utils/dist/helpers.d.ts"
+      ],
+      "@powerchain/utils/http": [
+        "../../packages/utils/dist/http.d.ts"
+      ],
+      "@powerchain/utils/utils/errors": [
+        "../../packages/utils/dist/utils/errors.d.ts"
+      ]
+    },
+    "types": [
+      "node",
+      "react",
+      "react-dom"
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ]
+}

@@ -1,0 +1,18 @@
+import fs from "node:fs";
+import path from "node:path";
+
+const root = path.resolve(new URL("..", import.meta.url).pathname);
+const errors = [];
+const read = file => JSON.parse(fs.readFileSync(path.join(root, file), "utf8"));
+const rootConfig = read("vercel.json");
+const frontend = read("apps/frontend/vercel.json");
+const backend = read("apps/backend/vercel.json");
+if (rootConfig.framework !== "nextjs") errors.push("root vercel.json framework must be nextjs");
+if (!String(rootConfig.buildCommand ?? "").includes("@powerchain/launchpad-frontend")) errors.push("root vercel.json must build the frontend workspace");
+if (frontend.framework !== "nextjs" || backend.framework !== "nextjs") errors.push("both app Vercel configs must declare nextjs");
+const backendFunctions = backend.functions ?? {};
+if (!backendFunctions["app/api/**/*.ts"]) errors.push("backend Vercel config must define API function limits");
+const crons = backend.crons ?? [];
+if (!crons.some(c => c.path === "/api/v1/launchpad/reconcile" && c.schedule === "*/5 * * * *")) errors.push("backend Vercel config must schedule reconciliation every 5 minutes");
+console.log(JSON.stringify({ ok: errors.length === 0, errors }, null, 2));
+if (errors.length) process.exit(1);

@@ -1,0 +1,64 @@
+{
+  "name": "powerchain_launchpad",
+  "version": "1.0.0",
+  "programId": null,
+  "notes": "Program ID intentionally unset until real deployment. Instruction order mirrors Borsh enum tags 0-7.",
+  "instructions": [
+    {
+      "tag": 0,
+      "name": "initializeSale"
+    },
+    {
+      "tag": 1,
+      "name": "updateTiming"
+    },
+    {
+      "tag": 2,
+      "name": "setPaused"
+    },
+    {
+      "tag": 3,
+      "name": "purchase"
+    },
+    {
+      "tag": 4,
+      "name": "claim"
+    },
+    {
+      "tag": 5,
+      "name": "cancelSale"
+    },
+    {
+      "tag": 6,
+      "name": "completeSale"
+    },
+    {
+      "tag": 7,
+      "name": "adoptVaultAuthority"
+    }
+  ],
+  "pdaSeeds": {
+    "sale": [
+      "sale",
+      "creator",
+      "mint",
+      "saleSeed32"
+    ],
+    "vaultAuthority": [
+      "vault",
+      "salePda"
+    ],
+    "participant": [
+      "participant",
+      "salePda",
+      "wallet"
+    ]
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "deliveryModes": [
+      "immediate",
+      "claim"
+    ]
+  }
+}

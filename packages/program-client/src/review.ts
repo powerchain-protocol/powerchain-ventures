@@ -1,0 +1,12 @@
+import type {ProgramOperation} from "./operations.js";
+
+const ACCOUNT_LABELS:Record<ProgramOperation["name"],readonly string[]>={
+ "initialize-sale":["Creator wallet","Sale PDA","Token mint","Presale vault","Vault-authority PDA","Sale proceeds wallet","PowerChain fee wallet","Token-2022 program","System program"],
+ "adopt-vault-authority":["Current vault authority","Sale PDA","Presale vault","Vault-authority PDA","Token-2022 program"],
+ purchase:["Buyer wallet","PowerChain quote authority","Sale PDA","Participant PDA","Presale vault","Vault-authority PDA","Buyer token account","Token mint","Sale proceeds wallet","PowerChain fee wallet","Token-2022 program","System program"],
+ claim:["Participant wallet","Sale PDA","Participant PDA","Presale vault","Vault-authority PDA","Destination token account","Token mint","Token-2022 program"],
+ pause:["Creator wallet","Sale PDA"],resume:["Creator wallet","Sale PDA"],"update-timing":["Creator wallet","Sale PDA"],cancel:["Creator wallet","Sale PDA"],complete:["Creator wallet","Sale PDA"],
+};
+
+export function operationToReview(operation:ProgramOperation,index=0){const ix=operation.instruction,labels=ACCOUNT_LABELS[operation.name];return {index,programId:ix.programId.toBase58(),programName:"PowerChain Launchpad Program",accounts:ix.keys.map((key,i)=>({address:key.pubkey.toBase58(),signer:key.isSigner,writable:key.isWritable,label:labels[i]??`Account ${i+1}`})),dataBase64:Buffer.from(ix.data).toString("base64"),summary:summary(operation.name)}}
+function summary(name:ProgramOperation["name"]){switch(name){case"initialize-sale":return"Create and initialize the on-chain sale PDA with canonical fee, quote authority, timing and delivery policy.";case"adopt-vault-authority":return"Move Token-2022 vault ownership to the sale vault-authority PDA.";case"purchase":return"Buyer and quote authority co-sign; enforce allocation, fee routing, purchase nonce and token delivery or claim entitlement.";case"claim":return"Release claimable Token-2022 units from the PDA-controlled vault to the participant token account.";case"pause":return"Pause new purchases and claims for this sale.";case"resume":return"Resume this sale after a creator pause.";case"update-timing":return"Update sale and claim/vesting timing before participation begins.";case"cancel":return"Cancel a sale only before any on-chain sale quantity has been sold.";case"complete":return"Mark an ended sale complete after all claim-delivery entitlements are settled."}}

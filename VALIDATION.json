@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "version": "1.0.0",
+  "branding": "PowerChain-only",
+  "tests": {
+    "passed": 79,
+    "total": 79
+  },
+  "syntax": {
+    "passed": 211,
+    "total": 211
+  },
+  "env": {
+    "documented": 47,
+    "referenced": 44
+  },
+  "openapi": "PASS",
+  "relativeImports": "PASS",
+  "features": [
+    "mobile-onboarding",
+    "sign-in",
+    "sign-up",
+    "email-confirmation",
+    "password-recovery",
+    "password-update",
+    "secure-cookie-session",
+    "account-profile",
+    "creator-route-gating",
+    "wallet-auth-separation"
+  ],
+  "generatedAt": "2026-08-14T11:01:32.682Z"
+}

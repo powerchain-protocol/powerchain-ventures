@@ -1,0 +1,20 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Keep local PowerChain packages linked deterministically in pnpm 11.
+linkWorkspacePackages: true
+preferWorkspacePackages: true
+sharedWorkspaceLockfile: true
+
+# pnpm 11 supply-chain policy. These packages are reviewed runtime/build
+# dependencies used by the Solana/WebSocket/Next.js stack.
+strictDepBuilds: true
+
+allowBuilds:
+  "@prisma/engines": true
+  bigint-buffer: true
+  bufferutil: true
+  prisma: true
+  sharp: true
+  utf-8-validate: true

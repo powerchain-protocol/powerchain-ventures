@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="page"><section className="panel catalog-empty"><b>Loading PowerChain Launchpad…</b><span>Refreshing sale and wallet state.</span></section></main>}

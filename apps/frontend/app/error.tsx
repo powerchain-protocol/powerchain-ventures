@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({error,reset}:{error:Error&{digest?:string};reset:()=>void}){return <main className="page"><section className="panel fatal-state"><span className="eyebrow">PowerChain Launchpad</span><h1>Something went wrong.</h1><p>{error.message||"The application could not complete this request."}</p><div><button className="primary" onClick={reset}>Try again</button><a className="secondary link" href="/">Return home</a></div></section></main>}

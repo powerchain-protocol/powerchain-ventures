@@ -1,0 +1,5 @@
+import { json } from "../../../../lib/http";
+import { normalizeOrigin } from "@powerchain/utils/helpers";
+function origins(){const configured=(process.env.ALLOWED_ORIGINS??"").split(",").map(v=>v.trim()).filter(Boolean);const app=process.env.NEXT_PUBLIC_APP_URL?.trim();return [...new Set([...configured,...(app?[app]:[])].map(normalizeOrigin))];}
+export async function GET(){return json({cors:{allowedOrigins:origins(),methods:["GET","POST","OPTIONS"],headers:["content-type","authorization","idempotency-key","x-request-id"],credentials:false,maxAgeSeconds:600}})}
+export async function OPTIONS(request:Request){const origin=request.headers.get("origin")??"";const allowed=origins();const headers=new Headers({"access-control-allow-methods":"GET,POST,OPTIONS","access-control-allow-headers":"content-type,authorization,idempotency-key,x-request-id","access-control-max-age":"600","cache-control":"no-store","vary":"origin"});if(allowed.includes(normalizeOrigin(origin)))headers.set("access-control-allow-origin",origin);return new Response(null,{status:204,headers})}

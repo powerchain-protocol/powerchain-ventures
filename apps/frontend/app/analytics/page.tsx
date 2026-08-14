@@ -1,0 +1,2 @@
+import {AnalyticsExplorer} from "../../components/launchpad/analytics-explorer";
+export default function AnalyticsPage(){return <main className="page"><div className="page-heading"><div><span className="eyebrow">Onchain data</span><h1>Solana token analytics</h1><p>Explore recent SPL Token and Token-2022 transfers and decoded instructions on Solana Mainnet. Powered by Coinbase Developer Platform SQL API public beta.</p></div></div><AnalyticsExplorer/></main>}
