@@ -8,8 +8,10 @@ const required = [
   "expo",
   "expo-router",
   "expo-constants",
+  "expo-doctor",
   "react",
   "react-native",
+  "react-native-screens",
   "typescript",
   "@types/react",
 ];

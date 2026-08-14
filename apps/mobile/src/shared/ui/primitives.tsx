@@ -35,7 +35,7 @@ export function Card({ children, style, ...props }: ViewProps) {
   );
 }
 
-export function PText({ children, muted = false, style }: { children: React.ReactNode; muted?: boolean; style?: any }) {
+export function PText({ children, muted = false, style }: { children: React.ReactNode; muted?: boolean | undefined; style?: any }) {
   const t = usePowerChainTheme();
   return <Text style={[{ color: muted ? t.colors.textMuted : t.colors.text }, style]}>{children}</Text>;
 }
@@ -50,11 +50,11 @@ export function Button({
   ...props
 }: {
   title: string;
-  variant?: "primary" | "secondary" | "ghost" | "danger";
-  loading?: boolean;
-  disabled?: boolean;
-  haptic?: boolean;
-  onPress?: PressableProps["onPress"];
+  variant?: "primary" | "secondary" | "ghost" | "danger" | undefined;
+  loading?: boolean | undefined;
+  disabled?: boolean | undefined;
+  haptic?: boolean | undefined;
+  onPress?: PressableProps["onPress"] | undefined;
 } & Omit<PressableProps, "children">) {
   const t = usePowerChainTheme();
   const primary = variant === "primary";
@@ -72,22 +72,25 @@ export function Button({
         onPress?.(event);
       }}
       {...props}
-      style={({ pressed }) => [
+      style={(state) => {
+        const { pressed } = state;
+        return [
         styles.button,
         {
           backgroundColor: pressed && primary ? t.colors.greenPressed : background,
           borderColor: border,
           opacity: disabled ? 0.5 : pressed ? 0.86 : 1,
         },
-        typeof props.style === "function" ? props.style({ pressed }) : props.style,
-      ]}
+        typeof props.style === "function" ? props.style(state) : props.style,
+      ];
+      }}
     >
       {loading ? <ActivityIndicator color={text} /> : <Text style={[styles.buttonText, { color: text }]}>{title}</Text>}
     </Pressable>
   );
 }
 
-export function Field({ label, hint, error, ...props }: TextInputProps & { label?: string; hint?: string; error?: string }) {
+export function Field({ label, hint, error, ...props }: TextInputProps & { label?: string | undefined; hint?: string | undefined; error?: string | undefined }) {
   const t = usePowerChainTheme();
   return (
     <View style={styles.fieldWrap}>
@@ -107,7 +110,7 @@ export function Field({ label, hint, error, ...props }: TextInputProps & { label
   );
 }
 
-export function Badge({ label, tone = "green" }: { label: string; tone?: "green" | "muted" | "danger" | "warning" }) {
+export function Badge({ label, tone = "green" }: { label: string; tone?: "green" | "muted" | "danger" | "warning" | undefined }) {
   const t = usePowerChainTheme();
   const bg = tone === "green" ? t.colors.greenSoft : tone === "danger" ? t.colors.dangerSoft : tone === "warning" ? t.colors.warningSoft : t.colors.surfaceMuted;
   const color = tone === "green" ? t.colors.green : tone === "danger" ? t.colors.danger : tone === "warning" ? t.colors.warning : t.colors.textMuted;
@@ -118,7 +121,7 @@ export function Badge({ label, tone = "green" }: { label: string; tone?: "green"
   );
 }
 
-export function SectionHeader({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
+export function SectionHeader({ title, action, onAction }: { title: string; action?: string | undefined; onAction?: (() => void) | undefined }) {
   const t = usePowerChainTheme();
   return (
     <View style={styles.sectionHeader}>
@@ -128,7 +131,7 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
   );
 }
 
-export function Notice({ title, body, tone = "info" }: { title: string; body?: string; tone?: "info" | "success" | "warning" | "danger" }) {
+export function Notice({ title, body, tone = "info" }: { title: string; body?: string | undefined; tone?: "info" | "success" | "warning" | "danger" | undefined }) {
   const t = usePowerChainTheme();
   const bg = tone === "success" ? t.colors.greenSoft : tone === "warning" ? t.colors.warningSoft : tone === "danger" ? t.colors.dangerSoft : t.colors.surfaceMuted;
   const accent = tone === "danger" ? t.colors.danger : tone === "warning" ? t.colors.warning : t.colors.green;
@@ -143,7 +146,7 @@ export function Notice({ title, body, tone = "info" }: { title: string; body?: s
   );
 }
 
-export function EmptyState({ title, body, action, onAction }: { title: string; body: string; action?: string; onAction?: () => void }) {
+export function EmptyState({ title, body, action, onAction }: { title: string; body: string; action?: string | undefined; onAction?: (() => void) | undefined }) {
   const t = usePowerChainTheme();
   return (
     <Card style={styles.empty}>

@@ -19,11 +19,11 @@ export function Page({
   onRefresh,
 }: {
   children: React.ReactNode;
-  title?: string;
-  subtitle?: string;
-  scroll?: boolean;
-  refreshing?: boolean;
-  onRefresh?: () => void;
+  title?: string | undefined;
+  subtitle?: string | undefined;
+  scroll?: boolean | undefined;
+  refreshing?: boolean | undefined;
+  onRefresh?: (() => void | Promise<void>) | undefined;
 }) {
   const t = usePowerChainTheme();
   const content = (
@@ -42,7 +42,7 @@ export function Page({
             keyboardShouldPersistTaps="handled"
             contentInsetAdjustmentBehavior="automatic"
             showsVerticalScrollIndicator={false}
-            refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={t.colors.green} colors={[t.colors.green]} /> : undefined}
+            refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={() => { void onRefresh(); }} tintColor={t.colors.green} colors={[t.colors.green]} /> : undefined}
             contentContainerStyle={styles.scrollContent}
           >
             {content}

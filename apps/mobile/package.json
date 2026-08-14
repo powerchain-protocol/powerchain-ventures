@@ -11,7 +11,7 @@
     "prebuild": "EXPO_NO_TELEMETRY=1 expo prebuild",
     "prebuild:clean": "EXPO_NO_TELEMETRY=1 expo prebuild --clean",
     "typecheck": "node ../../scripts/check-mobile-toolchain.mjs --typescript && tsc --noEmit",
-    "doctor": "node ../../scripts/check-mobile-toolchain.mjs && expo-doctor",
+    "doctor": "node ../../scripts/check-mobile-toolchain.mjs && pnpm exec expo-doctor",
     "build:ios": "eas build --platform ios",
     "build:android": "eas build --platform android",
     "validate:native": "node ../../scripts/check-mobile-native.mjs",
@@ -25,7 +25,7 @@
     "preandroid": "node ../../scripts/check-mobile-install.mjs"
   },
   "dependencies": {
-    "expo": "~57.0.9",
+    "expo": "~57.0.12",
     "expo-router": "~57.0.12",
     "expo-constants": "~57.0.10",
     "expo-dev-client": "~57.0.11",
@@ -39,7 +39,7 @@
     "react": "19.2.0",
     "react-native": "0.86.2",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.24.0",
+    "react-native-screens": "4.26.0",
     "@supabase/supabase-js": "2.111.0",
     "@powerchain/launchpad-config": "workspace:*",
     "@powerchain/utils": "workspace:*"
@@ -48,6 +48,7 @@
     "@types/react": "^19",
     "typescript": "5.9.3",
     "babel-preset-expo": "~57.0.0",
-    "@types/node": "^22"
+    "@types/node": "^22",
+    "expo-doctor": "1.20.1"
   }
 }

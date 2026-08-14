@@ -18,3 +18,9 @@ allowBuilds:
   prisma: true
   sharp: true
   utf-8-validate: true
+# Accepted legacy transitive UUID copies from @solana/web3.js 1.x.
+# The application may still use modern uuid directly; this only mutes these exact
+# upstream deprecation warnings and does not override dependency resolution.
+allowedDeprecatedVersions:
+  uuid: "7.0.3 || 8.3.2"
+

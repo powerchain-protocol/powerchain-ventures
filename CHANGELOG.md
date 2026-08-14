@@ -2,6 +2,8 @@
 
 ## 1.0.0 — Mobile Expo dependency-resolution hardening
 
+- Pin mobile `react-native-screens` to exactly `4.26.0` for Expo SDK 57 / React Native 0.86 navigation compatibility.
+
 - Fixed Expo/React Native editor cascades when the mobile workspace is not yet linked.
 - Made the mobile TypeScript config self-contained for JSX, Bundler resolution, React Native conditions, and `@/*` aliases.
 - Added explicit `expo-constants` dependency for the Expo Router SDK 57 stack.
@@ -155,3 +157,11 @@ All notable changes to PowerChain Launchpad™ are documented here. The release/
 - Added `docs/README.md`, app/package READMEs, and dedicated Launchpad-program documentation.
 - Added focused `@powerchain/utils` Node tests and Rust Launchpad instruction/protocol regression tests.
 - Updated repository validation to enforce the organized documentation layout.
+
+### Mobile toolchain/typecheck stabilization
+
+- Fixed Expo Doctor invocation under pnpm 11 by using an explicit local `expo-doctor` binary.
+- Fixed `exactOptionalPropertyTypes` errors in pull-to-refresh and Field error props.
+- Fixed Expo/React Native Web Pressable style-state typing by forwarding the complete callback state.
+- Aligned Expo dependency range with the installed SDK 57.0.12 patch.
+- Narrowly allowlisted only the legacy transitive `uuid@7.0.3` and `uuid@8.3.2` deprecation warnings without overriding them.

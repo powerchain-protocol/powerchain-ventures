@@ -44,3 +44,16 @@ Expo SDK 52+ automatically configures monorepo resolution when using `expo/metro
 ## Deprecated uuid warnings
 
 Warnings for `uuid@7` or `uuid@8` are transitive dependency notices. PowerChain does not force a major-version override across Expo's dependency graph. Use `pnpm why uuid` to identify the upstream package and upgrade through Expo-compatible package versions.
+
+## pnpm 11 Expo Doctor and exact optional type errors
+
+For the SDK 57 mobile workspace, use the repository scripts rather than invoking an unlinked `expo-doctor` command directly:
+
+```bash
+pnpm install --no-frozen-lockfile
+pnpm mobile:check:install
+pnpm mobile:doctor
+pnpm mobile:typecheck
+```
+
+The mobile package pins `expo-doctor` and invokes it through `pnpm exec`, avoiding command-name collisions with pnpm's own doctor command. Pull-to-refresh callbacks may be async; the shared `Page` component adapts them to React Native's void refresh callback. Shared optional UI props are compatible with `exactOptionalPropertyTypes`.

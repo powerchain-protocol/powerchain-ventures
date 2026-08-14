@@ -25,9 +25,18 @@ if (expoPackage) {
   ok("Expo package linked", expoPackage);
 }
 
-for (const dep of ["expo-router", "expo-constants", "react-native"]) {
+for (const dep of ["expo-router", "expo-constants", "expo-doctor", "react-native", "react-native-screens"]) {
   try { ok(dep, requireFromMobile.resolve(`${dep}/package.json`)); }
   catch { fail(`${dep} is not linked`, "run `pnpm mobile:bootstrap` from the repository root"); }
+}
+
+try {
+  const screensPkgPath = requireFromMobile.resolve("react-native-screens/package.json");
+  const screensPkg = JSON.parse(readFileSync(screensPkgPath, "utf8"));
+  if (screensPkg.version === "4.26.0") ok("react-native-screens version", screensPkg.version);
+  else fail("react-native-screens version mismatch", `expected 4.26.0, found ${screensPkg.version}`);
+} catch {
+  fail("react-native-screens version check failed");
 }
 
 const mobileTsconfig = JSON.parse(readFileSync(join(mobileRoot, "tsconfig.json"), "utf8"));
