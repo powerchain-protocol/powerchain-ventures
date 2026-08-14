@@ -14,7 +14,7 @@ Checkout, claims, transaction receipts, auth, onboarding, and creator tools use 
 
 ## Environment
 
-Copy `.env.example` to a local environment file and configure only `EXPO_PUBLIC_*` values. Server secrets stay in the backend environment.
+Use `apps/mobile/.env.example` as the template and `apps/mobile/.env.local` for local development. Configure only `EXPO_PUBLIC_*` values plus `IOS_BUNDLE_IDENTIFIER` and `ANDROID_PACKAGE_NAME`. Server secrets stay in the backend environment.
 
 ## Development
 
@@ -28,3 +28,8 @@ pnpm mobile:android
 ```
 
 See [`../../docs/MOBILE-APP.md`](../../docs/MOBILE-APP.md) and [`../../docs/MOBILE-INSTALL-TROUBLESHOOTING.md`](../../docs/MOBILE-INSTALL-TROUBLESHOOTING.md).
+
+
+For local development the included `.env.local` targets the local frontend/backend
+and Solana devnet. Android emulators may need `10.0.2.2` instead of `localhost`
+for host-machine services.

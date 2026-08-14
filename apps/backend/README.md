@@ -22,3 +22,17 @@ pnpm --filter @powerchain/launchpad-backend dev
 pnpm --filter @powerchain/launchpad-backend typecheck
 pnpm --filter @powerchain/launchpad-backend build
 ```
+
+
+## Environment
+
+Use the backend-local files:
+
+```bash
+cp apps/backend/.env.example apps/backend/.env.local
+```
+
+The backend env owns Solana RPC, Supabase/server credentials, integration keys,
+transaction-builder credentials, reconciliation secrets, CORS origins, and
+other server-only configuration. Next.js loads this app-local `.env.local`
+automatically. Keep real credentials out of source control.

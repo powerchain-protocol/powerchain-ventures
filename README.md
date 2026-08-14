@@ -35,6 +35,12 @@ Production-oriented, PowerChain-only token-sale application for Solana Token-202
 - Health/readiness probes, audit trail and protected reconciliation.
 - PowerChain/PWRC branding only; release version remains exactly `1.0.0`.
 
+## Frontend routes
+
+Public surfaces include `/`, `/sales`, `/wallet`, `/claims`, `/transactions`, `/analytics`, `/integration`, `/docs`, `/eligibility`, `/vesting`, `/security`, `/legal` and `/settings`. Creator/account routes `/dashboard`, `/create` and `/account` remain session-gated. The first-run `/onboarding` flow is mobile-only; desktop visitors land directly on `/`.
+
+The frontend owns a same-origin `/api/v1/*` route proxy that forwards to `BACKEND_ORIGIN`. If the backend is unavailable it returns a structured HTTP 503 response instead of allowing a raw Next.js rewrite `ECONNREFUSED` failure to escape into the development console.
+
 ## User purchase path
 
 `/sales` lists canonical database-backed sales. `/sales/[saleId]` loads live pricing/allocation data, requests a server-owned quote, prepares the exact transaction, shows the mandatory instruction/recipient/fee review, signs through the connected Solana wallet, and confirms the exact reviewed transaction before atomic settlement.
@@ -209,14 +215,31 @@ The repository root intentionally keeps only three Markdown files: `README.md`, 
 - Solana program README/tests: [`programs/README.md`](programs/README.md)
 - Utility package tests: [`packages/utils/tests/`](packages/utils/tests/)
 
-## Development startup diagnostics
+## Environment files and development startup
 
-The web apps load the canonical `.env*` files from the monorepo root. App-local
-environment values, shell variables, and deployment variables keep precedence.
-The repository ships a non-secret `.env.development` so local development is
-zero-config for the frontend URL and Solana devnet RPC. Use `.env.local` only
-when you need to override those development defaults. Production does not use
-these fallbacks and still requires explicit environment configuration.
+Each runnable app owns its own environment files. Next.js automatically loads
+`.env.local`, `.env.development`, and `.env` from the individual Next project
+root, so frontend/backend `next.config.ts` do not import `@next/env`. The
+repository root also contains `.env.example` and a non-secret `.env.local` for
+root-level tooling, Prisma, validation, and deployment preparation.
+
+Environment layout:
+
+```text
+.env.example
+.env.local
+apps/frontend/.env.example
+apps/frontend/.env.local
+apps/backend/.env.example
+apps/backend/.env.local
+apps/mobile/.env.example
+apps/mobile/.env.local
+```
+
+The source-bundle `.env.local` files contain development-safe defaults and
+blank secret slots only. Replace secret values locally and never commit real
+credentials. Frontend env files contain browser-safe values only. Production
+still requires explicit deployment environment configuration.
 
 Before starting the frontend:
 
@@ -225,6 +248,7 @@ nvm use 24
 corepack enable
 corepack prepare pnpm@11.21.0 --activate
 pnpm install
+pnpm validate:app-envs
 pnpm preflight:frontend
 pnpm dev:frontend
 ```

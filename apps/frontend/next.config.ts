@@ -1,16 +1,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
 
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.resolve(appRoot, "../..");
 
-// Next normally loads .env* from the app directory. PowerChain keeps one
-// canonical environment file at the monorepo root, so load it explicitly.
-// Existing app/process variables keep precedence; root values fill gaps.
-loadEnvConfig(monorepoRoot, process.env.NODE_ENV !== "production");
 
+// Next.js loads apps/frontend/.env.local and apps/frontend/.env* automatically.
 // Keep local development zero-config even when a developer has not created
 // .env.local yet. These values are public and intentionally non-secret.
 // Production/Vercel remains strict below and does not receive these defaults.
@@ -28,13 +24,13 @@ function normalizeOrigin(value: string): string {
   return value.trim().replace(/\/+$/, "");
 }
 
-function resolveBackendOrigin(): string {
+function validateBackendOrigin(): void {
   const configured = process.env.BACKEND_ORIGIN;
   if (!configured) {
     if (strictBuildEnv) {
       throw new Error("[PowerChain] BACKEND_ORIGIN is required for strict/Vercel production builds.");
     }
-    return "http://localhost:3001";
+    return;
   }
 
   const origin = normalizeOrigin(configured);
@@ -53,10 +49,10 @@ function resolveBackendOrigin(): string {
   if (isVercel && parsed.protocol !== "https:") {
     throw new Error("[PowerChain] BACKEND_ORIGIN must use HTTPS on Vercel.");
   }
-  return origin;
+  void origin;
 }
 
-const backendOrigin = resolveBackendOrigin();
+validateBackendOrigin();
 
 function validatePublicSolanaRuntime(): void {
   const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER;
@@ -112,9 +108,6 @@ const nextConfig: NextConfig = {
   ...(!isVercel ? { output: "standalone" as const } : {}),
   outputFileTracingRoot: monorepoRoot,
   transpilePackages: ["@powerchain/launchpad-config", "@powerchain/utils", "@powerchain/integrations"],
-  async rewrites() {
-    return [{ source: "/api/v1/:path*", destination: `${backendOrigin}/api/v1/:path*` }];
-  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

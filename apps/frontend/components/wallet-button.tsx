@@ -13,6 +13,24 @@ import { StatusBadge } from "./ui/status-badge";
 import { useWalletData } from "../hooks/use-wallet-data";
 import { PwrcCoin } from "./pwrc-coin";
 
+function WalletIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      className="wallet-button-icon"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path d="M4 7.25A2.25 2.25 0 0 1 6.25 5h10.5A2.25 2.25 0 0 1 19 7.25v.5H6.25A2.25 2.25 0 0 0 4 10V7.25Z" fill="currentColor" opacity=".72" />
+      <path d="M4 10a2.25 2.25 0 0 1 2.25-2.25h12.5A2.25 2.25 0 0 1 21 10v7.25a2.25 2.25 0 0 1-2.25 2.25H6.25A2.25 2.25 0 0 1 4 17.25V10Z" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M16.25 12.25H21v4.25h-4.75a2.125 2.125 0 1 1 0-4.25Z" fill="currentColor" opacity=".18" />
+      <circle cx="16.2" cy="14.38" r=".9" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function WalletButton() {
   const wallet = useWallet();
   const connectors = useWalletConnectors();
@@ -53,12 +71,12 @@ export function WalletButton() {
           type="button"
           className="wallet-button connected"
           onClick={() => setOpen((value) => !value)}
+          aria-label="Open connected wallet"
           aria-expanded={open}
           aria-haspopup="menu"
         >
-          <span className="wallet-button-dot" />
-          <span>{shortenWalletAddress(address)}</span>
-          <span className="wallet-chevron" aria-hidden="true">⌄</span>
+          <WalletIcon />
+          <span className="wallet-button-label">Wallet</span>
         </button>
         {open && (
           <div className="wallet-menu" role="menu" aria-label="Connected wallet actions">
@@ -104,9 +122,15 @@ export function WalletButton() {
 
   return (
     <>
-      <button type="button" className="wallet-button" onClick={() => setOpen(true)} disabled={wallet.isConnecting}>
-        <span className="wallet-button-dot" />
-        {wallet.isConnecting ? "Connecting…" : "Connect wallet"}
+      <button
+        type="button"
+        className="wallet-button"
+        onClick={() => setOpen(true)}
+        disabled={wallet.isConnecting}
+        aria-label={wallet.isConnecting ? "Connecting wallet" : "Connect wallet"}
+      >
+        <WalletIcon />
+        <span className="wallet-button-label">{wallet.isConnecting ? "Connecting…" : "Connect Wallet"}</span>
       </button>
       <WalletConnectModal
         open={open}

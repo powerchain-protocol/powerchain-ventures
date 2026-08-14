@@ -5,18 +5,23 @@ import test from "node:test";
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const json = (file) => JSON.parse(read(file));
 
-test("Next apps load monorepo-root env with the official Next env loader", () => {
+test("Next apps own app-local env files and do not require @next/env", () => {
   for (const app of ["frontend", "backend"]) {
     const config = read(`apps/${app}/next.config.ts`);
-    assert.match(config, /loadEnvConfig/);
+    assert.doesNotMatch(config, /@next\/env|loadEnvConfig/);
     assert.match(config, /fileURLToPath\(import\.meta\.url\)/);
-    assert.doesNotMatch(config, /path\.resolve\(process\.cwd\(\),\s*["']\.\.\/\.\.["']\)/);
 
     const pkg = json(`apps/${app}/package.json`);
-    assert.equal(pkg.devDependencies["@next/env"], "16.2.12");
+    assert.equal(pkg.devDependencies?.["@next/env"], undefined);
     assert.match(pkg.scripts.predev, /check-dev-start\.mjs/);
     assert.match(pkg.scripts.predev, /build:packages/);
+
+    assert.ok(fs.existsSync(new URL(`../apps/${app}/.env.example`, import.meta.url)));
+    assert.ok(fs.existsSync(new URL(`../apps/${app}/.env.local`, import.meta.url)));
   }
+  assert.ok(fs.existsSync(new URL("../.env.example", import.meta.url)));
+  assert.ok(fs.existsSync(new URL("../.env.local", import.meta.url)));
+  assert.ok(fs.existsSync(new URL("../apps/mobile/.env.local", import.meta.url)));
 });
 
 test("frontend startup keeps fixed ports and direct diagnostics", () => {
@@ -46,7 +51,7 @@ test("test and validate build generated workspace outputs before dist imports", 
 
 
 test("frontend development runtime has safe defaults while production stays strict", () => {
-  const envFile = read(".env.development");
+  const envFile = read("apps/frontend/.env.local");
   const parser = read("apps/frontend/lib/env/public.ts");
   const config = read("apps/frontend/next.config.ts");
 

@@ -1,9 +1,102 @@
 "use client";
-import{useRouter}from"next/navigation";import{useState}from"react";import{PowerChainLogo}from"../logo";import{PwrcCoin}from"../pwrc-coin";
-const steps=[
- {eyebrow:"Welcome to PowerChain",title:"Launch. Buy. Claim.\nAll in one place.",copy:"Discover Token-2022 launches, manage PWRC and review every transaction before you sign.",visual:"coin"},
- {eyebrow:"Security first",title:"Your wallet stays\nunder your control.",copy:"PowerChain never asks for private keys or recovery phrases. Purchases and claims require your wallet approval.",visual:"shield"},
- {eyebrow:"Built for Solana",title:"Fast settlement.\nClear verification.",copy:"See exact recipients, PowerChain fees, Solana costs and token delivery before a transaction becomes final.",visual:"route"},
- {eyebrow:"Ready",title:"Your Launchpad\nis ready.",copy:"Create an account for creator tools or continue directly to public sales and connect your wallet when needed.",visual:"ready"},
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { PowerChainLogo } from "../logo";
+import { PwrcCoin } from "../pwrc-coin";
+
+const steps = [
+  {
+    eyebrow: "Welcome to PowerChain",
+    title: "Launch. Buy. Claim.\nAll in one place.",
+    copy: "Discover Token-2022 launches, manage PWRC and review every transaction before you sign.",
+    visual: "coin",
+  },
+  {
+    eyebrow: "Security first",
+    title: "Your wallet stays\nunder your control.",
+    copy: "PowerChain never asks for private keys or recovery phrases. Purchases and claims require your wallet approval.",
+    visual: "shield",
+  },
+  {
+    eyebrow: "Built for Solana",
+    title: "Fast settlement.\nClear verification.",
+    copy: "See exact recipients, PowerChain fees, Solana costs and token delivery before a transaction becomes final.",
+    visual: "route",
+  },
+  {
+    eyebrow: "Ready",
+    title: "Your Launchpad\nis ready.",
+    copy: "Create an account for creator tools or continue directly to public sales and connect your wallet when needed.",
+    visual: "ready",
+  },
 ] as const;
-export function OnboardingFlow(){const router=useRouter();const[index,setIndex]=useState(0);const step=steps[index]!;function complete(path:string){localStorage.setItem("powerchain.onboarding.complete","1");document.cookie="pc_onboarding=1; Path=/; Max-Age=31536000; SameSite=Lax";router.replace(path)}return <main className="onboarding-page"><header className="onboarding-header"><PowerChainLogo/><button className="text-button" onClick={()=>complete("/sales")}>Skip</button></header><section className="onboarding-card"><div className={`onboarding-visual ${step.visual}`}>{step.visual==="coin"&&<PwrcCoin size={178} priority/>}{step.visual==="shield"&&<span className="onboarding-glyph">✓</span>}{step.visual==="route"&&<div className="route-visual"><i>Wallet</i><b>→</b><i>Review</i><b>→</b><i>Solana</i></div>}{step.visual==="ready"&&<div className="ready-stack"><PwrcCoin size={92}/><span>POWERCHAIN</span></div>}</div><div className="onboarding-copy"><span className="eyebrow">{step.eyebrow}</span><h1>{step.title.split("\n").map((line,i)=><span key={line}>{line}{i===0&&<br/>}</span>)}</h1><p>{step.copy}</p></div><div className="onboarding-dots" aria-label={`Step ${index+1} of ${steps.length}`}>{steps.map((_,i)=><i key={i} className={i===index?"active":""}/>)}</div><div className="onboarding-actions">{index>0&&<button className="secondary" onClick={()=>setIndex(i=>i-1)}>Back</button>}{index<steps.length-1?<button className="primary" onClick={()=>setIndex(i=>i+1)}>Continue</button>:<><button className="primary" onClick={()=>complete("/auth/sign-up")}>Create account</button><button className="secondary" onClick={()=>complete("/sales")}>Explore first</button></>}</div>{index===steps.length-1&&<p className="onboarding-signin">Already registered? <button type="button" onClick={()=>complete("/auth/sign-in")}>Sign in</button></p>}</section></main>}
+
+export function OnboardingFlow() {
+  const router = useRouter();
+  const [index, setIndex] = useState(0);
+  const [mobileViewport, setMobileViewport] = useState<boolean | null>(null);
+  const step = steps[index]!;
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 720px)");
+    const sync = () => {
+      setMobileViewport(media.matches);
+      if (!media.matches) router.replace("/");
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, [router]);
+
+  function complete(path: string) {
+    localStorage.setItem("powerchain.onboarding.complete", "1");
+    document.cookie = "pc_onboarding=1; Path=/; Max-Age=31536000; SameSite=Lax";
+    router.replace(path);
+  }
+
+  if (mobileViewport !== true) return null;
+
+  return (
+    <main className="onboarding-page">
+      <header className="onboarding-header">
+        <PowerChainLogo />
+        <button className="text-button" onClick={() => complete("/sales")}>Skip</button>
+      </header>
+      <section className="onboarding-card">
+        <div className={`onboarding-visual ${step.visual}`}>
+          {step.visual === "coin" && <PwrcCoin size={178} priority />}
+          {step.visual === "shield" && <span className="onboarding-glyph">✓</span>}
+          {step.visual === "route" && (
+            <div className="route-visual"><i>Wallet</i><b>→</b><i>Review</i><b>→</b><i>Solana</i></div>
+          )}
+          {step.visual === "ready" && (
+            <div className="ready-stack"><PwrcCoin size={92} /><span>POWERCHAIN</span></div>
+          )}
+        </div>
+        <div className="onboarding-copy">
+          <span className="eyebrow">{step.eyebrow}</span>
+          <h1>{step.title.split("\n").map((line, i) => <span key={line}>{line}{i === 0 && <br />}</span>)}</h1>
+          <p>{step.copy}</p>
+        </div>
+        <div className="onboarding-dots" aria-label={`Step ${index + 1} of ${steps.length}`}>
+          {steps.map((_, i) => <i key={i} className={i === index ? "active" : ""} />)}
+        </div>
+        <div className="onboarding-actions">
+          {index > 0 && <button className="secondary" onClick={() => setIndex((i) => i - 1)}>Back</button>}
+          {index < steps.length - 1 ? (
+            <button className="primary" onClick={() => setIndex((i) => i + 1)}>Continue</button>
+          ) : (
+            <>
+              <button className="primary" onClick={() => complete("/auth/sign-up")}>Create account</button>
+              <button className="secondary" onClick={() => complete("/sales")}>Explore first</button>
+            </>
+          )}
+        </div>
+        {index === steps.length - 1 && (
+          <p className="onboarding-signin">Already registered? <button type="button" onClick={() => complete("/auth/sign-in")}>Sign in</button></p>
+        )}
+      </section>
+    </main>
+  );
+}

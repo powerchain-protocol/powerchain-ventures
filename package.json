@@ -12,7 +12,7 @@
     "build": "pnpm build:packages && pnpm prisma:generate && pnpm --filter @powerchain/launchpad-backend build && pnpm --filter @powerchain/launchpad-frontend build",
     "typecheck": "pnpm typecheck:packages && pnpm typecheck:apps",
     "test": "pnpm build:packages && node --test tests/*.test.mjs && pnpm test:utils",
-    "validate": "node scripts/check-workspace.mjs && node scripts/validate.mjs && node scripts/check-pnpm-policy.mjs && node scripts/check-vercel-config.mjs && node scripts/check-env-example.mjs && node scripts/check-mobile-env-example.mjs && node scripts/check-mobile-native.mjs && node scripts/sync-openapi.mjs --check && pnpm build:packages && node --test tests/*.test.mjs && pnpm test:utils",
+    "validate": "node scripts/check-workspace.mjs && node scripts/validate.mjs && node scripts/check-pnpm-policy.mjs && node scripts/check-vercel-config.mjs && node scripts/check-env-example.mjs && node scripts/check-app-env-files.mjs && node scripts/check-mobile-env-example.mjs && node scripts/check-mobile-native.mjs && node scripts/sync-openapi.mjs --check && pnpm build:packages && node --test tests/*.test.mjs && pnpm test:utils",
     "dev:all": "pnpm --parallel --filter @powerchain/launchpad-backend --filter @powerchain/launchpad-frontend dev",
     "build:frontend": "pnpm --filter @powerchain/launchpad-frontend build",
     "build:backend": "pnpm --filter @powerchain/launchpad-backend build",
@@ -80,7 +80,8 @@
     "preflight:backend": "node scripts/check-dev-start.mjs backend",
     "dev:frontend:direct": "node scripts/run-next.mjs frontend dev",
     "dev:backend:direct": "node scripts/run-next.mjs backend dev",
-    "preinstall": "node scripts/check-install-runtime.mjs"
+    "preinstall": "node scripts/check-install-runtime.mjs",
+    "validate:app-envs": "node scripts/check-app-env-files.mjs"
   },
   "devDependencies": {
     "next": "16.2.12",

@@ -41,19 +41,19 @@ if (packageJson.packageManager !== "pnpm@11.21.0") {
   process.exit(1);
 }
 
-const rootEnvCandidates = [
+const appDir = path.join(root, "apps", app);
+const appEnvCandidates = [
   ".env.development.local",
   ".env.local",
   ".env.development",
   ".env",
 ];
-const hasRootEnv = rootEnvCandidates.some((name) => fs.existsSync(path.join(root, name)));
-if (!hasRootEnv) {
-  console.warn("[PowerChain] No root .env override found; using committed safe development defaults.");
-  console.warn("Optional override: cp .env.development.example .env.local");
+const hasAppEnv = appEnvCandidates.some((name) => fs.existsSync(path.join(appDir, name)));
+if (!hasAppEnv) {
+  console.warn(`[PowerChain] No ${app} app-local env file found under ${appDir}.`);
+  console.warn(`Create one with: cp apps/${app}/.env.example apps/${app}/.env.local`);
 }
 
-const appDir = path.join(root, "apps", app);
 const routerCandidates = ["app", "pages", "src/app", "src/pages"];
 if (!routerCandidates.some((candidate) => fs.existsSync(path.join(appDir, candidate)))) {
   console.error(`[PowerChain] ${app} has no app/pages router under ${appDir}.`);

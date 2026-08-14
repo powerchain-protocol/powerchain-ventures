@@ -1,9 +1,23 @@
+
+- Simplified the header wallet control to a wallet icon plus `Connect Wallet`/`Wallet`; compact screens show only the wallet icon.
+- Added explicit `shortAddress` frontend export to prevent Turbopack static-export failures.
+- Replaced the raw frontend API rewrite with a catchable same-origin API route proxy that returns structured 503 responses when the backend is offline.
+- Added Docs, Eligibility, Vesting, Settings, Security and Legal pages.
+- Made onboarding mobile-only and restored the desktop root landing page as public.
 # Changelog
+
+## Environment ownership and Next config fix — 2026-08-14
+
+- Added `.env.example` and non-secret `.env.local` files at the repository root and for frontend, backend, and mobile apps.
+- Removed `@next/env` imports and dependencies from frontend/backend; Next.js now loads each app's environment files natively from that app root.
+- Added `validate:app-envs` to verify required env files and prevent server-secret keys from entering the frontend env template.
+- Updated root and app READMEs with environment ownership, copy commands, local ports, and security boundaries.
+
 
 - Fixed pnpm Node-runtime bootstrap: removed `devEngines.runtime`, which caused pnpm 11.21.0 to install the `node` npm package and fail under `strictDepBuilds`; Node 24 is now enforced with `engines`, `.nvmrc`, `.node-version`, and the dev preflight.
 - Hardened Next startup by passing `apps/frontend` / `apps/backend` explicitly to the Next CLI from a monorepo-root wrapper, and removed the unnecessary custom `turbopack.root` override.
 
-- Hardened local Next.js startup: frontend/backend configs now load canonical monorepo-root `.env*` files through `@next/env`, derive the root from the config file path rather than `process.cwd()`, preflight Node 24 and ports 3000/3001, and provide direct Next/cache diagnostic commands.
+- Earlier startup hardening introduced monorepo-root `@next/env` loading; this is superseded by the 2026-08-14 app-local environment ownership fix above, which removes the extra dependency while preserving Node/port preflight and direct Next/cache diagnostics.
 
 ### Runtime toolchain
 

@@ -26,7 +26,6 @@
     "@powerchain/launchpad-program-client": "workspace:*"
   },
   "devDependencies": {
-    "@next/env": "16.2.12",
     "@types/node": "^24",
     "@types/pg": "8.15.5",
     "@types/react": "^19",

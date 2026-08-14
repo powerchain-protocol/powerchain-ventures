@@ -25,7 +25,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <footer>
         <PowerChainLogo compact />
         <span>PowerChain Launchpad™ 1.0.0</span>
-        <span>Solana • Token-2022 • PWRC</span>
+        <nav className="footer-links" aria-label="Footer navigation">
+          <Link href="/docs">Docs</Link>
+          <Link href="/security">Security</Link>
+          <Link href="/legal">Legal</Link>
+          <Link href="/settings">Settings</Link>
+        </nav>
       </footer>
     </>
   );

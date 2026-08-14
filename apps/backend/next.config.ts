@@ -1,14 +1,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
 
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.resolve(appRoot, "../..");
 
-// Load the monorepo-root .env* files before backend modules read process.env.
-// This keeps one canonical environment source for frontend and backend.
-loadEnvConfig(monorepoRoot, process.env.NODE_ENV !== "production");
+// Next.js loads apps/backend/.env.local and apps/backend/.env* automatically.
+
 
 const isProduction = process.env.NODE_ENV === "production";
 const isVercel = process.env.VERCEL === "1";

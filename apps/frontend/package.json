@@ -20,7 +20,6 @@
     "@powerchain/utils": "workspace:*"
   },
   "devDependencies": {
-    "@next/env": "16.2.12",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",

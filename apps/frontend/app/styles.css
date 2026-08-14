@@ -100,3 +100,19 @@
 @media(max-width:600px){.auth-form-column{align-items:start;place-items:initial;padding:24px 18px 40px}.auth-form-wrap{width:100%}.auth-mobile-logo{margin-bottom:44px}.auth-form-wrap h2{font-size:32px}.auth-subtitle{font-size:14px}.auth-field input,.password-input{min-height:54px}.auth-submit,.auth-secondary{min-height:54px;border-radius:14px}.password-rules{grid-template-columns:1fr}.onboarding-page{padding:0;background:#fff}.onboarding-header{height:70px;padding:0 18px}.onboarding-card{border:0;border-radius:0;box-shadow:none;padding:16px 20px 26px;min-height:calc(100dvh - 70px);grid-template-rows:minmax(250px,.95fr) auto auto auto auto}.onboarding-visual{border-radius:22px}.onboarding-copy{padding:26px 0 8px}.onboarding-copy h1{font-size:36px}.onboarding-actions{position:sticky;bottom:0;background:#fff;padding-top:8px}.onboarding-actions button{min-height:52px}.account-sign-in{display:none}.account-menu{display:none}.account-page{padding-bottom:100px}}
 .onboarding-signin button{border:0;background:transparent;padding:0;color:#075f3b;font:inherit;font-weight:800;cursor:pointer}
 .auth-session-note{color:#69776f;font-size:10px;display:inline-flex;align-items:center;gap:6px}.auth-session-note:before{content:"";width:6px;height:6px;border-radius:50%;background:#0b7a4f}
+
+
+/* Header wallet CTA: icon + simple label; icon-only on compact screens. */
+.wallet-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;white-space:nowrap;cursor:pointer}
+.wallet-button-icon{display:block;flex:0 0 auto}
+.wallet-button.connected{padding-inline:14px}
+.wallet-button:focus-visible{outline:3px solid rgba(12,124,80,.2);outline-offset:2px}
+.footer-links{display:flex;align-items:center;gap:16px;font-size:12px}
+.footer-links a:hover{color:var(--green)}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.info-panel{display:grid;align-content:start;gap:8px}
+.info-panel h2{font-size:20px;margin:0}
+.info-panel p{margin:0}
+.text-link{color:var(--green);font-size:12px;font-weight:800;margin-top:8px}
+@media(max-width:720px){.info-grid{grid-template-columns:1fr}.footer-links{width:100%;justify-content:flex-start;flex-wrap:wrap}}
+@media(max-width:520px){.wallet-button{width:42px;height:42px;min-width:42px;padding:0!important;border-radius:12px}.wallet-button-label{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.header-actions{gap:6px}.network-compact{display:none}}
