@@ -1,0 +1,42 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "transport": {
+    "apiPrefix": "/api/v1",
+    "endpointRegistry": true,
+    "backendFallbackOrigins": true,
+    "mutationFallbackRequiresIdempotency": true,
+    "solanaRpcFallbacks": true,
+    "serverWebSockets": true,
+    "browserWebSocketOptional": true,
+    "httpPollingFallback": true,
+    "reconnect": "exponential endpoint rotation",
+    "healthIntervalMs": 60000
+  },
+  "ui": {
+    "forms": true,
+    "dropdown": true,
+    "badge": true,
+    "select": true,
+    "formats": "packages/utils/src/formats.ts",
+    "payments": "packages/domain/src/payments.ts"
+  },
+  "validation": {
+    "checks": {
+      "api-transport": true,
+      "frontend-architecture": true,
+      "runtime-resolution": true,
+      "workspace": true,
+      "openapi": true,
+      "validate-source": true,
+      "repo-tests": true
+    },
+    "repoTests": true,
+    "jsonErrors": [],
+    "nodeSyntaxErrors": [],
+    "typescriptFiles": 438,
+    "typescriptSyntaxErrors": [],
+    "dependencyBackedBuildExecuted": false,
+    "note": "Full installed Node 24/pnpm Next/Expo build remains a local gate."
+  }
+}

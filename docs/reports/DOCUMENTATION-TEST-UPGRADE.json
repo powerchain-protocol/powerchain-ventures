@@ -1,0 +1,54 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "documentation": {
+    "rootReadmes": [
+      "README.md",
+      "CHANGELOG.md",
+      "CONTRIBUTORS.md"
+    ],
+    "appReadmes": [
+      "apps/README.md",
+      "apps/frontend/README.md",
+      "apps/backend/README.md",
+      "apps/mobile/README.md"
+    ],
+    "coreDocs": [
+      "docs/ARCHITECTURE.md",
+      "docs/ROUTING.md",
+      "docs/API.md",
+      "docs/DATABASE.md",
+      "docs/SECURITY.md",
+      "docs/TESTING.md",
+      "docs/OPERATIONS.md",
+      "docs/DEPLOYMENT.md",
+      "docs/RELEASE-CHECKLIST.md",
+      "docs/MOBILE.md",
+      "docs/PROGRAMS.md"
+    ]
+  },
+  "tests": {
+    "repositoryTests": 33,
+    "results": {
+      "scripts/check-documentation.mjs": true,
+      "tests/*.test.mjs": false,
+      "scripts/check-workspace.mjs": true,
+      "scripts/check-pnpm-policy.mjs": true,
+      "scripts/check-vercel-config.mjs": true,
+      "scripts/check-env-example.mjs": true,
+      "scripts/check-app-env-files.mjs": true,
+      "scripts/check-mobile-env-example.mjs": true,
+      "scripts/check-mobile-native.mjs": true
+    },
+    "sourceOnlyRawNodeTest": {
+      "ok": false,
+      "note": "Built-output suites skip when dist artifacts are absent and run after pnpm build:packages."
+    }
+  },
+  "validation": {
+    "jsonErrors": [],
+    "nodeSyntaxErrors": [],
+    "typescriptFiles": 386,
+    "typescriptSyntaxErrors": []
+  }
+}

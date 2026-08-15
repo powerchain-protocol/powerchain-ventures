@@ -1,0 +1,10 @@
+NEXT_PUBLIC_SOLANA_CLUSTER=devnet
+NEXT_PUBLIC_SOLANA_RPC_URL=http://localhost:3001/api/v1/solana/rpc
+SOLANA_RPC_PROVIDER=auto
+HELIUS_API_KEY=
+HELIUS_RPC_URL=https://devnet.helius-rpc.com/
+HELIUS_API_URL=https://api.helius.xyz
+CUSTOM_SOLANA_RPC_URL=
+CUSTOM_SOLANA_RPC_FALLBACK_URLS=
+SOLANA_RPC_URL=https://api.devnet.solana.com
+SOLANA_EXPECTED_GENESIS_PREFIX=

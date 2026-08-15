@@ -7,7 +7,9 @@
     "typecheck": "tsc --noEmit",
     "dev": "node ../../scripts/run-next.mjs backend dev",
     "start": "node ../../scripts/run-next.mjs backend start",
-    "predev": "node ../../scripts/check-dev-start.mjs backend && pnpm -C ../.. build:packages"
+    "predev": "node ../../scripts/check-dev-start.mjs backend && pnpm -C ../.. build:packages",
+    "prebuild": "pnpm -C ../.. build:packages && pnpm -C ../.. prisma:generate",
+    "pretypecheck": "pnpm -C ../.. build:packages && pnpm -C ../.. prisma:generate"
   },
   "dependencies": {
     "next": "16.2.12",
@@ -23,7 +25,10 @@
     "@prisma/client": "7.9.1",
     "@prisma/adapter-pg": "7.9.1",
     "pg": "8.16.3",
-    "@powerchain/launchpad-program-client": "workspace:*"
+    "@powerchain/launchpad-program-client": "workspace:*",
+    "@powerchain/token-data": "workspace:*",
+    "@powerchain/mail": "workspace:*",
+    "better-auth": "1.6.25"
   },
   "devDependencies": {
     "@types/node": "^24",

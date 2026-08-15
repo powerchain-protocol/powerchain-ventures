@@ -1,0 +1,91 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "releaseLabel": "RC.1",
+  "architecture": {
+    "apps": [
+      "frontend",
+      "backend",
+      "checkout",
+      "mobile"
+    ],
+    "checkoutOwner": "apps/checkout",
+    "payloadApplicationLayer": false,
+    "frontendOwnsPurchaseForm": false,
+    "sharedUi": "packages/ui"
+  },
+  "purchase": {
+    "rail": "SOL",
+    "serviceFeeBps": 250,
+    "localTransactionBuilder": "apps/backend/lib/purchase-transaction-builder.ts",
+    "quoteAuthorityPartialSignature": true,
+    "buyerWalletFinalSignature": true,
+    "token2022AtaCreation": true,
+    "simulationBeforeBuyerReview": true,
+    "prepareRequiresIdempotencyKey": true,
+    "pendingSignedPurchaseAutoResubmit": false,
+    "confirmationBindsSubmittedSignature": true
+  },
+  "marketData": {
+    "providers": [
+      "pyth",
+      "birdeye",
+      "coinmarketcap"
+    ],
+    "publicEndpoints": [
+      "/api/v1/market/prices",
+      "/api/v1/market/rates"
+    ],
+    "freshnessRequiredForPurchase": true,
+    "divergenceGuard": true,
+    "shortServerCache": true
+  },
+  "paymentMethods": {
+    "solWalletPurchase": "enabled",
+    "coinbaseOnramp": "wallet-funding-only",
+    "card": "provider-gated-disabled",
+    "usdcPurchase": "adapter-gated",
+    "suiPurchase": "adapter-gated"
+  },
+  "validation": {
+    "layout": "PASS",
+    "documentation": "PASS",
+    "branding": "PASS",
+    "workspace": "PASS",
+    "pnpmPolicy": "PASS",
+    "vercel": "PASS",
+    "environment": "PASS",
+    "appEnvironmentSeparation": "PASS",
+    "mobileEnvironment": "PASS",
+    "mobileNative": "PASS",
+    "runtimeResolution": "PASS",
+    "frontendArchitecture": "PASS",
+    "apiTransport": "PASS",
+    "authWallet": "PASS",
+    "openapi": "PASS",
+    "sourceValidator": "PASS",
+    "repositoryTests": {
+      "total": 168,
+      "passed": 166,
+      "failed": 0,
+      "skipped": 2
+    },
+    "typescriptSyntaxFiles": 530,
+    "typescriptSyntaxErrors": 0,
+    "jsonErrors": 0,
+    "nodeSyntaxErrors": 0,
+    "cargoAvailableInArtifactRuntime": false,
+    "dependencyBackedNode24BuildExecuted": false,
+    "lockfileRegenerated": false,
+    "dependencyDoctorPassed": false,
+    "dependencyDoctorOutput": "{\n  \"ok\": false,\n  \"failures\": [\n    \"pnpm-lock.yaml has not been regenerated for better-auth; run pnpm install --no-frozen-lockfile\",\n    \"pnpm-lock.yaml has not been regenerated for @web3icons/react; run pnpm install --no-frozen-lockfile\",\n    \"pnpm-lock.yaml has not been regenerated for @mysten/dapp-kit-react; run pnpm install --no-frozen-lockfile\",\n    \"pnpm-lock.yaml has not been regenerated for @mysten/sui; run pnpm install --no-frozen-lockfile\"\n  ],\n  \"actionable\": \"Run pnpm install --no-frozen-lockfile under Node 24, then rerun this doctor.\"\n}",
+    "localFinalGate": [
+      "pnpm install --no-frozen-lockfile",
+      "pnpm doctor:layout",
+      "pnpm doctor:auth-deps",
+      "pnpm typecheck",
+      "pnpm test",
+      "pnpm build"
+    ]
+  }
+}

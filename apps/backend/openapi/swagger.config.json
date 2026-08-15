@@ -1,6 +1,0 @@
-{
-  "name": "PowerChain Launchpad API",
-  "version": "1.0.0",
-  "spec": "./swagger.yaml",
-  "servedAt": "/api/v1/openapi"
-}

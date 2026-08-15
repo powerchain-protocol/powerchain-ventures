@@ -8,6 +8,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./payments": {
+      "types": "./dist/payments.d.ts",
+      "import": "./dist/payments.js",
+      "default": "./dist/payments.js"
+    },
+    "./fees": {
+      "types": "./dist/fees.d.ts",
+      "import": "./dist/fees.js",
+      "default": "./dist/fees.js"
     }
   },
   "scripts": {

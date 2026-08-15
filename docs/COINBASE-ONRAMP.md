@@ -17,7 +17,7 @@ PowerChain uses Coinbase-hosted Onramp as an optional wallet-funding rail. It do
 CDP_API_KEY_ID=
 CDP_API_KEY_SECRET=
 CDP_ONRAMP_ENABLED=false
-CDP_ONRAMP_REDIRECT_URL=https://launchpad.example.com/checkout/onramp-return
+CDP_ONRAMP_REDIRECT_URL=https://checkout.powerchain.energy/onramp-return
 ```
 
 ## Flow

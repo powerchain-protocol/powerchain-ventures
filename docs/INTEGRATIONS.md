@@ -1,46 +1,92 @@
 # Provider integrations
 
+Provider credentials are backend-only. Frontend, Checkout and mobile environment files must never contain Helius, Pyth, Birdeye or CoinMarketCap secrets.
+
 ## Helius
 
-PowerChain uses Helius only from the backend. Configure `HELIUS_API_KEY`; optionally override `HELIUS_RPC_URL` (default `https://mainnet.helius-rpc.com/`). The key is inserted server-side and redacted from health/audit endpoint labels.
+Helius is available for server-side Solana RPC/API infrastructure. `HELIUS_API_KEY` may be selected as a dedicated RPC provider through the centralized RPC pool. Browser clients use the backend `/api/v1/solana/rpc` proxy.
 
-`SOLANA_RPC_URL` remains the required primary server RPC. A distinct Helius RPC URL can satisfy the second mainnet redundancy slot; duplicate endpoints are deduplicated before readiness is calculated.
+## Pyth
 
-Helius DAS `getAsset` enriches validated SPL/Token-2022 mints. Solana signature/message/payment/delivery verification remains authoritative for settlement.
+Pyth is the preferred oracle-quality SOL/USD source when configured.
+
+```text
+PYTH_API_KEY=
+PYTH_HERMES_URL=https://pyth.dourolabs.app/hermes
+PYTH_SOL_USD_FEED_ID=
+PYTH_USDC_USD_FEED_ID=
+PYTH_SUI_USD_FEED_ID=
+```
+
+Feed IDs are deployment configuration. Source code does not invent them.
 
 ## Birdeye
 
-Configure backend-only `BIRDEYE_API_KEY`. Requests send `X-API-KEY` plus `x-chain: solana` and use fixed, bounded price/token-overview templates. Public market routes are rate-limited.
+Birdeye supplies address-based token spot data and liquidity context:
 
-Birdeye observations are informational. They never set sale price, authorize purchases, confirm transactions, or mutate settlement state.
+```text
+BIRDEYE_API_KEY=
+BIRDEYE_BASE_URL=https://public-api.birdeye.so
+```
 
-## PWRC
+Requests use server-side `X-API-KEY` and the target `x-chain`.
 
-`POWERCHAIN_PWRC_MINT_ADDRESS` is intentionally `null` in source until the real deployed mainnet Token-2022 mint is supplied. Production must configure `POWERCHAIN_PRESALE_MINT`.
+Birdeye is also the mint-specific PWRC market source once a real PWRC mint is configured.
 
-`POWERCHAIN_LAUNCHPAD_PROGRAM_ID` is also intentionally `null` until the real deployed program address is supplied. Production must configure `POWERCHAIN_LAUNCHPAD_PROGRAM_ID`.
+## CoinMarketCap
 
-The canonical service-fee wallet is:
+CoinMarketCap is an optional authenticated fallback:
 
-`FeeszhrKKEsvxr1kg8LDtPx6BLcEbYHiAThYaxajNhqy`
+```text
+COINMARKETCAP_API_KEY=
+COINMARKETCAP_BASE_URL=https://pro-api.coinmarketcap.com
+```
 
-Purchase settlement rejects any different fee recipient.
+PowerChain does not rely on undocumented browser endpoints for production price conversion.
 
-## Prisma + Supabase
+## Price policy
 
-Supabase/PostgreSQL SQL migrations in `database/migrations` remain authoritative for schema, locking, settlement functions, RLS and privileges. Migration `023_integrations_fee_market_data.sql` adds provider market observations and canonical fee/program fields.
+Implementation:
 
-Prisma ORM **7.9.1** is a typed companion layer. The Prisma schema lives at `database/prisma/schema.prisma` and CLI configuration at `/prisma.config.ts`. `DATABASE_URL` is server-only.
+```text
+packages/integrations/src/
+├── amount.ts
+├── rates.ts
+├── prices.ts
+├── pyth.ts
+├── birdeye.ts
+├── coinmarketcap.ts
+└── helius.ts
 
-## OpenAPI / Swagger
+apps/backend/lib/integrations/prices.ts
+```
 
-The canonical API contract is `apps/backend/openapi/powerchain-launchpad.openapi.yaml` and is served at `/api/v1/openapi`.
+Market observations have bounded timeouts and freshness. Multiple available sources are checked for excessive divergence. Backend price snapshots are cached briefly to avoid repeated provider fan-out.
+
+Public read endpoints:
+
+```text
+GET /api/v1/market/prices
+GET /api/v1/market/prices?asset=SOL
+GET /api/v1/market/rates
+```
+
+Market data does not change the configured token sale price. For SOL purchases it is used only to convert the already-authoritative USD sale principal into the exact SOL amount used in the reviewed transaction.
+
+## Coinbase CDP Onramp
+
+Onramp credentials remain server-side. The hosted URL is single-use and is never persisted. Onramp funds the user's wallet; it does not bypass PowerChain purchase preparation or on-chain verification.
+
+## Database and API
+
+The canonical API contract remains:
+
+```text
+apps/backend/api/openapi/openapi.yaml
+```
 
 Run:
 
 ```bash
-pnpm openapi:sync
 pnpm openapi:check
 ```
-
-The sync command generates `apps/backend/openapi/swagger.yaml` and the root `openapi/openapi.yaml` compatibility copy.

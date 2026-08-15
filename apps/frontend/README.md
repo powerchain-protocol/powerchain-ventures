@@ -1,49 +1,53 @@
-# PowerChain Launchpad Frontend
+# @powerchain/launchpad-frontend
 
-Next.js frontend for PowerChain Launchpad™ `1.0.0`.
+Next.js 16 App Router frontend for PowerChain Launchpad™ `1.0.0`.
 
 ## Responsibilities
 
-- sale catalog and sale details
-- wallet connection and wallet center
-- checkout and exact transaction review
-- claims and transaction receipts
-- creator console/dashboard
-- onboarding/auth/account UI
-- analytics and integration status
+- launchpad discovery and sale details
+- wallet center and non-purchase transaction review
+- sale discovery and secure-checkout redirect
+- claims and receipts
+- creator dashboard and sale creation
+- account/authentication UX
+- API/developer documentation
+- responsive PWA shell
 
-The frontend never receives service-role, provider, quote-authority, or transaction-builder secrets.
+## Branding
 
-## Development
+Application branding uses:
 
-```bash
-# Recommended full-stack development (frontend :3000 + backend :3001)
-pnpm dev:all
-
-# Frontend-only development is also supported. API calls return a structured
-# BACKEND_UNAVAILABLE 503 while the backend is stopped.
-pnpm --filter @powerchain/launchpad-frontend dev
-
-pnpm --filter @powerchain/launchpad-frontend typecheck
-pnpm --filter @powerchain/launchpad-frontend build
+```text
+public/assets/brand/powerchain-mark-dark.png
+components/logo.tsx
 ```
 
+The header, favicon, PWA icons and Apple touch icon all derive from this brand source. PWRC token artwork stays under token-specific assets.
+
+## Header
+
+`components/app-shell.tsx` owns the application header/footer shell.
+
+Primary navigation is deliberately compact. Secondary destinations live in the accessible `More` menu, while wallet/account actions remain separate controls.
 
 ## Environment
 
-Use the app-local files:
+Use `.env.example` / `.env.local` for local browser-safe configuration.
+
+Never expose Helius keys, service-role keys, transaction-builder credentials or private signing material in frontend variables.
+
+## Commands
 
 ```bash
-cp apps/frontend/.env.example apps/frontend/.env.local
+pnpm dev:frontend
+pnpm build:frontend
+pnpm doctor:frontend
+pnpm doctor:runtime-resolution
 ```
 
-Required development values are `NEXT_PUBLIC_APP_URL`, `BACKEND_ORIGIN`,
-`NEXT_PUBLIC_SOLANA_CLUSTER`, and `NEXT_PUBLIC_SOLANA_RPC_URL`. Do not place API
-keys, database credentials, service-role keys, or transaction-builder secrets in
-the frontend env. Next.js loads this app-local `.env.local` automatically.
 
-## Routes
+## Checkout boundary
 
-Public routes include `/`, `/sales`, `/wallet`, `/claims`, `/transactions`, `/analytics`, `/integration`, `/docs`, `/eligibility`, `/vesting`, `/security`, `/legal` and `/settings`. `/dashboard`, `/create` and `/account` require an authenticated account session. Mobile users are shown `/onboarding` on first visit; desktop users are not redirected into onboarding.
+`apps/frontend` does not own payment or token-purchase forms. Sale detail pages redirect to `NEXT_PUBLIC_CHECKOUT_URL`.
 
-The frontend serves `/api/v1/*` through a route-handler proxy to `BACKEND_ORIGIN`. When the backend is not running, the proxy returns HTTP 503 with `BACKEND_UNAVAILABLE` rather than crashing the Next rewrite layer.
+Purchase/payment UI belongs to `apps/checkout`; authoritative quote, pricing, transaction construction and settlement belong to `apps/backend`.

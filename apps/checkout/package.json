@@ -1,0 +1,35 @@
+{
+  "name": "@powerchain/launchpad-checkout",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ../../scripts/run-next.mjs checkout dev",
+    "build": "node ../../scripts/run-next.mjs checkout build",
+    "start": "node ../../scripts/run-next.mjs checkout start",
+    "typecheck": "tsc --noEmit",
+    "predev": "node ../../scripts/check-dev-start.mjs checkout && pnpm -C ../.. build:packages",
+    "prebuild": "pnpm -C ../.. build:packages"
+  },
+  "dependencies": {
+    "next": "16.2.12",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "@solana/connector": "0.2.6",
+    "@solana/web3.js": "1.98.4",
+    "@powerchain/launchpad-config": "workspace:*",
+    "@powerchain/utils": "workspace:*",
+    "@powerchain/integrations": "workspace:*",
+    "@powerchain/ui": "workspace:*",
+    "@web3icons/react": "4.1.19"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11.21.0 <12"
+  }
+}

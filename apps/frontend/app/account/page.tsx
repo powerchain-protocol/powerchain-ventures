@@ -1,3 +1,32 @@
-"use client";
-import Link from "next/link";import{AppShell}from"../../components/app-shell";import{useAuth}from"../../context/auth-context";import{PwrcCoin}from"../../components/pwrc-coin";
-export default function AccountPage(){const{loading,authenticated,user,signOut}=useAuth();return <AppShell><main className="page account-page"><div className="page-heading"><div><span className="eyebrow">PowerChain account</span><h1>Account</h1><p>Account identity and wallet custody are separate. Connecting a wallet never gives PowerChain access to its private keys.</p></div></div>{loading?<section className="panel account-loading">Loading account…</section>:!authenticated?<section className="panel account-empty"><PwrcCoin size={72}/><h2>Sign in to your account</h2><p>Creator projects and account preferences are available after sign in.</p><div className="row"><Link className="primary link" href="/auth/sign-in">Sign in</Link><Link className="secondary link" href="/auth/sign-up">Create account</Link></div></section>:<div className="account-grid"><section className="panel account-profile"><div className="account-profile-head"><span className="account-avatar large">{(user?.displayName||user?.email||"P").slice(0,1).toUpperCase()}</span><div><h2>{user?.displayName||"PowerChain user"}</h2><p>{user?.email}</p></div></div><dl><div><dt>Email status</dt><dd>{user?.emailConfirmedAt?"Verified":"Confirmation pending"}</dd></div><div><dt>Member since</dt><dd>{user?.createdAt?new Date(user.createdAt).toLocaleDateString():"—"}</dd></div><div><dt>Wallet custody</dt><dd>Non-custodial</dd></div></dl><button className="secondary danger-outline" onClick={()=>void signOut()}>Sign out</button></section><section className="panel account-actions"><span className="eyebrow">Quick access</span><h2>Continue in PowerChain</h2><Link href="/dashboard"><strong>Creator Dashboard</strong><small>Manage your launches and settlement.</small></Link><Link href="/wallet"><strong>Wallet Center</strong><small>Connect a Solana wallet and view PWRC.</small></Link><Link href="/transactions"><strong>Transactions</strong><small>Review settlement and receipts.</small></Link><Link href="/settings"><strong>Settings</strong><small>Review network, wallet and local preferences.</small></Link></section></div>}</main></AppShell>}
+import type {
+  Metadata,
+} from "next";
+import {
+  AccountSecurity,
+} from "../../components/account/account-security";
+
+export const metadata: Metadata = {
+  title: "Account",
+  description:
+    "Manage PowerChain account security and linked wallets.",
+};
+
+export default function AccountPage() {
+  return (
+    <main className="page account-page">
+      <header className="page-heading">
+        <span className="eyebrow">
+          Account
+        </span>
+        <h1>
+          Security and wallet identity
+        </h1>
+        <p>
+          Review your PowerChain account session and verified wallet links.
+        </p>
+      </header>
+
+      <AccountSecurity />
+    </main>
+  );
+}

@@ -20,8 +20,9 @@ test("Next apps own app-local env files and do not require @next/env", () => {
     assert.ok(fs.existsSync(new URL(`../apps/${app}/.env.local`, import.meta.url)));
   }
   assert.ok(fs.existsSync(new URL("../.env.example", import.meta.url)));
+  assert.ok(fs.existsSync(new URL("../apps/mobile/.env.example", import.meta.url)));
   assert.ok(fs.existsSync(new URL("../.env.local", import.meta.url)));
-  assert.ok(fs.existsSync(new URL("../apps/mobile/.env.local", import.meta.url)));
+  assert.equal(fs.existsSync(new URL("../apps/mobile/.env.local", import.meta.url)), false);
 });
 
 test("frontend startup keeps fixed ports and direct diagnostics", () => {
@@ -51,16 +52,16 @@ test("test and validate build generated workspace outputs before dist imports", 
 
 
 test("frontend development runtime has safe defaults while production stays strict", () => {
-  const envFile = read("apps/frontend/.env.local");
+  const envFile = read("apps/frontend/.env.example");
   const parser = read("apps/frontend/lib/env/public.ts");
   const config = read("apps/frontend/next.config.ts");
 
   assert.match(envFile, /NEXT_PUBLIC_APP_URL=http:\/\/localhost:3000/);
-  assert.match(envFile, /NEXT_PUBLIC_SOLANA_CLUSTER=devnet/);
-  assert.match(envFile, /NEXT_PUBLIC_SOLANA_RPC_URL=https:\/\/api\.devnet\.solana\.com/);
+  assert.match(envFile, /NEXT_PUBLIC_SOLANA_CLUSTER=mainnet-beta/);
+  assert.match(envFile, /NEXT_PUBLIC_SOLANA_RPC_URL=http:\/\/localhost:3001\/api\/v1\/solana\/rpc/);
   assert.match(parser, /DEVELOPMENT_DEFAULTS/);
   assert.match(parser, /if \(!isProduction\(source\)\) return DEVELOPMENT_DEFAULTS\[name\]/);
   assert.match(parser, /if \(!value\) throw new Error\(`\[PowerChain\] \$\{name\} is required`\)/);
   assert.match(config, /process\.env\.NEXT_PUBLIC_APP_URL \|\|= "http:\/\/localhost:3000"/);
-  assert.match(config, /process\.env\.NEXT_PUBLIC_SOLANA_CLUSTER \|\|= "devnet"/);
+  assert.match(config, /process\.env\.NEXT_PUBLIC_SOLANA_CLUSTER \|\|= "mainnet-beta"/);
 });

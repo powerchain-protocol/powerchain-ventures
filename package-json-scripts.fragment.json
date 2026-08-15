@@ -1,6 +1,0 @@
-{
-  "scripts": {
-    "check:launchpad-config": "node scripts/verify-launchpad-config.mjs",
-    "check:launchpad-config:type": "tsc -p packages/launchpad-config/tsconfig.json --noEmit"
-  }
-}

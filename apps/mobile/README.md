@@ -1,35 +1,35 @@
-# PowerChain Launchpad Mobile
+# @powerchain/launchpad-mobile
 
-Expo/React Native application for PowerChain Launchpad™ `1.0.0`, with checked-in native iOS and Android projects.
+Expo / React Native companion for PowerChain Launchpad™ `1.0.0`.
 
-## Navigation
+## Branding
 
-- Home
-- Launches
-- Wallet
-- Activity
-- Account
+The native app uses the same PowerChain application mark as the web product.
 
-Checkout, claims, transaction receipts, auth, onboarding, and creator tools use native stack/modal routes.
-
-## Environment
-
-Use `apps/mobile/.env.example` as the template and `apps/mobile/.env.local` for local development. Configure only `EXPO_PUBLIC_*` values plus `IOS_BUNDLE_IDENTIFIER` and `ANDROID_PACKAGE_NAME`. Server secrets stay in the backend environment.
-
-## Development
-
-```bash
-pnpm mobile:check:install
-pnpm mobile:doctor
-pnpm mobile:typecheck
-pnpm mobile:ios
-# or
-pnpm mobile:android
+```text
+assets/logo-dark.png
+assets/app-icon.png
+assets/adaptive-icon.png
+assets/splash-icon.png
+assets/notification-icon.png
 ```
 
-See [`../../docs/MOBILE-APP.md`](../../docs/MOBILE-APP.md) and [`../../docs/MOBILE-INSTALL-TROUBLESHOOTING.md`](../../docs/MOBILE-INSTALL-TROUBLESHOOTING.md).
+The `Brand` component switches the dark mark to a light runtime tint on dark surfaces rather than maintaining a second decorative logo source.
 
+PWRC token artwork remains separate in `assets/pwrc.png`.
 
-For local development the included `.env.local` targets the local frontend/backend
-and Solana devnet. Android emulators may need `10.0.2.2` instead of `localhost`
-for host-machine services.
+## Theme
+
+The app supports light, dark and system theme preferences. Expo is configured with automatic system appearance.
+
+## Dependency policy
+
+`react-native-screens` remains pinned exactly to `4.26.0`.
+
+## Commands
+
+```bash
+pnpm dev:mobile
+pnpm mobile:typecheck
+pnpm mobile:doctor
+```

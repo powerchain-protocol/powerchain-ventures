@@ -24,6 +24,48 @@ function checkResolved(label, req, target) {
   }
 }
 
+
+function checkWorkspaceLinked(label, appRelativeDir, packageName, workspaceRelativeDir) {
+  const appPackage = JSON.parse(
+    fs.readFileSync(path.join(root, appRelativeDir, "package.json"), "utf8"),
+  );
+  if (appPackage.dependencies?.[packageName] !== "workspace:*") {
+    failures.push(`${label} workspace dependency`);
+    console.error(`[missing] ${label}: dependency is not workspace:*`);
+    return;
+  }
+
+  const workspacePackageJson = path.join(root, workspaceRelativeDir, "package.json");
+  if (!fs.existsSync(workspacePackageJson)) {
+    failures.push(`${label} workspace package`);
+    console.error(`[missing] ${label}: ${workspacePackageJson}`);
+    return;
+  }
+
+  const workspacePackage = JSON.parse(fs.readFileSync(workspacePackageJson, "utf8"));
+  if (workspacePackage.name !== packageName) {
+    failures.push(`${label} workspace package name`);
+    console.error(`[missing] ${label}: expected ${packageName}, found ${workspacePackage.name ?? "<missing>"}`);
+    return;
+  }
+
+  const linkedPackageJson = path.join(
+    root,
+    appRelativeDir,
+    "node_modules",
+    ...packageName.split("/"),
+    "package.json",
+  );
+
+  if (!fs.existsSync(linkedPackageJson)) {
+    failures.push(`${label} workspace link`);
+    console.error(`[missing] ${label}: pnpm workspace link not installed`);
+    return;
+  }
+
+  console.log(`[ok] ${label}: ${linkedPackageJson}`);
+}
+
 if (!fs.existsSync(path.join(root, "node_modules"))) {
   failures.push("root node_modules");
   console.error("[missing] root node_modules");
@@ -32,6 +74,7 @@ if (!fs.existsSync(path.join(root, "node_modules"))) {
 const rootRequire = packageRequire("package.json");
 const frontendRequire = packageRequire("apps/frontend/package.json");
 const backendRequire = packageRequire("apps/backend/package.json");
+const checkoutRequire = packageRequire("apps/checkout/package.json");
 const mobileRequire = packageRequire("apps/mobile/package.json");
 
 checkResolved("root TypeScript", rootRequire, "typescript/package.json");
@@ -54,25 +97,39 @@ checkResolved("backend React types", backendRequire, "@types/react/package.json"
 checkResolved("backend React DOM types", backendRequire, "@types/react-dom/package.json");
 checkResolved("backend Node types", backendRequire, "@types/node/package.json");
 
+checkResolved("checkout Next.js", checkoutRequire, "next/package.json");
+checkResolved("checkout React", checkoutRequire, "react/package.json");
+checkResolved("checkout React DOM", checkoutRequire, "react-dom/package.json");
+checkResolved("checkout React types", checkoutRequire, "@types/react/package.json");
+checkResolved("checkout React DOM types", checkoutRequire, "@types/react-dom/package.json");
+checkResolved("checkout Node types", checkoutRequire, "@types/node/package.json");
+checkResolved("checkout ConnectorKit React", checkoutRequire, "@solana/connector/react");
+checkResolved("checkout ConnectorKit headless", checkoutRequire, "@solana/connector/headless");
+
 checkResolved("mobile Expo", mobileRequire, "expo/package.json");
 checkResolved("mobile Expo Router", mobileRequire, "expo-router/package.json");
 checkResolved("mobile React", mobileRequire, "react/package.json");
 checkResolved("mobile React Native", mobileRequire, "react-native/package.json");
 checkResolved("mobile React types", mobileRequire, "@types/react/package.json");
 checkResolved("mobile TypeScript", mobileRequire, "typescript/package.json");
-checkResolved("mobile PowerChain config", mobileRequire, "@powerchain/launchpad-config");
-checkResolved("mobile PowerChain utils", mobileRequire, "@powerchain/utils");
+checkWorkspaceLinked("mobile PowerChain config", "apps/mobile", "@powerchain/launchpad-config", "packages/config");
+checkWorkspaceLinked("mobile PowerChain utils", "apps/mobile", "@powerchain/utils", "packages/utils");
 
 // Verify the private workspace packages that Next.js/TypeScript import directly.
-checkResolved("frontend PowerChain config", frontendRequire, "@powerchain/launchpad-config");
-checkResolved("frontend PowerChain utils", frontendRequire, "@powerchain/utils");
-checkResolved("backend PowerChain config", backendRequire, "@powerchain/launchpad-config");
-checkResolved("backend PowerChain utils", backendRequire, "@powerchain/utils");
-checkResolved("backend PowerChain Solana", backendRequire, "@powerchain/solana");
-checkResolved("backend PowerChain integrations", backendRequire, "@powerchain/integrations");
+checkWorkspaceLinked("frontend PowerChain config", "apps/frontend", "@powerchain/launchpad-config", "packages/config");
+checkWorkspaceLinked("frontend PowerChain utils", "apps/frontend", "@powerchain/utils", "packages/utils");
+checkWorkspaceLinked("backend PowerChain config", "apps/backend", "@powerchain/launchpad-config", "packages/config");
+checkWorkspaceLinked("backend PowerChain utils", "apps/backend", "@powerchain/utils", "packages/utils");
+checkWorkspaceLinked("backend PowerChain Solana", "apps/backend", "@powerchain/solana", "packages/solana");
+checkWorkspaceLinked("backend PowerChain integrations", "apps/backend", "@powerchain/integrations", "packages/integrations");
+checkWorkspaceLinked("checkout PowerChain config", "apps/checkout", "@powerchain/launchpad-config", "packages/config");
+checkWorkspaceLinked("checkout PowerChain utils", "apps/checkout", "@powerchain/utils", "packages/utils");
+checkWorkspaceLinked("checkout PowerChain integrations", "apps/checkout", "@powerchain/integrations", "packages/integrations");
+checkWorkspaceLinked("checkout PowerChain UI", "apps/checkout", "@powerchain/ui", "packages/ui");
 
 const backendPkg = JSON.parse(fs.readFileSync(path.join(root, "apps/backend/package.json"), "utf8"));
 const frontendPkg = JSON.parse(fs.readFileSync(path.join(root, "apps/frontend/package.json"), "utf8"));
+const checkoutPkg = JSON.parse(fs.readFileSync(path.join(root, "apps/checkout/package.json"), "utf8"));
 const solanaPkg = JSON.parse(fs.readFileSync(path.join(root, "packages/solana/package.json"), "utf8"));
 const configPkg = JSON.parse(fs.readFileSync(path.join(root, "packages/config/package.json"), "utf8"));
 const integrationsPkg = JSON.parse(fs.readFileSync(path.join(root, "packages/integrations/package.json"), "utf8"));
@@ -88,7 +145,7 @@ if (backendPkg.dependencies?.["@powerchain/solana"] !== "workspace:*") {
 if (solanaPkg.name !== "@powerchain/solana") {
   failures.push("@powerchain/solana package name");
 }
-for (const [name, pkg] of [["frontend", frontendPkg], ["backend", backendPkg]]) {
+for (const [name, pkg] of [["frontend", frontendPkg], ["backend", backendPkg], ["checkout", checkoutPkg]]) {
   for (const dep of ["next", "react", "react-dom"]) {
     if (!pkg.dependencies?.[dep]) failures.push(`${name} dependency ${dep}`);
   }

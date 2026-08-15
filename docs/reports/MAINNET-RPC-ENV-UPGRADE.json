@@ -1,0 +1,39 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "networkDefault": "mainnet-beta",
+  "rpc": {
+    "browserProxy": "/api/v1/solana/rpc",
+    "providers": [
+      "auto",
+      "helius",
+      "custom",
+      "solana"
+    ],
+    "heliusRpcBase": "https://mainnet.helius-rpc.com/",
+    "heliusApiBase": "https://api.helius.xyz",
+    "heliusKeyBrowserExposed": false
+  },
+  "cors": {
+    "local": "http://localhost:3000",
+    "production": "https://launchpad.powerchain.energy",
+    "credentials": false
+  },
+  "validation": {
+    "checks": {
+      "env-rpc": true,
+      "app-env": true,
+      "workspace": true,
+      "runtime-resolution": true,
+      "openapi": true,
+      "validate-source": false,
+      "repo-tests": false
+    },
+    "repoTests": false,
+    "jsonErrors": [],
+    "nodeSyntaxErrors": [],
+    "typescriptFiles": 391,
+    "typescriptErrors": [],
+    "fullDependencyBuildExecuted": false
+  }
+}

@@ -1,6 +1,7 @@
+import { SERVICE_FEE_BPS, calculateServiceFee } from "./fees.js";
+export * from "./fees.js";
 export const POWERCHAIN_VERSION = "1.0.0" as const;
-export const SERVICE_FEE_BPS = 250n;
-export const BPS_DENOMINATOR = 10_000n;
+
 export const PWRC_DECIMALS = 9;
 export const PWRC_SYMBOL = "PWRC" as const;
 
@@ -27,12 +28,6 @@ export interface SaleConfig {
 
 export interface QuoteInput { usdMicros: bigint; priceUsdMicros: bigint; decimals: number; }
 export interface Quote { tokenBaseUnits: bigint; serviceFeeUsdMicros: bigint; totalUsdMicros: bigint; }
-
-export function calculateServiceFee(amount: bigint, feeBps = SERVICE_FEE_BPS): bigint {
-  if (amount < 0n) throw new Error("amount must be non-negative");
-  if (feeBps < 0n || feeBps > BPS_DENOMINATOR) throw new Error("invalid fee bps");
-  return (amount * feeBps + BPS_DENOMINATOR - 1n) / BPS_DENOMINATOR;
-}
 
 export function buildQuote(input: QuoteInput): Quote {
   if (input.usdMicros <= 0n) throw new Error("purchase amount must be positive");
@@ -185,3 +180,5 @@ export function assertTransactionReview(plan: TransactionReviewPlan, now = new D
     if (expiry <= now.getTime()) throw new Error("transaction review expired");
   }
 }
+
+export * from "./payments.js";

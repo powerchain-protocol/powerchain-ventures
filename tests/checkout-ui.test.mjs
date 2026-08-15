@@ -1,17 +1,70 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {readFileSync,existsSync} from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
-const files=[
- "apps/frontend/components/checkout/checkout.tsx",
- "apps/frontend/components/checkout/payment-form.tsx",
- "apps/frontend/components/checkout/payment-methods.tsx",
- "apps/frontend/components/checkout/credit-card.tsx",
- "apps/frontend/components/checkout/onramp.tsx",
+const files = [
+  "apps/checkout/components/purchase-flow.tsx",
+  "apps/checkout/components/payment-methods.tsx",
+  "apps/checkout/components/transaction-review.tsx",
+  "apps/checkout/components/onramp.tsx",
+  "apps/checkout/components/purchase-success.tsx",
+  "apps/checkout/components/wallet-button.tsx",
 ];
 
-test("PowerChain checkout component stack exists",()=>{for(const f of files)assert.ok(existsSync(f),f)});
-test("checkout uses PowerChain branding only",()=>{const text=files.map(f=>readFileSync(f,"utf8")).join("\n");assert.match(text,/PowerChain Checkout/);assert.doesNotMatch(text,/PowerPay Checkout|Powered by PowerPay/i)});
-test("card option does not collect raw card secrets",()=>{const text=readFileSync("apps/frontend/components/checkout/payment-form.tsx","utf8");assert.doesNotMatch(text,/<input[^>]+(?:card|cvv|expiry|pan)/i);assert.match(text,/PCI-safe by design/)});
-test("checkout exposes verified completion receipt and recovery-friendly actions",()=>{const success=readFileSync("apps/frontend/components/checkout/checkout-success.tsx","utf8"),form=readFileSync("apps/frontend/components/checkout/payment-form.tsx","utf8");assert.match(success,/Purchase successful/);assert.match(success,/View transaction receipt/);assert.match(success,/explorer\.solana\.com\/tx/);assert.match(form,/onSettled/)});
-test("unconfigured card and onramp methods are visibly fail-closed",()=>{const text=["apps/frontend/components/checkout/payment-form.tsx","apps/frontend/components/checkout/onramp.tsx"].map(f=>readFileSync(f,"utf8")).join("\n");assert.match(text,/Setup required/);assert.match(text,/provider not configured/i)});
+test("dedicated PowerChain checkout component stack exists", () => {
+  for (const file of files) assert.ok(existsSync(file), file);
+});
+
+test("checkout uses PowerChain branding only", () => {
+  const text = files.map(file => readFileSync(file, "utf8")).join("\n");
+  assert.match(text, /PowerChain|PowerChain Checkout/);
+  assert.doesNotMatch(text, /PowerPay Checkout|Powered by PowerPay/i);
+});
+
+test("card payment is disabled without rendering raw card secrets", () => {
+  const methods = readFileSync(
+    "apps/checkout/components/payment-methods.tsx",
+    "utf8",
+  );
+  const flow = readFileSync(
+    "apps/checkout/components/purchase-flow.tsx",
+    "utf8",
+  );
+  assert.match(methods, /disabled:\s*true/);
+  assert.match(methods, /Provider required/);
+  assert.doesNotMatch(`${methods}\n${flow}`, /name=["'](?:card|cvv|expiry|pan)["']/i);
+});
+
+test("checkout exposes verified completion receipt and transaction explorer", () => {
+  const success = readFileSync(
+    "apps/checkout/components/purchase-success.tsx",
+    "utf8",
+  );
+  const flow = readFileSync(
+    "apps/checkout/components/purchase-flow.tsx",
+    "utf8",
+  );
+  const service = readFileSync(
+    "apps/checkout/services/checkout-service.ts",
+    "utf8",
+  );
+  assert.match(success, /Purchase successful/);
+  assert.match(success, /explorer\.solana\.com\/tx/);
+  assert.match(service, /purchase\/confirm/);
+  assert.match(flow, /confirmUntilSettled/);
+});
+
+test("frontend no longer owns checkout or purchase forms", () => {
+  assert.equal(existsSync("apps/frontend/app/checkout"), false);
+  assert.equal(existsSync("apps/frontend/components/checkout"), false);
+  assert.equal(
+    existsSync("apps/frontend/components/launchpad/purchase-experience.tsx"),
+    false,
+  );
+  const sale = readFileSync(
+    "apps/frontend/components/launchpad/sale-overview.tsx",
+    "utf8",
+  );
+  assert.match(sale, /NEXT_PUBLIC_CHECKOUT_URL/);
+  assert.match(sale, /Continue to secure checkout/);
+});

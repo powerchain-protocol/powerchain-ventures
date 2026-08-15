@@ -41,6 +41,7 @@ const isoDate=(name,{requiredValue=false}={})=>{
 
 if((env.NODE_ENV??'production')!=='production')errors.push('NODE_ENV must be production for this preflight');
 url('NEXT_PUBLIC_APP_URL');
+url('NEXT_PUBLIC_CHECKOUT_URL');
 url('NEXT_PUBLIC_SOLANA_RPC_URL');
 url('SOLANA_RPC_URL');
 url('SUPABASE_URL');
@@ -56,6 +57,10 @@ if((env.POWERCHAIN_TRANSACTION_BUILDER_API_KEY??'').length<20)errors.push('POWER
 const reconciliationSecret=env.CRON_SECRET||env.RECONCILIATION_SECRET||'';
 if(reconciliationSecret.length<32)errors.push('CRON_SECRET or RECONCILIATION_SECRET must be at least 32 characters');
 if(!(env.ALLOWED_ORIGINS??'').trim())errors.push('ALLOWED_ORIGINS is required');
+const allowedOrigins=new Set((env.ALLOWED_ORIGINS??'').split(',').map(v=>v.trim()).filter(Boolean).map(v=>{try{return new URL(v).origin}catch{return v}}));
+for(const [name,value] of [["NEXT_PUBLIC_APP_URL",env.NEXT_PUBLIC_APP_URL],["NEXT_PUBLIC_CHECKOUT_URL",env.NEXT_PUBLIC_CHECKOUT_URL]]) {
+  if(value){try{if(!allowedOrigins.has(new URL(value).origin))errors.push(`ALLOWED_ORIGINS must include ${name}`)}catch{}}
+}
 if(env.VERCEL==='1'&&(env.BACKEND_ORIGIN??'').includes('localhost'))errors.push('BACKEND_ORIGIN must not point to localhost on Vercel');
 
 const cluster=env.NEXT_PUBLIC_SOLANA_CLUSTER;
@@ -93,6 +98,47 @@ for(const name of ['POWERCHAIN_PRESALE_MINT','POWERCHAIN_PRESALE_VAULT_TOKEN_ACC
 }
 
 
+
+
+if((env.POWERCHAIN_RUNTIME_PERSISTENCE??"").trim()!=="database"){
+  errors.push("POWERCHAIN_RUNTIME_PERSISTENCE must be database in production");
+}
+
+for(const [name,min,max] of [
+  ["SETTLEMENT_WORKER_BATCH_SIZE",1,500],
+  ["SETTLEMENT_OUTBOX_FAILED_TOLERANCE",0,1000],
+  ["SETTLEMENT_OUTBOX_MAX_PENDING_AGE_MS",30000,3600000],
+]){
+  const raw=(env[name]??"").trim();
+  if(!raw)continue;
+  const value=Number(raw);
+  if(!Number.isInteger(value)||value<min||value>max){
+    errors.push(`${name} must be an integer between ${min} and ${max}`);
+  }
+}
+
+const quoteKeypairRaw=env.POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON?.trim()??'';
+if(!quoteKeypairRaw){
+  errors.push('POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON is required for purchase construction');
+}else{
+  try{
+    const key=JSON.parse(quoteKeypairRaw);
+    if(!Array.isArray(key)||key.length!==64||key.some(v=>!Number.isInteger(v)||v<0||v>255))errors.push('POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON must be a JSON array of exactly 64 byte values');
+  }catch{
+    errors.push('POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON must be valid JSON');
+  }
+}
+
+const pythFeed=env.PYTH_SOL_USD_FEED_ID?.trim()??'';
+const pythKey=env.PYTH_API_KEY?.trim()??'';
+if(Boolean(pythFeed)!==Boolean(pythKey))errors.push('PYTH_SOL_USD_FEED_ID and PYTH_API_KEY must be configured together');
+if(pythFeed&&!/^(?:0x)?[0-9a-fA-F]{64}$/.test(pythFeed))errors.push('PYTH_SOL_USD_FEED_ID must be a 32-byte hex feed ID');
+const birdeyeKey=env.BIRDEYE_API_KEY?.trim()??'';
+const cmcKey=env.COINMARKETCAP_API_KEY?.trim()??'';
+if(!((pythFeed&&pythKey)||birdeyeKey||cmcKey))errors.push('At least one SOL/USD market source must be configured: Pyth, Birdeye or CoinMarketCap');
+if(pythKey&&pythKey.length<8)errors.push('PYTH_API_KEY appears too short');
+if(cmcKey&&cmcKey.length<8)errors.push('COINMARKETCAP_API_KEY appears too short');
+
 if(env.HELIUS_API_KEY&&env.HELIUS_API_KEY.trim().length<8)errors.push('HELIUS_API_KEY appears too short');
 if(env.HELIUS_RPC_URL){try{const u=new URL(env.HELIUS_RPC_URL);if(env.NODE_ENV==='production'&&u.protocol!=='https:')errors.push('HELIUS_RPC_URL must use https in production')}catch{errors.push('HELIUS_RPC_URL must be a valid URL')}}
 if(env.BIRDEYE_API_KEY&&env.BIRDEYE_API_KEY.trim().length<8)errors.push('BIRDEYE_API_KEY appears too short');
@@ -114,6 +160,7 @@ console.log(JSON.stringify({
   ok:true,
   cluster,
   appUrl:env.NEXT_PUBLIC_APP_URL,
+  checkoutUrl:env.NEXT_PUBLIC_CHECKOUT_URL,
   rpcEndpoints:rpcUrls.length,
   rpcFallbacks:Math.max(0,rpcUrls.length-1),
   presaleAllocationTokens:env.POWERCHAIN_PRESALE_ALLOCATION_TOKENS,

@@ -6,4 +6,4 @@ test("mobile auth uses secure store and backend accepts bearer auth",()=>{assert
 test("mobile signing fails closed without approved native adapter",()=>{const wallet=read("apps/mobile/src/services/wallet.ts");assert.match(wallet,/Native Solana signing adapter is not configured/);assert.equal(/private.?key|seed.?phrase/i.test(wallet),false)});
 
 test("mobile auth handles PKCE deep links",()=>{const a=read("apps/mobile/src/context/auth-context.tsx");assert.match(a,/exchangeCodeForSession/);assert.match(a,/powerchain:\/\/callback/);assert.match(a,/powerchain:\/\/update-password/)});
-test("native requests are not rejected solely for missing browser Origin",()=>{const proxy=read("apps/backend/proxy.ts");assert.match(proxy,/production.*&& origin && !allowed/s)});
+test("native requests are not rejected solely for missing browser Origin",()=>{const proxy=read("apps/backend/proxy.ts");const cors=read("apps/backend/lib/cors.ts");assert.match(proxy,/origin &&\s*!isCorsOriginAllowed/s);assert.match(cors,/if \(!origin\) return true/)});

@@ -14,10 +14,11 @@ const forwarded = process.argv.slice(4);
 const apps = {
   frontend: { directory: "apps/frontend", port: "3000" },
   backend: { directory: "apps/backend", port: "3001" },
+  checkout: { directory: "apps/checkout", port: "3002" },
 };
 
 if (!(appName in apps) || !["dev", "build", "start"].includes(command)) {
-  console.error("Usage: node scripts/run-next.mjs <frontend|backend> <dev|build|start> [...next args]");
+  console.error("Usage: node scripts/run-next.mjs <frontend|backend|checkout> <dev|build|start> [...next args]");
   process.exit(2);
 }
 

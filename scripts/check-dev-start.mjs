@@ -21,10 +21,19 @@ const apps = {
     port: 3001,
     env: [],
   },
+  checkout: {
+    port: 3002,
+    env: [
+      "NEXT_PUBLIC_CHECKOUT_URL",
+      "NEXT_PUBLIC_LAUNCHPAD_URL",
+      "NEXT_PUBLIC_SOLANA_CLUSTER",
+      "NEXT_PUBLIC_SOLANA_RPC_URL",
+    ],
+  },
 };
 
 if (!(app in apps)) {
-  console.error("Usage: node scripts/check-dev-start.mjs <frontend|backend>");
+  console.error("Usage: node scripts/check-dev-start.mjs <frontend|backend|checkout>");
   process.exit(2);
 }
 

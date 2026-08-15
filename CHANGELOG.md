@@ -28,7 +28,123 @@
 - Added `.nvmrc` and `.node-version` with Node 24.
 
 
-## 1.0.0 — Mobile Expo dependency-resolution hardening
+## 1.0.0
+
+### Durable runtime persistence and reconciled purchase completion
+
+- Added production-fail-closed runtime persistence mode and Prisma 7 PostgreSQL adapter bootstrap.
+- Added runtime schema preflight for settlement/outbox migrations and migration 035 outbox diagnostics.
+- Added outbox lease recovery, error diagnostics and backlog statistics.
+- Added a minutely protected settlement reconciliation worker endpoint.
+- Purchase confirmation now creates and returns a durable settlement ID.
+- Checkout now treats a purchase as successful only after Solana finalization reaches `reconciled`.
+- Pending signed purchase recovery never automatically resubmits a financial transaction.
+- Readiness now includes runtime persistence and settlement-outbox operational health.
+
+
+### Dedicated Checkout, real SOL purchase and market pricing
+
+- Moved token-purchase/payment ownership into the standalone `apps/checkout` Next.js app on local port 3002.
+- Removed duplicate checkout routes/components and purchase forms from `apps/frontend`.
+- Added `@powerchain/ui` for shared web primitives used by Launchpad and Checkout.
+- Added a shared resilient backend proxy used by both web applications.
+- Added Pyth, Birdeye and CoinMarketCap server-side pricing modules plus rate/amount conversion helpers.
+- Added bounded price freshness, provider divergence checks and a short server-side price cache.
+- Added `/api/v1/market/prices` and `/api/v1/market/rates`.
+- Replaced the remote-builder requirement for purchases with an in-process Solana Launchpad purchase transaction builder.
+- Purchase preparation now derives the buyer Token-2022 ATA, calculates exact SOL principal plus the canonical 250 bps fee, builds the Launchpad instruction, partially signs with the quote authority and simulates before buyer review.
+- Purchase preparation now requires caller idempotency and signed-purchase recovery never automatically resubmits a financial transaction.
+- Purchase confirmation binds the first submitted signature and allows that same submitted transaction to finish confirmation after review expiry.
+- Moved Coinbase Onramp return handling into `apps/checkout`; Onramp remains wallet funding rather than purchase settlement.
+- Added a monorepo-layout doctor that rejects root `payload/`, `apps/payload/`, and duplicated frontend checkout ownership.
+- Updated root/app/program READMEs, environment examples, routing inventory, OpenAPI, Docker/Compose and Vercel configuration for the dedicated Checkout application.
+
+
+### Account security and wallet capability hardening
+
+- Added centralized account/wallet session resolution and route guards.
+- Added linked-wallet listing and unlink controls for authenticated accounts.
+- Added account security page and linked-wallet management UI.
+- Added explicit Solana/Sui network capability matrix.
+- Added reusable loading, empty and error state primitives.
+- Added send/receive wallet action components for SOL, PWRC and USDC while preserving the existing reviewed transaction path.
+- Added dependency doctor for Better Auth, Web3 Icons and Mysten packages.
+
+
+### RC.1 top bar and cluster UI
+
+- Added configurable RC.1 release top bar with environment-level enable/disable control.
+- Added reusable information and alarm UI primitives.
+- Added typed Solana/Sui network configuration.
+- Added reusable cluster icon, badge, card and selector components.
+
+
+### Better Auth, wallet identity and asset integrations
+
+- Added Better Auth 1.6.x web authentication with PostgreSQL persistence.
+- Added configuration-driven Google, GitHub, Discord and Apple social login.
+- Added same-origin `/api/auth` routing for OAuth cookies and callbacks.
+- Added cryptographically signed Solana wallet login with nonce, deployment and expiry binding.
+- Added linked wallet identities and wallet-auth sessions.
+- Added account types and `use-users.ts`.
+- Added wallet provider context and embedded-wallet adapter contract.
+- Added `@web3icons/react` token/network/wallet icons.
+- Added canonical PWRC/SOL/USDC/SUI asset registry.
+- Added shared chart types, lightweight SVG chart, invoice component and receive-PWRC flow.
+- Added SOL/USDC payment asset integrations; SUI settlement remains fail-closed until its adapter is configured.
+
+
+### API transport, WebSockets and UI primitives
+
+- Added a centralized `/api/v1` endpoint registry.
+- Added API transport, endpoint-discovery and Solana WebSocket status routes.
+- Added safe frontend-to-backend origin fallbacks.
+- Mutation backend failover now requires an idempotency key.
+- Added resilient Solana WebSocket endpoint rotation, reconnect/backoff and resubscription.
+- Added optional browser-safe realtime WebSockets with HTTP polling fallback.
+- Added reusable `forms.tsx`, `dropdown.tsx`, `badge.tsx` and `select.tsx`.
+- Added shared deterministic `formats.ts`.
+- Added shared `payments.ts` fee/payment contracts.
+- Refactored navigation, network status, contact, auth and checkout to shared primitives.
+
+
+### Frontend architecture, checkout, auth and mail
+
+- Added reusable button, card, tabs and form-field primitives.
+- Added typed frontend services, actions, hooks and UI/checkout contexts.
+- Refactored authentication API access into a dedicated service layer.
+- Improved sign-in UX and responsive form controls.
+- Refactored checkout payment selection to reusable accessible tabs.
+- Added responsive checkout layout improvements.
+- Added a full-stack Contact route with rate limiting and honeypot protection.
+- Added `@powerchain/mail` with reusable React email templates and deterministic rendering.
+- Added backend-only Resend-compatible mail delivery configuration.
+- Added Next.js image optimization, package import optimization and Turbopack filesystem caching.
+
+
+### Mainnet/RPC environment configuration
+
+- Added mainnet-beta-first local and production environment profiles.
+- Added Helius RPC/API server-only configuration.
+- Added custom RPC primary/fallback configuration.
+- Added provider selection with `auto`, `helius`, `custom`, and `solana`.
+- Added browser-safe backend Solana JSON-RPC proxy.
+- Centralized CORS origin parsing and exposed-header policy.
+- Added `/env/` profiles plus local and production app environment examples.
+
+
+
+### Runtime resolution fixes
+
+- Removed Next/Turbopack aliases that mapped executable workspace imports to `.d.ts` files.
+- Fixed `fetchJsonWithPolicy` becoming undefined at runtime.
+- Fixed `safePost` to use the supported two-argument HTTP policy API.
+- Updated backend OpenAPI output-file tracing to the canonical backend API contract.
+- Made Prisma client generation load safely without a configured production database URL.
+- Updated the type dependency doctor to verify pnpm workspace links before package build output exists.
+- Added runtime module-resolution regression checks.
+
+ — Mobile Expo dependency-resolution hardening
 
 - Pin mobile `react-native-screens` to exactly `4.26.0` for Expo SDK 57 / React Native 0.86 navigation compatibility.
 
@@ -85,7 +201,7 @@ All notable changes to PowerChain Launchpad™ are documented here. The release/
 - Added validated mint market/PWRC integration APIs and a responsive `/integration` UI.
 - Added market-observation persistence through migration `023_integrations_fee_market_data.sql` with RLS and service-role-only writes.
 - Added Prisma ORM **7.9.1** CLI/client/pg-adapter configuration as a typed companion to the authoritative Supabase/PostgreSQL SQL migrations.
-- Reorganized the canonical OpenAPI 3.1 specification under `apps/backend/openapi/`, added `/api/v1/openapi`, generated Swagger/OpenAPI compatibility copies, and sync/check scripts.
+- Reorganized the canonical OpenAPI 3.1 specification under `apps/backend/api/openapi/`, added `/api/v1/openapi`, generated Swagger/OpenAPI compatibility copies, and sync/check scripts.
 
 ### Existing production platform
 

@@ -1,0 +1,60 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "releaseLabel": "RC.1",
+  "auth": {
+    "primary": "Better Auth 1.6.25",
+    "legacyFallback": "Supabase compatibility",
+    "socialProviders": [
+      "google",
+      "github",
+      "discord",
+      "apple"
+    ],
+    "solanaWalletLogin": "signed Ed25519 challenge",
+    "embeddedWalletAdapter": "fail-closed"
+  },
+  "wallets": {
+    "solana": "@solana/connector",
+    "sui": "@mysten/dapp-kit-react 2.1.14 + @mysten/sui 2.22.0",
+    "icons": "@web3icons/react 4.1.19"
+  },
+  "assets": {
+    "PWRC": "Solana Token-2022",
+    "SOL": "Solana native",
+    "USDC": "Circle native Solana balance + reviewed transfer",
+    "SUI": "real wallet/network connectivity; checkout settlement adapter-gated"
+  },
+  "ui": {
+    "topbar": "config-driven RC.1",
+    "information": true,
+    "alarms": true,
+    "clusters": true,
+    "charts": true,
+    "invoice": true
+  },
+  "validation": {
+    "checks": {
+      "documentation": true,
+      "branding": true,
+      "workspace": true,
+      "pnpm-policy": true,
+      "vercel": true,
+      "env": true,
+      "app-env": true,
+      "mobile-env": true,
+      "mobile-native": true,
+      "runtime-resolution": true,
+      "frontend-architecture": true,
+      "api-transport": true,
+      "auth-wallet": true,
+      "openapi": true,
+      "validate-source": true,
+      "repo-tests": true
+    },
+    "repoTestsPassed": true,
+    "dependencyBackedBuildExecuted": false,
+    "lockfileRegenerated": false,
+    "lockfileNote": "Artifact runtime has Node 22 and no registry access; run pnpm install --no-frozen-lockfile under Node 24 to resolve the newly added external packages before the final dependency-backed build."
+  }
+}

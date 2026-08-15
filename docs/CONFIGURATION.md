@@ -25,6 +25,9 @@ The following values intentionally have no production fallback in source control
 - `NEXT_PUBLIC_SOLANA_RPC_URL`
 - `POWERCHAIN_TRANSACTION_BUILDER_URL`
 - `POWERCHAIN_TRANSACTION_BUILDER_API_KEY`
+- `POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON`
+- `PYTH_API_KEY` + `PYTH_SOL_USD_FEED_ID` (when Pyth is the SOL/USD source)
+- `BIRDEYE_API_KEY` or `COINMARKETCAP_API_KEY` as configured market fallbacks
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -35,3 +38,10 @@ Production purchase preparation stays disabled until the real deployment configu
 ## Presale defaults
 
 The configurable presale allocation remains `5,000,000,000` tokens by default. Fresh Creator Console drafts load central configuration from `/api/v1/launchpad/config`; restored local drafts are not overwritten.
+
+
+## Purchase construction
+
+Purchase construction is local to `apps/backend/lib/purchase-transaction-builder.ts`; it does not call `POWERCHAIN_TRANSACTION_BUILDER_URL`.
+
+The remote transaction-builder configuration remains for claim/creator operation classes that still use the generic builder boundary. Purchase readiness additionally requires a server-side quote-authority keypair and at least one configured SOL/USD source.

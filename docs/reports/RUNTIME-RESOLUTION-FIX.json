@@ -1,0 +1,29 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "fixed": {
+    "turbopackDeclarationAlias": true,
+    "fetchJsonRuntimeUndefined": true,
+    "safePostSignature": true,
+    "prismaGenerateMissingDatabaseUrl": true,
+    "workspaceTypeDoctorPrebuild": true,
+    "backendOpenApiTracing": true
+  },
+  "validation": {
+    "checks": {
+      "runtime-resolution": false,
+      "workspace": true,
+      "pnpm-policy": true,
+      "openapi": true,
+      "validate-source": true,
+      "repo-tests": true
+    },
+    "repoTestsPassed": true,
+    "jsonErrors": [],
+    "nodeSyntaxErrors": [],
+    "typescriptSyntaxFiles": 388,
+    "typescriptSyntaxErrors": [],
+    "fullNextBuildExecuted": false,
+    "reason": "Artifact container does not provide the repository-required Node 24 installed workspace."
+  }
+}

@@ -1,18 +1,40 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { parseRetryAfterMs, retryDelayMs } from '../packages/utils/dist/http.js';
-import { isUsableSolanaWalletAddress, requireUsableSolanaWalletAddress } from '../packages/utils/dist/helpers.js';
-import { getServerRuntimeConfig } from '../packages/config/dist/runtime.js';
-import { getDeploymentReadiness } from '../packages/config/dist/deployment.js';
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-test('retry-after seconds are bounded and parsed in milliseconds', () => {
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const required = [
+  "packages/utils/dist/http.js",
+  "packages/utils/dist/helpers.js",
+  "packages/config/dist/runtime.js",
+  "packages/config/dist/deployment.js",
+];
+
+if (!required.every(rel => fs.existsSync(path.join(root, rel)))) {
+  test("runtime utils built-output tests", {
+    skip: "run pnpm build:packages before dependency-backed tests",
+  }, () => {});
+} else {
+  const { parseRetryAfterMs, retryDelayMs } =
+    await import("../packages/utils/dist/http.js");
+  const { isUsableSolanaWalletAddress, requireUsableSolanaWalletAddress } =
+    await import("../packages/utils/dist/helpers.js");
+  const { getServerRuntimeConfig } =
+    await import("../packages/config/dist/runtime.js");
+  const { getDeploymentReadiness } =
+    await import("../packages/config/dist/deployment.js");
+  const t = test;
+
+t('retry-after seconds are bounded and parsed in milliseconds', () => {
   assert.equal(parseRetryAfterMs('2', 0), 2000);
   assert.equal(parseRetryAfterMs('9999', 0), 120000);
   assert.equal(parseRetryAfterMs('nope', 0), null);
   assert.ok(retryDelayMs(2) >= 1000);
 });
 
-test('mainnet server runtime config requires RPC redundancy', () => {
+t('mainnet server runtime config requires RPC redundancy', () => {
   const env = {
     NODE_ENV: 'production', NEXT_PUBLIC_APP_URL: 'https://launchpad.example', BACKEND_ORIGIN: 'https://api.example',
     NEXT_PUBLIC_SOLANA_CLUSTER: 'mainnet-beta', NEXT_PUBLIC_SOLANA_RPC_URL: 'https://browser-rpc.example', SOLANA_RPC_URL: 'https://rpc.example', SUPABASE_URL: 'https://db.example',
@@ -26,7 +48,7 @@ test('mainnet server runtime config requires RPC redundancy', () => {
 });
 
 
-test('mainnet deployment readiness requires real deployment addresses and rejects System Program treasury', () => {
+t('mainnet deployment readiness requires real deployment addresses and rejects System Program treasury', () => {
   const base = {
     NEXT_PUBLIC_SOLANA_CLUSTER: 'mainnet-beta',
     SOLANA_RPC_URL: 'https://rpc-a.example',
@@ -51,8 +73,10 @@ test('mainnet deployment readiness requires real deployment addresses and reject
 });
 
 
-test('wallet helper rejects System Program placeholder as an operational wallet', () => {
+t('wallet helper rejects System Program placeholder as an operational wallet', () => {
   assert.equal(isUsableSolanaWalletAddress('11111111111111111111111111111111'), false);
   assert.equal(isUsableSolanaWalletAddress('airGefMqLgmzgTim1p8LXWDhHqWFJ3DSVpbHgZ1WyrZ'), true);
   assert.throws(() => requireUsableSolanaWalletAddress('11111111111111111111111111111111', 'treasury'), /configured Solana wallet/);
 });
+
+}

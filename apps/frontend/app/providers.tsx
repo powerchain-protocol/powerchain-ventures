@@ -5,6 +5,9 @@ import { AppProvider } from "@solana/connector/react";
 import { getDefaultConfig, getDefaultMobileConfig } from "@solana/connector/headless";
 import { PowerChainConfigProvider } from "../context/powerchain-config-context";
 import { AuthProvider } from "../context/auth-context";
+import { UiProvider } from "../context/ui-context";
+import { WalletProvider } from "../context/wallet-provider";
+import { SuiWalletProvider } from "../context/sui-wallet-provider";
 import { WALLET_CONNECTORS } from "../lib/constants";
 import { getClientConfig } from "../lib/config";
 
@@ -30,7 +33,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <AppProvider connectorConfig={connectorConfig} mobile={mobile}>
-      <PowerChainConfigProvider><AuthProvider>{children}</AuthProvider></PowerChainConfigProvider>
+      <SuiWalletProvider><PowerChainConfigProvider><UiProvider><WalletProvider><AuthProvider>{children}</AuthProvider></WalletProvider></UiProvider></PowerChainConfigProvider></SuiWalletProvider>
     </AppProvider>
   );
 }

@@ -1,0 +1,84 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "structure": {
+    "apps": [
+      "frontend",
+      "backend",
+      "mobile"
+    ],
+    "payloadRemoved": true,
+    "macOSMetadataRemoved": true,
+    "singleComposeFile": true,
+    "rootDockerfileRemoved": true,
+    "canonicalDeployDockerfiles": [
+      "deploy/Dockerfile.frontend",
+      "deploy/Dockerfile.backend"
+    ]
+  },
+  "payloadMerge": {
+    "moved": 236,
+    "identicalDuplicatesRemoved": 0,
+    "conflictsKeptCanonicalRoot": 2,
+    "conflictPaths": [
+      "apps/backend/app/api/v1/version/route.ts",
+      "apps/backend/lib/rate-limit.ts"
+    ]
+  },
+  "packages": {
+    "workspacePackageCount": 11,
+    "missingFilterReferences": [],
+    "appNames": {
+      "apps/frontend/package.json": "@powerchain/launchpad-frontend",
+      "apps/backend/package.json": "@powerchain/launchpad-backend",
+      "apps/mobile/package.json": "@powerchain/launchpad-mobile"
+    }
+  },
+  "routing": {
+    "routeEntries": 99,
+    "issues": []
+  },
+  "validation": {
+    "jsonErrors": [],
+    "nodeSyntaxErrors": [],
+    "typescriptSyntaxFiles": 386,
+    "typescriptSyntaxErrors": [],
+    "sourceCheckers": {
+      "scripts/check-workspace.mjs": {
+        "ok": true,
+        "output": "{\n  \"ok\": true,\n  \"workspaces\": 10,\n  \"version\": \"1.0.0\",\n  \"packageNames\": [\n    \"@powerchain/integrations\",\n    \"@powerchain/launchpad-backend\",\n    \"@powerchain/launchpad-config\",\n    \"@powerchain/launchpad-domain\",\n    \"@powerchain/launchpad-frontend\",\n    \"@powerchain/launchpad-mobile\",\n    \"@powerchain/launchpad-program-client\",\n    \"@powerchain/solana\",\n    \"@powerchain/token-data\",\n    \"@powerchain/utils\"\n  ]\n}\n"
+      },
+      "scripts/check-pnpm-policy.mjs": {
+        "ok": true,
+        "output": "[ok] Node 24 + pnpm 11.21.0 policy valid; strictDepBuilds enabled; 6 reviewed build dependencies explicitly allowed.\n"
+      },
+      "scripts/check-vercel-config.mjs": {
+        "ok": true,
+        "output": "{\n  \"ok\": true,\n  \"errors\": []\n}\n"
+      },
+      "scripts/check-env-example.mjs": {
+        "ok": true,
+        "output": "{\n  \"ok\": true,\n  \"documentedKeys\": 45,\n  \"referencedKeys\": 45\n}\n"
+      },
+      "scripts/check-app-env-files.mjs": {
+        "ok": true,
+        "output": "[PowerChain] root/frontend/backend/mobile env examples are present and separated correctly; .env.local remains intentionally untracked.\n"
+      },
+      "scripts/check-mobile-env-example.mjs": {
+        "ok": true,
+        "output": "{\n  \"ok\": true,\n  \"documented\": 14,\n  \"referenced\": 11\n}\n"
+      },
+      "scripts/check-mobile-native.mjs": {
+        "ok": true,
+        "output": "PowerChain native mobile artifacts passed (10 required files; 18 iOS icons).\n"
+      }
+    }
+  },
+  "environment": {
+    "rootExample": ".env.example",
+    "frontendExample": "apps/frontend/.env.example",
+    "backendExample": "apps/backend/.env.example",
+    "mobileExample": "apps/mobile/.env.example",
+    "localEnvTracked": false
+  }
+}

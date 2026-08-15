@@ -59,9 +59,9 @@ SQL migrations remain authoritative. Prisma ORM 7.9.1 is included as a typed com
 
 The canonical API contract now lives at:
 
-`apps/backend/openapi/powerchain-launchpad.openapi.yaml`
+`apps/backend/api/openapi/openapi.yaml`
 
-It is served at `/api/v1/openapi`. `pnpm openapi:sync` regenerates `apps/backend/openapi/swagger.yaml` and `openapi/openapi.yaml`; `pnpm openapi:check` detects drift.
+It is served at `/api/v1/openapi`. `pnpm openapi:check` validates the single backend-owned canonical contract.
 
 ## Mainnet deployment values intentionally not invented
 

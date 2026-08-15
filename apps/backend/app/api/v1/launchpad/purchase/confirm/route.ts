@@ -10,16 +10,24 @@ import {verifyConfirmedTokenDelivery,type TokenDeliveryContract} from "../../../
 import {verifyConfirmedNativeSolPayment,type NativeSolPaymentSettlement} from "../../../../../../lib/payment-settlement";
 import {markConfirmationAttempt,markSettlementStage} from "../../../../../../lib/confirmation-state";
 import {readParticipantProgramState} from "../../../../../../lib/program/accounts";
+import {bootstrapRuntimePersistence} from "../../../../../../lib/runtime-persistence/bootstrap";
+import {registerSubmittedSettlement} from "../../../../../../lib/settlement/service";
 
-type Review={id:string;wallet:string;sale_id:string;plan_hash:string;plan:unknown;expires_at:string|null;status:string;metadata:{idempotencyKey?:string;usdMicros?:string;tokenBaseUnits?:string;serviceFeeUsdMicros?:string;delivery?:TokenDeliveryContract|null;paymentSettlement?:NativeSolPaymentSettlement;programId?:string;salePda?:string;participantPda?:string;purchaseNonce?:string}};
+type Review={id:string;wallet:string;sale_id:string;plan_hash:string;plan:unknown;expires_at:string|null;status:string;submitted_signature:string|null;metadata:{idempotencyKey?:string;usdMicros?:string;tokenBaseUnits?:string;serviceFeeUsdMicros?:string;delivery?:TokenDeliveryContract|null;paymentSettlement?:NativeSolPaymentSettlement;programId?:string;salePda?:string;participantPda?:string;purchaseNonce?:string}};
 export async function POST(req:Request){
  try{
   const limited=await enforceRateLimit(req,"purchase.confirm",60);if(limited)return limited;
   const b=await readJson<{saleId?:string;wallet?:string;reviewId?:string;signature?:string}>(req);const saleId=String(b.saleId??""),wallet=String(b.wallet??""),reviewId=String(b.reviewId??""),signature=String(b.signature??"");
   if(!isSolanaAddress(wallet)||!/^[0-9a-f-]{36}$/i.test(reviewId)||!/^[1-9A-HJ-NP-Za-km-z]{80,100}$/.test(signature))return error("BAD_REQUEST","Invalid confirmation payload");
-  const rows=await select<Review>("launchpad_transaction_reviews",`id=eq.${encodeURIComponent(reviewId)}&wallet=eq.${encodeURIComponent(wallet)}&sale_id=eq.${encodeURIComponent(saleId)}&kind=eq.purchase&select=id,wallet,sale_id,plan_hash,plan,expires_at,status,metadata&limit=1`);const review=rows[0];if(!review)return error("BAD_REQUEST","Prepared purchase review not found",404);
-  if(review.status==="confirmed")return json({status:"confirmed",reviewId});
-  if(review.expires_at&&Date.parse(review.expires_at)<=Date.now()){await patch("launchpad_transaction_reviews",`id=eq.${reviewId}`,{status:"expired"});return error("QUOTE_EXPIRED","Prepared transaction expired",409)}
+  const rows=await select<Review>("launchpad_transaction_reviews",`id=eq.${encodeURIComponent(reviewId)}&wallet=eq.${encodeURIComponent(wallet)}&sale_id=eq.${encodeURIComponent(saleId)}&kind=eq.purchase&select=id,wallet,sale_id,plan_hash,plan,expires_at,status,submitted_signature,metadata&limit=1`);const review=rows[0];if(!review)return error("BAD_REQUEST","Prepared purchase review not found",404);
+  if(review.submitted_signature&&review.submitted_signature!==signature)return error("BAD_REQUEST","Prepared purchase is already bound to a different submitted signature",409);
+  if(review.status==="confirmed"){
+    await bootstrapRuntimePersistence();
+    const settlement=await registerSubmittedSettlement({mutationId:`purchase:${reviewId}`,kind:"purchase",signature:review.submitted_signature||signature});
+    return json({status:"confirmed",reviewId,settlementId:settlement.settlementId,settlementState:settlement.state});
+  }
+  if(review.status==="failed")return json({status:"failed",reviewId},{status:409});
+  if(review.expires_at&&Date.parse(review.expires_at)<=Date.now()&&review.status==="prepared"&&!review.submitted_signature){await patch("launchpad_transaction_reviews",`id=eq.${reviewId}`,{status:"expired"});return error("QUOTE_EXPIRED","Prepared transaction expired before submission",409)}
   if(!review.plan||reviewPlanHash(review.plan as never)!==review.plan_hash)return error("INTERNAL_ERROR","Prepared transaction integrity check failed",500);
   await patch("launchpad_transaction_reviews",`id=eq.${reviewId}&status=eq.prepared`,{status:"submitted",submitted_signature:signature});
   await markConfirmationAttempt(reviewId);
@@ -35,7 +43,9 @@ export async function POST(req:Request){
   const settled=await rpc<{purchaseId:string;soldBaseUnits:string;deliveryMode:string;vestingEntitlementCreated:boolean}>("launchpad_apply_confirmed_purchase",{p_sale_id:saleId,p_wallet:wallet,p_usd_micros:m.usdMicros,p_token_base_units:m.tokenBaseUnits,p_fee_usd_micros:m.serviceFeeUsdMicros,p_signature:signature,p_idempotency_key:m.idempotencyKey,p_review_id:reviewId,p_confirmed_slot:verified.slot});
   await patch("launchpad_purchases",`id=eq.${encodeURIComponent(settled.purchaseId)}`,{payment_asset_kind:"native-sol",payment_amount_base_units:paymentVerified.paymentAmountBaseUnits,service_fee_payment_base_units:paymentVerified.serviceFeeBaseUnits,payment_verified_at:new Date().toISOString(),payment_rpc_endpoint:paymentVerified.endpoint,participant_pda:m.participantPda,program_purchase_nonce:m.purchaseNonce,program_operation_verified_at:new Date().toISOString(),...(deliveryEvidence?{buyer_token_account:deliveryEvidence.destinationTokenAccount,delivered_base_units:deliveryEvidence.deliveredBaseUnits,delivery_verified_at:new Date().toISOString()}:{})});
   await markSettlementStage(reviewId,"settled",{status:"confirmed",confirmed_slot:verified.slot,confirmed_message_hash:txMatch.messageHash,confirmed_rpc_endpoint:txMatch.endpoint,confirmed_at:new Date().toISOString(),next_confirmation_check_at:null,last_confirmation_error:null});await insert("launchpad_program_operations",{review_id:reviewId,sale_id:saleId,wallet,operation:"purchase",program_id:m.programId,sale_pda:m.salePda,participant_pda:m.participantPda,instruction_data_base64:(review.plan as {programOperation?:{instructionDataBase64?:string}}).programOperation?.instructionDataBase64??null,signature,status:"confirmed",confirmed_slot:verified.slot,confirmed_at:new Date().toISOString()});
-  await audit(wallet,"purchase.confirmed","purchase",reviewId,{saleId,signature,slot:verified.slot,settled,payment:paymentVerified,delivery:deliveryEvidence,messageHash:txMatch.messageHash,rpcEndpoint:txMatch.endpoint});
-  return json({status:verified.status,reviewId,slot:verified.slot,settled,payment:paymentVerified,delivery:deliveryEvidence,messageHash:txMatch.messageHash,rpcEndpoint:txMatch.endpoint});
+  await bootstrapRuntimePersistence();
+  const settlement=await registerSubmittedSettlement({mutationId:`purchase:${reviewId}`,kind:"purchase",signature});
+  await audit(wallet,"purchase.confirmed","purchase",reviewId,{saleId,signature,slot:verified.slot,settled,payment:paymentVerified,delivery:deliveryEvidence,messageHash:txMatch.messageHash,rpcEndpoint:txMatch.endpoint,settlementId:settlement.settlementId,settlementState:settlement.state});
+  return json({status:"confirmed",reviewId,slot:verified.slot,settled,payment:paymentVerified,delivery:deliveryEvidence,messageHash:txMatch.messageHash,rpcEndpoint:txMatch.endpoint,settlementId:settlement.settlementId,settlementState:settlement.state});
  }catch(e){return error("BAD_REQUEST",e instanceof Error?e.message:"Unable to confirm purchase")}
 }

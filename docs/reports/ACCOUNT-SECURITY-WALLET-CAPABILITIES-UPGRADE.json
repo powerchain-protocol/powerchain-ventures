@@ -1,0 +1,30 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "releaseLabel": "RC.1",
+  "upgrade": "account-security-wallet-capabilities",
+  "features": {
+    "accountSessionGuards": true,
+    "linkedWalletManagement": true,
+    "accountSecurityPage": true,
+    "networkCapabilityMatrix": true,
+    "walletSendReceiveUi": true,
+    "loadingEmptyErrorStates": true,
+    "topbarConfigPreserved": true,
+    "solanaWalletAuth": true,
+    "suiWalletConnectivity": true,
+    "usdcWalletTransfers": true
+  },
+  "validation": {
+    "sourceChecks": "PASS",
+    "repositoryTests": "PASS",
+    "typescriptSyntaxFiles": 490,
+    "typescriptSyntaxErrors": 0,
+    "jsonErrors": 0,
+    "nodeSyntaxErrors": 0,
+    "dependencyDoctorPassed": false,
+    "dependencyDoctorOutput": "{\n  \"ok\": false,\n  \"failures\": [\n    \"pnpm-lock.yaml has not been regenerated for better-auth; run pnpm install --no-frozen-lockfile\",\n    \"pnpm-lock.yaml has not been regenerated for @web3icons/react; run pnpm install --no-frozen-lockfile\",\n    \"pnpm-lock.yaml has not been regenerated for @mysten/dapp-kit-react; run pnpm install --no-frozen-lockfile\",\n    \"pnpm-lock.yaml has not been regenerated for @mysten/sui; run pnpm install --no-frozen-lockfile\"\n  ],\n  \"actionable\": \"Run pnpm install --no-frozen-lockfile under Node 24, then rerun this doctor.\"\n}",
+    "dependencyBackedBuildExecuted": false,
+    "note": "Run pnpm install --no-frozen-lockfile under the target Node 24 toolchain to regenerate the lockfile for Better Auth, Web3 Icons and Mysten dependencies, then run pnpm typecheck && pnpm build."
+  }
+}

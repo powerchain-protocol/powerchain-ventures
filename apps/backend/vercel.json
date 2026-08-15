@@ -8,6 +8,10 @@
   },
   "crons": [
     {
+      "path": "/api/v1/runtime/settlements/reconcile",
+      "schedule": "* * * * *"
+    },
+    {
       "path": "/api/v1/launchpad/reconcile",
       "schedule": "*/5 * * * *"
     }

@@ -15,6 +15,28 @@ export function requireSolanaAddress(value: unknown, field = "wallet") {
   const out = requireString(value, field, 64);
   try { return new PublicKey(out).toBase58(); } catch { throw new PowerChainError("BAD_REQUEST", `${field} is not a valid Solana address`); }
 }
+
+export function requireSuiAddress(
+  value: unknown,
+  field = "wallet",
+) {
+  const out =
+    requireString(
+      value,
+      field,
+      66,
+    ).toLowerCase();
+
+  if (!/^0x[0-9a-f]{64}$/.test(out)) {
+    throw new PowerChainError(
+      "BAD_REQUEST",
+      `${field} is not a valid Sui address`,
+    );
+  }
+
+  return out;
+}
+
 export function requireUuid(value: unknown, field = "id") {
   const out = requireString(value, field, 64);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(out)) throw new PowerChainError("BAD_REQUEST", `${field} is invalid`);

@@ -22,11 +22,17 @@ test("shortAddress is explicitly available through frontend helpers", () => {
   assert.match(helpers, /export function shortAddress\(/);
 });
 
-test("frontend API proxy catches unavailable backend and Next rewrite is removed", () => {
-  const route = read("apps/frontend/app/api/v1/[...path]/route.ts");
+test("frontend and checkout API routes use shared resilient backend proxy", () => {
+  const shared = read("packages/utils/src/backend-proxy.ts");
+  const frontend = read("apps/frontend/app/api/v1/[...path]/route.ts");
+  const checkout = read("apps/checkout/app/api/v1/[...path]/route.ts");
   const config = read("apps/frontend/next.config.ts");
-  assert.match(route, /BACKEND_UNAVAILABLE/);
-  assert.match(route, /status: 503/);
+
+  assert.match(shared, /BACKEND_UNAVAILABLE/);
+  assert.match(shared, /BACKEND_FALLBACK_ORIGINS/);
+  assert.match(shared, /status:\s*503/);
+  assert.match(frontend, /forwardBackendRequest/);
+  assert.match(checkout, /forwardBackendRequest/);
   assert.doesNotMatch(config, /async rewrites\(\)/);
 });
 

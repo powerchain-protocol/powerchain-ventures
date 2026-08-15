@@ -36,3 +36,5 @@ export function transactionMessageBytes(serialized: Uint8Array) {
   if (messageOffset >= serialized.length) throw new Error("transaction_message_missing");
   return serialized.slice(messageOffset);
 }
+
+export * from "./websocket.js";

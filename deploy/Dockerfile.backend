@@ -3,9 +3,7 @@ WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-workspace.yaml ./
 COPY apps/backend/package.json apps/backend/package.json
-COPY packages/config/package.json packages/config/package.json
-COPY packages/domain/package.json packages/domain/package.json
-COPY packages/solana/package.json packages/solana/package.json
+COPY packages ./packages
 RUN corepack prepare pnpm@11.21.0 --activate && pnpm install --filter @powerchain/launchpad-backend... --no-frozen-lockfile
 
 FROM node:24-alpine AS builder

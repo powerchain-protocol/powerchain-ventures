@@ -1,29 +1,75 @@
 # PowerChain Wallet Center and Checkout
 
-**Version:** 1.0.0
+**Version:** `1.0.0`
+
+## Application ownership
+
+```text
+apps/frontend   sale discovery, wallet center, claims, creator console
+apps/checkout   payment UX, exact purchase review, buyer signature
+apps/backend    price/quote authority, transaction construction, verification, settlement
+```
+
+There is no `payload/` application layer.
 
 ## Wallet Center
 
-`/wallet` is a non-custodial PWRC/SOL account view. The backend reads confirmed SOL balance and, when a real `POWERCHAIN_PRESALE_MINT` is configured, derives the wallet's Token-2022 associated token account and reads its PWRC balance. Birdeye conversion values are display-only market estimates.
+`/wallet` in `apps/frontend` is non-custodial. The backend reads confirmed SOL, PWRC Token-2022 and native Solana USDC balances.
 
-### Transfers
+Wallet transfers use:
 
-`POST /api/v1/transfers/prepare` creates an unsigned reviewed transaction for the connected wallet. SOL uses the System Program. PWRC uses Token-2022 `transferChecked`; the recipient Token-2022 associated token account is created idempotently when missing. The transfer plan always uses a **0 bps PowerChain service fee**.
+```text
+POST /api/v1/transfers/prepare
+POST /api/v1/transfers/confirm
+```
 
-`POST /api/v1/transfers/confirm` verifies the submitted signature, binds it to the exact prepared transaction message and verifies the actual recipient SOL balance delta or PWRC Token-2022 delivery before storing a settled receipt.
-
-The application never accepts a private key, seed phrase or mnemonic.
+SOL uses the System Program. PWRC uses Token-2022. USDC uses the standard SPL Token program. Wallet transfers have **0 bps** PowerChain service fee and are verified against the reviewed transaction before a receipt is stored.
 
 ## Checkout
 
-`/checkout/[saleId]` reuses the canonical PowerChain purchase pipeline. `/api/v1/checkout` is a bootstrap/market-context endpoint, not a settlement shortcut. It validates wallet, idempotency, sale phase, exact start/end window, purchase bounds and the canonical 250 bps fee policy.
+The purchase UI is exclusively:
 
-Birdeye supplies the displayed PWRC↔SOL/SOL-USD estimate when available. Exact payment amounts come from the subsequent PowerChain quote/preparation transaction and must pass the final transaction review and on-chain settlement verification.
+```text
+apps/checkout/app/checkout/[saleId]/page.tsx
+```
 
-## PWRC assets
+The Launchpad frontend redirects to the dedicated Checkout app and does not contain a second purchase form.
 
-Canonical frontend assets are under `apps/frontend/public/assets/pwrc/`. `apps/frontend/components/pwrc-coin.tsx` is the reusable token-art component. App icons are generated from the supplied transparent PWRC PNG.
+Purchase sequence:
 
-## Mainnet configuration
+```text
+GET  /api/v1/launchpad/catalog
+POST /api/v1/checkout
+POST /api/v1/launchpad/quote
+POST /api/v1/launchpad/purchase/prepare
+wallet review + signature
+POST /api/v1/launchpad/purchase/confirm
+settlement/finality reconciliation
+```
 
-A real deployed PWRC Token-2022 mint remains required. Source code does not invent one. Wallet PWRC balances/transfers fail closed until the deployment mint is configured and validated.
+Purchase preparation is server-owned. The backend:
+
+1. reloads canonical sale state and eligibility;
+2. validates the active sale window and wallet limits;
+3. calculates token base units and the fixed **250 bps** service-fee policy;
+4. obtains a bounded SOL/USD market observation;
+5. derives the exact native-SOL principal and service-fee lamports;
+6. creates the buyer's Token-2022 ATA idempotently when needed;
+7. builds the PowerChain Launchpad `purchase` instruction;
+8. partially signs the exact instruction with the configured quote authority;
+9. simulates the transaction;
+10. returns the serialized transaction to the connected buyer wallet for final review/signing.
+
+The backend never exposes `POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON`.
+
+## Pending confirmation
+
+Once a wallet returns a signature, Checkout stores only the non-secret review/signature recovery tuple locally. Reload recovery calls confirmation again; it **does not automatically resubmit the financial transaction**.
+
+## Coinbase Onramp
+
+Coinbase Onramp is wallet funding only. Its hosted session is created server-side and targets SOL on the connected Solana wallet. After funding, the buyer returns to `/onramp-return` and creates a separate reviewed PowerChain purchase.
+
+## Card payments
+
+Raw PAN, CVV or expiry fields are not rendered by PowerChain Checkout. A card rail remains disabled until a provider-owned PCI/tokenization integration is configured.

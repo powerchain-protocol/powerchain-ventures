@@ -12,8 +12,8 @@ const monorepoRoot = path.resolve(appRoot, "../..");
 // Production/Vercel remains strict below and does not receive these defaults.
 if (process.env.NODE_ENV !== "production") {
   process.env.NEXT_PUBLIC_APP_URL ||= "http://localhost:3000";
-  process.env.NEXT_PUBLIC_SOLANA_CLUSTER ||= "devnet";
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||= "https://api.devnet.solana.com";
+  process.env.NEXT_PUBLIC_SOLANA_CLUSTER ||= "mainnet-beta";
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||= "http://localhost:3001/api/v1/solana/rpc";
 }
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -53,6 +53,35 @@ function validateBackendOrigin(): void {
 }
 
 validateBackendOrigin();
+
+function validateBackendFallbackOrigins(): void {
+  const values = (
+    process.env.BACKEND_FALLBACK_ORIGINS ?? ""
+  )
+    .split(",")
+    .map(value => value.trim())
+    .filter(Boolean);
+
+  for (const value of values) {
+    const parsed = new URL(value);
+    if (!/^https?:$/.test(parsed.protocol)) {
+      throw new Error(
+        "[PowerChain] BACKEND_FALLBACK_ORIGINS entries must use http or https.",
+      );
+    }
+    if (
+      isVercel &&
+      parsed.protocol !== "https:"
+    ) {
+      throw new Error(
+        "[PowerChain] BACKEND_FALLBACK_ORIGINS must use HTTPS on Vercel.",
+      );
+    }
+  }
+}
+
+validateBackendFallbackOrigins();
+
 
 function validatePublicSolanaRuntime(): void {
   const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER;
@@ -107,7 +136,27 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   ...(!isVercel ? { output: "standalone" as const } : {}),
   outputFileTracingRoot: monorepoRoot,
-  transpilePackages: ["@powerchain/launchpad-config", "@powerchain/utils", "@powerchain/integrations"],
+  transpilePackages: [
+    "@powerchain/launchpad-config",
+    "@powerchain/utils",
+    "@powerchain/integrations",
+    "@powerchain/solana",
+  ],
+  images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [480, 640, 768, 1024, 1280, 1536],
+    imageSizes: [32, 48, 64, 96, 128, 192, 256],
+  },
+  experimental: {
+    optimizePackageImports: [
+      "@powerchain/launchpad-config",
+      "@powerchain/utils",
+      "@powerchain/token-data",
+      "@web3icons/react",
+    ],
+    turbopackFileSystemCacheForDev: true,
+    turbopackFileSystemCacheForBuild: true,
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

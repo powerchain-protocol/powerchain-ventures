@@ -25,6 +25,16 @@
       "types": "./dist/http.d.ts",
       "import": "./dist/http.js",
       "default": "./dist/http.js"
+    },
+    "./formats": {
+      "types": "./dist/formats.d.ts",
+      "import": "./dist/formats.js",
+      "default": "./dist/formats.js"
+    },
+    "./backend-proxy": {
+      "types": "./dist/backend-proxy.d.ts",
+      "import": "./dist/backend-proxy.js",
+      "default": "./dist/backend-proxy.js"
     }
   },
   "scripts": {

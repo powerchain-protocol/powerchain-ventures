@@ -1,0 +1,35 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "api": {
+    "canonical": "apps/backend/api/openapi/openapi.yaml",
+    "servedAt": "/api/v1/openapi",
+    "swaggerDiscovery": "/api/v1/swagger",
+    "frontendDocs": "/docs/api",
+    "duplicates": 0
+  },
+  "validation": {
+    "checks": {
+      "validate-source": true,
+      "openapi": true,
+      "documentation": true,
+      "workspace": true,
+      "pnpm-policy": true,
+      "vercel": true,
+      "env": true,
+      "app-env": true,
+      "mobile-env": true,
+      "mobile-native": true,
+      "repo-tests": true
+    },
+    "repoTestsPassed": true,
+    "jsonErrors": [],
+    "nodeSyntaxErrors": [],
+    "typescriptSyntaxFiles": 388,
+    "typescriptSyntaxErrors": [],
+    "fullDependencyBuildExecuted": false,
+    "requiredNode": "24",
+    "availableNode": "22.16.0",
+    "note": "Source/routing/test gates are clean. Dependency-backed Next/Expo build is not claimed because this runtime lacks the repository-required Node 24 toolchain."
+  }
+}

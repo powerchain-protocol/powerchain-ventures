@@ -228,6 +228,9 @@ importers:
 
   apps/backend:
     dependencies:
+      '@powerchain/mail':
+        specifier: workspace:*
+        version: link:../../packages/mail
       '@coinbase/cdp-sdk':
         specifier: 1.45.0
         version: 1.45.0(bufferutil@4.1.0)(debug@4.4.3(supports-color@8.1.1))(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(typescript@5.9.3)(utf-8-validate@6.0.6)
@@ -292,6 +295,9 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@powerchain/solana':
+        specifier: workspace:*
+        version: link:../../packages/solana
       '@powerchain/launchpad-config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -439,6 +445,26 @@ importers:
 
   packages/solana:
     devDependencies:
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
+
+  packages/mail:
+    dependencies:
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+    devDependencies:
+      '@types/react':
+        specifier: ^19
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.2.4(@types/react@19.2.18)
       typescript:
         specifier: 5.9.3
         version: 5.9.3

@@ -30,8 +30,25 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   ...(!isVercel ? { output: "standalone" as const } : {}),
   outputFileTracingRoot: monorepoRoot,
-  outputFileTracingIncludes: { "/api/v1/openapi": ["./openapi/powerchain-launchpad.openapi.yaml"] },
-  transpilePackages: ["@powerchain/solana", "@powerchain/launchpad-config", "@powerchain/utils", "@powerchain/integrations", "@powerchain/launchpad-program-client"],
+  outputFileTracingIncludes: { "/api/v1/openapi": ["./api/openapi/openapi.yaml"] },
+  transpilePackages: [
+    "@powerchain/solana",
+    "@powerchain/launchpad-config",
+    "@powerchain/utils",
+    "@powerchain/integrations",
+    "@powerchain/launchpad-program-client",
+    "@powerchain/mail",
+  ],
+  experimental: {
+    optimizePackageImports: [
+      "@powerchain/launchpad-config",
+      "@powerchain/utils",
+      "@powerchain/token-data",
+      "@powerchain/mail",
+    ],
+    turbopackFileSystemCacheForDev: true,
+    turbopackFileSystemCacheForBuild: true,
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

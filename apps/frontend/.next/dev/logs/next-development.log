@@ -1,6 +1,0 @@
-{"timestamp":"00:12:29.714","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/miko/github/powerchain/powerchain-launchpad/apps/frontend/app'"}
-{"timestamp":"00:12:29.719","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection:\" Error: ENOENT: no such file or directory, scandir '/Users/miko/github/powerchain/powerchain-launchpad/apps/frontend/app'"}
-{"timestamp":"00:12:29.723","source":"Server","level":"ERROR","message":"⨯ \"unhandledRejection: \" Error: ENOENT: no such file or directory, scandir '/Users/miko/github/powerchain/powerchain-launchpad/apps/frontend/app'"}
-{"timestamp":"00:12:29.780","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/miko/github/powerchain/powerchain-launchpad/apps/frontend/app'"}
-{"timestamp":"00:12:29.792","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/miko/github/powerchain/powerchain-launchpad/apps/frontend/app'"}
-{"timestamp":"00:12:29.914","source":"Server","level":"LOG","message":"✓ Compiled in 143ms"}

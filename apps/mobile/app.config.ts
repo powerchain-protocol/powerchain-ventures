@@ -8,7 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: POWERCHAIN_MOBILE.version,
   orientation: "portrait",
   scheme: process.env.EXPO_PUBLIC_APP_SCHEME || "powerchain",
-  userInterfaceStyle: "light",
+  userInterfaceStyle: "automatic",
   icon: "./assets/app-icon.png",
   ios: {
     bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER || POWERCHAIN_MOBILE.iosBundleIdentifier,
@@ -36,7 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ["expo-dev-client", { launchMode: "most-recent", addGeneratedScheme: true }],
     "expo-router",
     ["expo-secure-store", { configureAndroidBackup: true, faceIDPermission: "Use Face ID to protect your PowerChain account session." }],
-    ["expo-splash-screen", { image: "./assets/splash-icon.png", imageWidth: 180, resizeMode: "contain", backgroundColor: POWERCHAIN_COLORS.lightBackground, dark: { backgroundColor: "#0B1210" } }],
+    ["expo-splash-screen", { image: "./assets/splash-icon.png", imageWidth: 180, resizeMode: "contain", backgroundColor: POWERCHAIN_COLORS.lightBackground, dark: { backgroundColor: "#0B1210", image: "./assets/splash-icon.png" } }],
   ],
   experiments: { typedRoutes: true },
   extra: {

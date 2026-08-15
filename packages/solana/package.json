@@ -15,6 +15,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./websocket": {
+      "types": "./dist/websocket.d.ts",
+      "import": "./dist/websocket.js",
+      "default": "./dist/websocket.js"
     }
   },
   "types": "./dist/index.d.ts",

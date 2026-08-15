@@ -23,12 +23,15 @@ function safePartnerUserRef(value:string){const v=value.trim();if(!/^[A-Za-z0-9.
 function safeAmount(value:string){const v=value.trim();if(!/^\d+(?:\.\d{1,2})?$/.test(v))throw new PowerChainError("BAD_REQUEST","Fiat amount must have at most two decimal places");const n=Number(v);if(!Number.isFinite(n)||n<5||n>100000)throw new PowerChainError("BAD_REQUEST","Fiat amount is outside the supported PowerChain onramp range");return n.toFixed(2)}
 function safeRedirect(value:string){let u:URL;try{u=new URL(value)}catch{throw new PowerChainError("CONFIGURATION_ERROR","CDP_ONRAMP_REDIRECT_URL must be an absolute URL")};if(process.env.NODE_ENV==="production"&&u.protocol!=="https:")throw new PowerChainError("CONFIGURATION_ERROR","Production Onramp redirect URL must use HTTPS");return u.toString()}
 
-export type CreateOnrampInput={wallet:string;paymentAmount:string;partnerUserRef:string;clientIp?:string};
+export type CreateOnrampInput={wallet:string;paymentAmount:string;partnerUserRef:string;saleId?:string;clientIp?:string};
 export async function createCoinbaseOnrampSession(input:CreateOnrampInput){
  if(!cdpOnrampConfigured())throw new PowerChainError("CONFIGURATION_ERROR","Coinbase-hosted Onramp is not configured");
  if(!isSolanaAddress(input.wallet))throw new PowerChainError("BAD_REQUEST","Destination wallet must be a valid Solana address");
  const paymentAmount=safeAmount(input.paymentAmount),partnerUserRef=safePartnerUserRef(input.partnerUserRef);
- const redirectUrl=safeRedirect(env("CDP_ONRAMP_REDIRECT_URL")||"http://localhost:3000/checkout/onramp-return");
+ const redirectBase=safeRedirect(env("CDP_ONRAMP_REDIRECT_URL")||"http://localhost:3002/onramp-return");
+ const redirect=new URL(redirectBase);
+ if(input.saleId)redirect.searchParams.set("saleId",input.saleId);
+ const redirectUrl=redirect.toString();
  const token=await jwt("POST",V2_HOST,V2_SESSION_PATH);
  const body={purchaseCurrency:"SOL",destinationNetwork:"solana",destinationAddress:input.wallet,paymentAmount,paymentCurrency:"USD",redirectUrl,partnerUserRef,...(input.clientIp?{clientIp:input.clientIp}:{})};
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12_000);

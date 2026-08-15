@@ -2,46 +2,49 @@
 
 This directory is the canonical documentation index for PowerChain Launchpad™ `1.0.0`.
 
-Root Markdown is intentionally limited to `README.md`, `CHANGELOG.md`, and `CONTRIBUTORS.md`. Detailed implementation notes, operational guidance, and generated reports belong under `docs/`.
-
-## Architecture and platform
+## Start here
 
 - [Architecture](ARCHITECTURE.md)
-- [Full-stack architecture](FULLSTACK.md)
-- [Runtime](RUNTIME.md)
-- [Configuration](CONFIGURATION.md)
-- [Mainnet](MAINNET.md)
-- [Deployment](DEPLOYMENT.md)
+- [Full stack](FULLSTACK.md)
+- [Environment and RPC](ENVIRONMENT.md)
+- [Branding](BRANDING.md)
+- [UI/UX](UI-UX.md)
+- [API](API.md)
+- [OpenAPI](OPENAPI.md)
 - [Security](SECURITY.md)
+- [Testing](TESTING.md)
+- [Deployment](DEPLOYMENT.md)
+- [Release checklist](RELEASE-CHECKLIST.md)
+
+## Runtime and operations
+
+- [Runtime](RUNTIME.md)
+- [Persistent runtime protection](PERSISTENT-RUNTIME-PROTECTION.md)
+- [Idempotency](IDEMPOTENCY.md)
+- [Atomic idempotency](ATOMIC-IDEMPOTENCY.md)
+- [Mutation orchestration](MUTATION-ORCHESTRATION.md)
+- [Mutation crash recovery](MUTATION-CRASH-RECOVERY.md)
 - [Settlement](SETTLEMENT.md)
+- [Settlement finality](SETTLEMENT-FINALITY.md)
+- [Solana finality reconciliation](SOLANA-FINALITY-RECONCILIATION.md)
 - [Operations](OPERATIONS.md)
 
-## API, wallets, checkout, and integrations
+## Product surfaces
 
-- [API v1 wallet and checkout](API-V1-WALLET-CHECKOUT.md)
 - [Wallet and checkout](WALLET-CHECKOUT.md)
-- [Fees](FEES.md)
-- [Coinbase Onramp](COINBASE-ONRAMP.md)
-- [Integrations](INTEGRATIONS.md)
-- [Program operations](PROGRAM-OPERATIONS.md)
-
-## UI, auth, and mobile
-
-- [UI/UX](UI-UX.md)
-- [Hooks and UI](HOOKS-AND-UI.md)
 - [Authentication and onboarding](AUTH-ONBOARDING.md)
-- [Mobile app](MOBILE-APP.md)
-- [Mobile source survey](MOBILE-SOURCE-SURVEY.md)
+- [Integrations](INTEGRATIONS.md)
+- [Programs](PROGRAMS.md)
+- [Mobile](MOBILE.md)
 - [Mobile environment](MOBILE-ENVIRONMENT.md)
-- [Mobile TypeScript and shared UI](MOBILE-TYPESCRIPT-UI.md)
-- [Mobile install troubleshooting](MOBILE-INSTALL-TROUBLESHOOTING.md)
-- [Expo/native troubleshooting](EXPO-NATIVE-TROUBLESHOOTING.md)
 
-## Development troubleshooting
+## Development and troubleshooting
 
 - [TypeScript troubleshooting](TYPESCRIPT-TROUBLESHOOTING.md)
+- [Runtime module resolution](RUNTIME-MODULE-RESOLUTION.md)
+- [Expo/native troubleshooting](EXPO-NATIVE-TROUBLESHOOTING.md)
 - [VS Code debugging](VS-CODE-DEBUG.md)
 
 ## Reports
 
-Release/build/status reports are kept under [`docs/reports/`](reports/) so they do not clutter the repository root. Validation JSON is stored under [`docs/reports/validation/`](reports/validation/).
+Generated and historical validation reports live under [`docs/reports/`](reports/). They are operational evidence, not canonical architecture documentation.

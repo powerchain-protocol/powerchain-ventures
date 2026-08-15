@@ -1,5 +1,40 @@
-import type { StatusDescriptor } from "../../types/status";
+import type {
+  StatusDescriptor,
+} from "../../types/status";
+import {
+  Badge,
+  type BadgeTone,
+} from "./badge";
 
-export function StatusBadge({ status, className = "" }: { status: StatusDescriptor; className?: string }) {
-  return <span className={`status-badge ${status.tone} ${className}`.trim()}><i aria-hidden="true" />{status.label}</span>;
+type Props =
+  | {
+      status: StatusDescriptor;
+      className?: string;
+      label?: never;
+      tone?: never;
+    }
+  | {
+      status?: never;
+      label: string;
+      tone?: BadgeTone;
+      className?: string;
+    };
+
+export function StatusBadge(props: Props) {
+  const label =
+    props.status?.label ?? props.label;
+  const tone =
+    props.status?.tone ??
+    props.tone ??
+    "neutral";
+
+  return (
+    <Badge
+      tone={tone}
+      dot
+      className={props.className ?? ""}
+    >
+      {label}
+    </Badge>
+  );
 }

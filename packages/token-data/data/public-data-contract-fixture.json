@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/public-data",
+    "headers": {
+      "accept": "application/json"
+    }
+  },
+  "response": {
+    "status": 200,
+    "requiredHeaders": [
+      "etag",
+      "cache-control",
+      "x-powerchain-data-source",
+      "x-powerchain-schema-version",
+      "x-powerchain-release"
+    ],
+    "schemaVersion": 1,
+    "release": "1.0.0"
+  }
+}

@@ -15,6 +15,36 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./amount": {
+      "types": "./dist/amount.d.ts",
+      "import": "./dist/amount.js",
+      "default": "./dist/amount.js"
+    },
+    "./rates": {
+      "types": "./dist/rates.d.ts",
+      "import": "./dist/rates.js",
+      "default": "./dist/rates.js"
+    },
+    "./pyth": {
+      "types": "./dist/pyth.d.ts",
+      "import": "./dist/pyth.js",
+      "default": "./dist/pyth.js"
+    },
+    "./birdeye": {
+      "types": "./dist/birdeye.d.ts",
+      "import": "./dist/birdeye.js",
+      "default": "./dist/birdeye.js"
+    },
+    "./coinmarketcap": {
+      "types": "./dist/coinmarketcap.d.ts",
+      "import": "./dist/coinmarketcap.js",
+      "default": "./dist/coinmarketcap.js"
+    },
+    "./prices": {
+      "types": "./dist/prices.d.ts",
+      "import": "./dist/prices.js",
+      "default": "./dist/prices.js"
     }
   },
   "types": "./dist/index.d.ts",

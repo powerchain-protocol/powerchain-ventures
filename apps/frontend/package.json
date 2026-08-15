@@ -17,7 +17,14 @@
     "@solana/connector": "0.2.6",
     "@solana/web3.js": "1.98.4",
     "@powerchain/launchpad-config": "workspace:*",
-    "@powerchain/utils": "workspace:*"
+    "@powerchain/utils": "workspace:*",
+    "@powerchain/token-data": "workspace:*",
+    "@powerchain/solana": "workspace:*",
+    "better-auth": "1.6.25",
+    "@web3icons/react": "4.1.19",
+    "@mysten/dapp-kit-react": "2.1.14",
+    "@mysten/sui": "2.22.0",
+    "@powerchain/ui": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24",

@@ -1098,3 +1098,310 @@ create index if not exists launchpad_profiles_auth_user_idx on public.launchpad_
 alter table public.launchpad_profiles enable row level security;
 revoke all on public.launchpad_profiles from anon, authenticated;
 grant select,insert,update on public.launchpad_profiles to service_role;
+
+-- Migration 028: 028_runtime_protection.sql
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_rate_limits (
+  bucket text NOT NULL,
+  identity_hash text NOT NULL,
+  count integer NOT NULL DEFAULT 0 CHECK (count >= 0),
+  reset_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (bucket, identity_hash)
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_rate_limits_reset_at_idx
+  ON powerchain_runtime_rate_limits (reset_at);
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_idempotency (
+  idempotency_key text PRIMARY KEY,
+  fingerprint text NOT NULL,
+  status_code integer NOT NULL CHECK (status_code BETWEEN 100 AND 599),
+  response_body jsonb NOT NULL,
+  expires_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_idempotency_expires_at_idx
+  ON powerchain_runtime_idempotency (expires_at);
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_audit (
+  id bigserial PRIMARY KEY,
+  event text NOT NULL,
+  request_id text,
+  route text,
+  status integer,
+  code text,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  occurred_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_audit_occurred_at_idx
+  ON powerchain_runtime_audit (occurred_at DESC);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_audit_request_id_idx
+  ON powerchain_runtime_audit (request_id)
+  WHERE request_id IS NOT NULL;
+
+COMMIT;
+
+
+-- Migration 029: 029_runtime_protection_cleanup.sql
+BEGIN;
+
+CREATE OR REPLACE FUNCTION powerchain_cleanup_runtime_protection()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  DELETE FROM powerchain_runtime_rate_limits
+  WHERE reset_at < now() - interval '10 minutes';
+
+  DELETE FROM powerchain_runtime_idempotency
+  WHERE expires_at < now();
+
+  DELETE FROM powerchain_runtime_idempotency_reservations
+  WHERE expires_at < now();
+
+  DELETE FROM powerchain_runtime_audit
+  WHERE occurred_at < now() - interval '90 days';
+
+  DELETE FROM powerchain_runtime_mutation_leases
+  WHERE state IN ('completed','failed')
+    AND heartbeat_at < now() - interval '7 days';
+
+  DELETE FROM powerchain_runtime_outbox
+  WHERE state IN ('completed','failed')
+    AND created_at < now() - interval '30 days';
+END;
+$$;
+
+REVOKE ALL ON FUNCTION powerchain_cleanup_runtime_protection() FROM PUBLIC;
+
+COMMIT;
+
+
+-- Migration 030: 030_runtime_mutation_receipts.sql
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_mutation_receipts (
+  mutation_id text PRIMARY KEY,
+  request_id text NOT NULL,
+  kind text NOT NULL,
+  state text NOT NULL CHECK (state IN ('accepted','processing','succeeded','failed','replayed')),
+  status_code integer NOT NULL CHECK (status_code BETWEEN 100 AND 599),
+  replayed boolean NOT NULL DEFAULT false,
+  result jsonb,
+  error_code text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_mutation_receipts_request_id_idx
+  ON powerchain_runtime_mutation_receipts (request_id);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_mutation_receipts_state_idx
+  ON powerchain_runtime_mutation_receipts (state, updated_at DESC);
+
+COMMIT;
+
+
+-- Migration 031: 031_atomic_idempotency_reservations.sql
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_idempotency_reservations (
+  idempotency_key text PRIMARY KEY,
+  fingerprint text NOT NULL,
+  state text NOT NULL CHECK (state IN ('reserved','completed','failed')),
+  status_code integer CHECK (status_code IS NULL OR status_code BETWEEN 100 AND 599),
+  response_body jsonb,
+  expires_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_idempotency_reservations_expires_at_idx
+  ON powerchain_runtime_idempotency_reservations (expires_at);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_idempotency_reservations_state_idx
+  ON powerchain_runtime_idempotency_reservations (state, updated_at DESC);
+
+COMMIT;
+
+
+-- Migration 032: 032_mutation_leases.sql
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_mutation_leases (
+  mutation_id text PRIMARY KEY,
+  owner_id text NOT NULL,
+  state text NOT NULL CHECK (state IN ('active','expired','completed','failed')),
+  lease_expires_at timestamptz NOT NULL,
+  heartbeat_at timestamptz NOT NULL DEFAULT now(),
+  attempt integer NOT NULL DEFAULT 1 CHECK (attempt >= 1),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_mutation_leases_expiry_idx
+  ON powerchain_runtime_mutation_leases (lease_expires_at)
+  WHERE state = 'active';
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_mutation_leases_state_idx
+  ON powerchain_runtime_mutation_leases (state, heartbeat_at DESC);
+
+COMMIT;
+
+
+-- Migration 033: 033_settlement_finality.sql
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_settlements (
+  settlement_id text PRIMARY KEY,
+  mutation_id text NOT NULL UNIQUE,
+  kind text NOT NULL CHECK (kind IN ('purchase','claim','creator')),
+  state text NOT NULL CHECK (
+    state IN ('created','submitted','observed','confirmed','finalized','reconciled','failed','manual-review')
+  ),
+  transaction_signature text,
+  submitted_at timestamptz,
+  observed_at timestamptz,
+  finalized_at timestamptz,
+  reconciled_at timestamptz,
+  error_code text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_settlements_state_idx
+  ON powerchain_runtime_settlements (state, updated_at DESC);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_settlements_signature_idx
+  ON powerchain_runtime_settlements (transaction_signature)
+  WHERE transaction_signature IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS powerchain_runtime_outbox (
+  event_id text PRIMARY KEY,
+  type text NOT NULL,
+  aggregate_id text NOT NULL,
+  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  state text NOT NULL DEFAULT 'pending' CHECK (state IN ('pending','processing','completed','failed')),
+  attempts integer NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+  available_at timestamptz NOT NULL DEFAULT now(),
+  owner_id text,
+  lease_until timestamptz,
+  completed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_outbox_pending_idx
+  ON powerchain_runtime_outbox (available_at, created_at)
+  WHERE state IN ('pending','processing');
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_outbox_aggregate_idx
+  ON powerchain_runtime_outbox (aggregate_id);
+
+COMMIT;
+
+
+-- Migration 034: 034_better_auth_wallet_accounts.sql
+begin;
+
+create table if not exists "user" (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null unique,
+  "emailVerified" boolean not null default false,
+  image text,
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now()
+);
+
+create table if not exists "session" (
+  id uuid primary key default gen_random_uuid(),
+  "userId" uuid not null references "user"(id) on delete cascade,
+  token text not null unique,
+  "expiresAt" timestamptz not null,
+  "ipAddress" text,
+  "userAgent" text,
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now()
+);
+
+create index if not exists better_auth_session_user_idx
+  on "session" ("userId");
+create index if not exists better_auth_session_expires_idx
+  on "session" ("expiresAt");
+
+create table if not exists "account" (
+  id uuid primary key default gen_random_uuid(),
+  "userId" uuid not null references "user"(id) on delete cascade,
+  "accountId" text not null,
+  "providerId" text not null,
+  "accessToken" text,
+  "refreshToken" text,
+  "accessTokenExpiresAt" timestamptz,
+  "refreshTokenExpiresAt" timestamptz,
+  scope text,
+  "idToken" text,
+  password text,
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now(),
+  unique ("providerId", "accountId")
+);
+
+create index if not exists better_auth_account_user_idx
+  on "account" ("userId");
+
+create table if not exists verification (
+  id uuid primary key default gen_random_uuid(),
+  identifier text not null,
+  value text not null,
+  "expiresAt" timestamptz not null,
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now()
+);
+
+create index if not exists better_auth_verification_identifier_idx
+  on verification (identifier);
+create index if not exists better_auth_verification_expires_idx
+  on verification ("expiresAt");
+
+create table if not exists powerchain_wallet_accounts (
+  id uuid primary key default gen_random_uuid(),
+  chain text not null check (chain in ('solana', 'sui')),
+  wallet_address text not null,
+  auth_user_id uuid references "user"(id) on delete set null,
+  provider text not null default 'wallet-signature',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_authenticated_at timestamptz,
+  unique (chain, wallet_address)
+);
+
+create index if not exists powerchain_wallet_accounts_user_idx
+  on powerchain_wallet_accounts (auth_user_id, updated_at desc);
+
+commit;
+
+
+-- Migration 035: 035_runtime_persistence_bootstrap_outbox_health.sql
+BEGIN;
+
+ALTER TABLE IF EXISTS powerchain_runtime_outbox
+  ADD COLUMN IF NOT EXISTS last_error text,
+  ADD COLUMN IF NOT EXISTS last_error_at timestamptz,
+  ADD COLUMN IF NOT EXISTS failed_at timestamptz,
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_outbox_failed_idx
+  ON powerchain_runtime_outbox (failed_at DESC)
+  WHERE state = 'failed';
+
+CREATE INDEX IF NOT EXISTS powerchain_runtime_outbox_lease_idx
+  ON powerchain_runtime_outbox (lease_until)
+  WHERE state = 'processing';
+
+COMMIT;

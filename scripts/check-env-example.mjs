@@ -14,7 +14,7 @@ const documented = new Set(
 const roots = ['apps', 'packages', 'scripts'];
 const extensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.cjs']);
 const refs = new Set();
-const ignored = new Set(['VERCEL']); // platform-provided, not user configuration
+const ignored = new Set(['VERCEL', 'NEXT_RUNTIME']); // platform-provided, not user configuration
 const ignoredPrefixes = ['EXPO_PUBLIC_'];
 const mobileOnly = new Set(['IOS_BUNDLE_IDENTIFIER', 'ANDROID_PACKAGE_NAME']);
 

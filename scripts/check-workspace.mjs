@@ -58,7 +58,7 @@ for (const [name, { dir, pkg }] of packages) {
     if (dep !== name && packages.has(dep) && !declared.has(dep)) failures.push(`${name} imports undeclared workspace dependency ${dep}`);
   }
 
-  if (name.startsWith('@powerchain/') && name !== '@powerchain/launchpad-frontend' && name !== '@powerchain/launchpad-backend' && name !== '@powerchain/launchpad-mobile') {
+  if (name.startsWith('@powerchain/') && name !== '@powerchain/launchpad-frontend' && name !== '@powerchain/launchpad-backend' && name !== '@powerchain/launchpad-mobile' && name !== '@powerchain/launchpad-checkout') {
     if (!pkg.exports?.['.']) failures.push(`${name} must expose an explicit package export`);
     const rootExport = pkg.exports?.['.'];
     const rootImport = typeof rootExport === 'string' ? rootExport : rootExport?.import ?? rootExport?.default;

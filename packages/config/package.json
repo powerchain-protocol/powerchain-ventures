@@ -36,7 +36,22 @@
       "import": "./dist/runtime.js",
       "default": "./dist/runtime.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./rpc": {
+      "types": "./dist/rpc.d.ts",
+      "import": "./dist/rpc.js",
+      "default": "./dist/rpc.js"
+    },
+    "./endpoints": {
+      "types": "./dist/endpoints.d.ts",
+      "import": "./dist/endpoints.js",
+      "default": "./dist/endpoints.js"
+    },
+    "./assets": {
+      "types": "./dist/assets.d.ts",
+      "import": "./dist/assets.js",
+      "default": "./dist/assets.js"
+    }
   },
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
