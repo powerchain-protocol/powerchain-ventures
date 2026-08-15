@@ -11,11 +11,13 @@ import {
   settlementIdForMutation,
 } from "./id";
 
-export async function ensureSettlement(input: {
-  mutationId: string;
-  kind:
-    SettlementRecord["kind"];
-}): Promise<SettlementRecord> {
+export async function ensureSettlement(
+  input: {
+    mutationId: string;
+    kind:
+      SettlementRecord["kind"];
+  },
+): Promise<SettlementRecord> {
   const persistence =
     getRuntimePersistence();
 
@@ -34,28 +36,31 @@ export async function ensureSettlement(input: {
     await settlementIdForMutation(
       input.mutationId,
     );
-
   const now =
-    new Date().toISOString();
+    new Date()
+      .toISOString();
 
   const record:
     SettlementRecord = {
     settlementId,
     mutationId:
       input.mutationId,
-    kind: input.kind,
-    state: "created",
+    kind:
+      input.kind,
+    state:
+      "created",
     createdAt: now,
     updatedAt: now,
   };
 
-  await persistence.settlements.create(
-    record,
-  );
+  await persistence
+    .settlements
+    .create(record);
 
   return (
     await persistence
-      .settlements.read(
+      .settlements
+      .read(
         settlementId,
       )
   ) ?? record;
@@ -86,11 +91,9 @@ export async function transitionSettlement(
     );
   }
 
-  const persistence =
-    getRuntimePersistence();
-
-  return persistence
-    .settlements.transition(
+  return getRuntimePersistence()
+    .settlements
+    .transition(
       {
         ...input,
         updatedAt:
@@ -106,31 +109,32 @@ export async function enqueueSettlementObservation(
 ): Promise<void> {
   const persistence =
     getRuntimePersistence();
-
   const eventId =
     await outboxEventId(
       "settlement.observe",
       `${settlementId}:${signature}`,
     );
-
   const now =
-    new Date().toISOString();
+    new Date()
+      .toISOString();
 
-  await persistence.outbox.enqueue(
-    {
-      eventId,
-      type:
-        "settlement.observe",
-      aggregateId:
-        settlementId,
-      payload: {
-        signature,
+  await persistence
+    .outbox
+    .enqueue(
+      {
+        eventId,
+        type:
+          "settlement.observe",
+        aggregateId:
+          settlementId,
+        payload: {
+          signature,
+        },
+        attempts: 0,
+        availableAt: now,
+        createdAt: now,
       },
-      attempts: 0,
-      availableAt: now,
-      createdAt: now,
-    },
-  );
+    );
 }
 
 export async function registerSubmittedSettlement(
@@ -144,70 +148,52 @@ export async function registerSubmittedSettlement(
   const persistence =
     getRuntimePersistence();
 
-  let settlement =
-    await ensureSettlement(
-      {
-        mutationId:
-          input.mutationId,
-        kind:
-          input.kind,
-      },
+  const settlementId =
+    await settlementIdForMutation(
+      input.mutationId,
     );
 
-  if (
-    settlement
-      .transactionSignature &&
-    settlement
-      .transactionSignature !==
-      input.signature
-  ) {
-    throw new Error(
-      "Settlement is already bound to a different transaction signature",
+  const eventId =
+    await outboxEventId(
+      "settlement.observe",
+      `${settlementId}:${input.signature}`,
     );
-  }
 
-  if (
-    settlement.state ===
-      "created" ||
-    settlement.state ===
-      "manual-review"
-  ) {
-    await transitionSettlement(
+  const now =
+    new Date()
+      .toISOString();
+
+  return persistence
+    .settlementRegistration
+    .registerSubmitted(
       {
-        settlementId:
-          settlement.settlementId,
-        expectedState:
-          settlement.state,
-        nextState:
-          "submitted",
-        transactionSignature:
+        settlement: {
+          settlementId,
+          mutationId:
+            input.mutationId,
+          kind:
+            input.kind,
+          state:
+            "created",
+          createdAt: now,
+          updatedAt: now,
+        },
+        signature:
           input.signature,
+        event: {
+          eventId,
+          type:
+            "settlement.observe",
+          aggregateId:
+            settlementId,
+          payload: {
+            signature:
+              input.signature,
+          },
+          attempts: 0,
+          availableAt: now,
+          createdAt: now,
+        },
       },
     );
-
-    settlement =
-      (
-        await persistence
-          .settlements.read(
-            settlement
-              .settlementId,
-          )
-      ) ?? settlement;
-  }
-
-  if (
-    settlement.state ===
-      "failed"
-  ) {
-    throw new Error(
-      "Failed settlement cannot be resubmitted automatically",
-    );
-  }
-
-  await enqueueSettlementObservation(
-    settlement.settlementId,
-    input.signature,
-  );
-
-  return settlement;
 }

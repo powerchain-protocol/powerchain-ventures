@@ -51,6 +51,21 @@
       "types": "./dist/assets.d.ts",
       "import": "./dist/assets.js",
       "default": "./dist/assets.js"
+    },
+    "./solana-programs": {
+      "types": "./dist/solana-programs.d.ts",
+      "import": "./dist/solana-programs.js",
+      "default": "./dist/solana-programs.js"
+    },
+    "./payments": {
+      "types": "./dist/payments.d.ts",
+      "import": "./dist/payments.js",
+      "default": "./dist/payments.js"
+    },
+    "./checkout": {
+      "types": "./dist/checkout.d.ts",
+      "import": "./dist/checkout.js",
+      "default": "./dist/checkout.js"
     }
   },
   "types": "./dist/index.d.ts",

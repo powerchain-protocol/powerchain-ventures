@@ -45,7 +45,9 @@ pnpm production:settlement:check
 
 `POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON` is server-only. The configured public key must match `POWERCHAIN_QUOTE_AUTHORITY_WALLET`.
 
-The legacy remote transaction-builder integration remains available for operation classes not yet migrated to local construction; it is no longer required by the purchase route.
+Claims, pause/resume, timing changes, cancel/complete and creator-controlled sale activation are also constructed and simulated locally by `lib/local-program-transaction-builder.ts`.
+
+The remote transaction-builder integration is optional and is used only when delegated vault-authority sale activation is explicitly enabled.
 
 
 ## Runtime settlement finality
@@ -53,3 +55,27 @@ The legacy remote transaction-builder integration remains available for operatio
 Production runtime persistence is configured with `POWERCHAIN_RUNTIME_PERSISTENCE=database`. Backend Node startup validates migrations before activating the Prisma-backed persistence layer.
 
 Purchase confirmations create durable settlement IDs. The minutely `/api/v1/runtime/settlements/reconcile` worker advances Solana finality until `reconciled`; Checkout does not show a successful purchase before that state.
+
+
+## Atomic settlement registration
+
+`lib/runtime-persistence/settlement-registration.ts` creates/binds the durable settlement and its `settlement.observe` outbox event inside one Prisma/PostgreSQL transaction. This prevents a confirmed purchase from being persisted without the worker event required to advance finality.
+
+Manual-review recovery uses `/api/v1/runtime/settlements/{settlementId}/action`. `retry-observation` only requeues observation of the already-signed transaction; it never sends the financial transaction again.
+
+
+## Solana Pay and protocol APIs
+
+PowerChain exposes the prepared purchase through the Solana Pay transaction-request standard without creating a second settlement path:
+
+```text
+GET|POST /api/v1/payments/solana-pay/transaction
+GET      /api/v1/payments/solana-pay/status
+GET      /api/v1/solana/settlement
+GET      /api/v1/payments/config
+GET      /api/v1/protocols
+```
+
+The Solana Pay transaction request is buyer-bound and returns the same reviewed serialized transaction used by connected-wallet checkout. The status route accepts only a signature whose message matches the prepared transaction.
+
+Circle CCTP V2 and ZK Compression are capability-gated and disabled by default. CCTP message/attestation inspection is available at `/api/v1/protocols/cctp/messages` only when CCTP is enabled.

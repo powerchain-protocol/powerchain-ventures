@@ -2,7 +2,7 @@ import {enforceRateLimit} from "../../../../../../lib/rate-limit-response";
 import {isSolanaAddress} from "../../../../../../lib/policy";
 import {json,error,readJson} from "../../../../../../lib/http";
 import {databaseConfigured,select,insert} from "../../../../../../lib/supabase-rest";
-import {buildTransaction,unavailablePlan} from "../../../../../../lib/transaction-builder";
+import {buildLocalClaimTransaction} from "../../../../../../lib/local-program-transaction-builder";
 import {reviewPlanHash} from "../../../../../../lib/review-integrity";
 import {assertBuilderDelivers,buildDeliveryContract} from "../../../../../../lib/token-delivery";
 import {attachFeePolicy} from "../../../../../../lib/fee-policy";
@@ -18,7 +18,10 @@ export async function POST(req:Request){
   const rows=await select<Record<string,unknown>>("launchpad_vesting",`select=sale_id,wallet,total_base_units,claimed_base_units,starts_at,cliff_at,ends_at,launchpad_sales(mint,decimals,name,source_vault_token_account,launchpad_program_id,sale_pda,vault_authority_pda)&sale_id=eq.${encodeURIComponent(b.saleId)}&wallet=eq.${encodeURIComponent(b.wallet)}&limit=1`);const row=rows[0];if(!row)return error("NOT_ELIGIBLE","No vesting schedule exists for this wallet",404);
   const total=BigInt(String(row.total_base_units)),claimed=BigInt(String(row.claimed_base_units)),v=vested(total,String(row.starts_at),String(row.ends_at),row.cliff_at?String(row.cliff_at):null),amount=v>claimed?v-claimed:0n;if(amount<=0n)return error("SALE_CLOSED","Nothing is currently available to claim");
   const sale=(row.launchpad_sales??{}) as Record<string,unknown>;const programId=configuredLaunchpadProgramId();const salePda=String(sale.sale_pda??"");if(!programId||String(sale.launchpad_program_id??"")!==programId||!salePda)return error("CONFIGURATION_ERROR","Sale is not bound to the configured PowerChain Launchpad program",503);const onchain=await readOnchainClaimability(salePda,b.wallet);if(BigInt(onchain.claimableBaseUnits)!==amount)return error("BAD_REQUEST","Database vesting state does not match the on-chain claimable amount",409);const delivery=buildDeliveryContract({wallet:b.wallet,mint:String(sale.mint),sourceVaultTokenAccount:String(sale.source_vault_token_account??""),amountBaseUnits:amount.toString(),decimals:Number(sale.decimals??9),mode:"claim"});
-  let plan;try{plan=attachFeePolicy(await buildTransaction("claim",{saleId:b.saleId,wallet:b.wallet,mint:String(sale.mint),decimals:Number(sale.decimals??9),claimAmountBaseUnits:amount.toString(),launchpadProgramId:programId,salePda,participantPda:onchain.participantPda,vaultAuthorityPda:String(sale.vault_authority_pda??""),delivery}),"claim");if(plan.feePayer!==b.wallet)throw new Error("builder_fee_payer_mismatch");assertBuilderUsesLaunchpadProgram(plan,{operation:"claim",salePda,participantPda:onchain.participantPda});assertBuilderDelivers(plan,delivery)}catch{plan=unavailablePlan("claim",b.wallet)}
+  const plan=attachFeePolicy(await buildLocalClaimTransaction({wallet:b.wallet,programId,salePda,sourceVaultTokenAccount:String(sale.source_vault_token_account??""),mint:String(sale.mint),amountBaseUnits:amount.toString()}),"claim");
+  if(plan.feePayer!==b.wallet)throw new Error("builder_fee_payer_mismatch");
+  assertBuilderUsesLaunchpadProgram(plan,{operation:"claim",salePda,participantPda:onchain.participantPda});
+  assertBuilderDelivers(plan,delivery);
   const reviewId=crypto.randomUUID();plan.id=reviewId;const planHash=reviewPlanHash(plan);await insert("launchpad_transaction_reviews",{id:reviewId,wallet:b.wallet,kind:"claim",sale_id:b.saleId,plan_hash:planHash,plan,expires_at:plan.expiresAt??null,status:"prepared",metadata:{claimAmountBaseUnits:amount.toString(),mint:String(sale.mint),delivery,programId,salePda,participantPda:onchain.participantPda}});return json({claimAmountBaseUnits:amount.toString(),delivery,plan})
  }catch(e){return error("INTERNAL_ERROR",e instanceof Error?e.message:"Unable to prepare claim",500)}
 }

@@ -48,6 +48,19 @@ The checkout never authorizes its own price or payment. `apps/backend` reloads s
 
 There is no `apps/payload/` or root `payload/` application layer; `pnpm doctor:layout` enforces this.
 
+### Transaction construction ownership
+
+PowerChain owns reviewed Solana transaction construction inside the monorepo:
+
+```text
+purchase                         apps/backend/lib/purchase-transaction-builder.ts
+claim/lifecycle/program actions  apps/backend/lib/local-program-transaction-builder.ts
+sale activation                  local when creator controls vault
+delegated vault activation       optional external builder capability
+```
+
+The optional delegated-vault path is enabled only with `POWERCHAIN_DELEGATED_VAULT_ACTIVATION_ENABLED=1`.
+
 ### Durable purchase finality
 
 Production uses Prisma/PostgreSQL runtime persistence and a leased outbox worker for settlement observation. A purchase moves through `submitted → observed/confirmed → finalized → reconciled`; Checkout shows success only at `reconciled`.
@@ -133,6 +146,11 @@ Never place real private keys, seed phrases, signing material, service-role cred
 
 ```bash
 pnpm doctor:workspace
+pnpm doctor:workspace-boundaries
+pnpm doctor:program-parity
+pnpm doctor:local-builders
+pnpm doctor:payment-protocols
+pnpm doctor:settlement-worker
 pnpm doctor:env
 pnpm doctor:runtime-resolution
 pnpm openapi:check

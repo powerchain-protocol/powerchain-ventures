@@ -42,17 +42,41 @@ const isoDate=(name,{requiredValue=false}={})=>{
 if((env.NODE_ENV??'production')!=='production')errors.push('NODE_ENV must be production for this preflight');
 url('NEXT_PUBLIC_APP_URL');
 url('NEXT_PUBLIC_CHECKOUT_URL');
+
+const delegatedVaultActivationRaw =
+  (env.POWERCHAIN_DELEGATED_VAULT_ACTIVATION_ENABLED ?? "0").trim();
+
+if (!["0", "1"].includes(delegatedVaultActivationRaw)) {
+  errors.push("POWERCHAIN_DELEGATED_VAULT_ACTIVATION_ENABLED must be 0 or 1");
+}
+
+const delegatedVaultActivation =
+  delegatedVaultActivationRaw === "1";
+
+if (delegatedVaultActivation) {
+  url("POWERCHAIN_TRANSACTION_BUILDER_URL");
+  if ((env.POWERCHAIN_TRANSACTION_BUILDER_API_KEY ?? "").length < 20) {
+    errors.push("POWERCHAIN_TRANSACTION_BUILDER_API_KEY is required when delegated vault activation is enabled");
+  }
+} else {
+  if ((env.POWERCHAIN_TRANSACTION_BUILDER_URL ?? "").trim()) {
+    url("POWERCHAIN_TRANSACTION_BUILDER_URL");
+  }
+  if ((env.POWERCHAIN_TRANSACTION_BUILDER_API_KEY ?? "").trim()
+      && (env.POWERCHAIN_TRANSACTION_BUILDER_API_KEY ?? "").length < 20) {
+    errors.push("POWERCHAIN_TRANSACTION_BUILDER_API_KEY is too short");
+  }
+}
+
 url('NEXT_PUBLIC_SOLANA_RPC_URL');
 url('SOLANA_RPC_URL');
 url('SUPABASE_URL');
-url('POWERCHAIN_TRANSACTION_BUILDER_URL');
 url('BACKEND_ORIGIN');
 
 const canonicalFeeWallet='FeeszhrKKEsvxr1kg8LDtPx6BLcEbYHiAThYaxajNhqy';
 if((env.POWERCHAIN_TREASURY_WALLET??canonicalFeeWallet).trim()!==canonicalFeeWallet)errors.push('POWERCHAIN_TREASURY_WALLET must equal the canonical PowerChain fee wallet');
 if((env.POWERCHAIN_TREASURY_WALLET??canonicalFeeWallet).trim()==='11111111111111111111111111111111')errors.push('POWERCHAIN_TREASURY_WALLET must not be the Solana System Program');
 if((env.SUPABASE_SERVICE_ROLE_KEY??'').length<20)errors.push('SUPABASE_SERVICE_ROLE_KEY is missing or too short');
-if((env.POWERCHAIN_TRANSACTION_BUILDER_API_KEY??'').length<20)errors.push('POWERCHAIN_TRANSACTION_BUILDER_API_KEY is missing or too short');
 
 const reconciliationSecret=env.CRON_SECRET||env.RECONCILIATION_SECRET||'';
 if(reconciliationSecret.length<32)errors.push('CRON_SECRET or RECONCILIATION_SECRET must be at least 32 characters');
@@ -99,6 +123,130 @@ for(const name of ['POWERCHAIN_PRESALE_MINT','POWERCHAIN_PRESALE_VAULT_TOKEN_ACC
 
 
 
+
+
+const binaryFlag=(name,{fallback="0"}={})=>{
+  const raw=(env[name]??fallback).trim();
+  if(!["0","1"].includes(raw))errors.push(`${name} must be 0 or 1`);
+  return raw==="1";
+};
+
+const paymentFlags = {
+  solanaPay: binaryFlag("POWERCHAIN_SOLANA_PAY_ENABLED",{fallback:"1"}),
+  coinbaseOnramp: binaryFlag("POWERCHAIN_COINBASE_ONRAMP_ENABLED"),
+  stripe: binaryFlag("POWERCHAIN_STRIPE_ENABLED"),
+  usdc: binaryFlag("POWERCHAIN_USDC_PURCHASE_ENABLED"),
+  cctp: binaryFlag("POWERCHAIN_CCTP_ENABLED"),
+  sui: binaryFlag("POWERCHAIN_SUI_PURCHASE_ENABLED"),
+  zkCompression: binaryFlag("POWERCHAIN_ZK_COMPRESSION_ENABLED"),
+};
+
+for(const name of [
+  "NEXT_PUBLIC_SOLANA_PAY_ENABLED",
+  "NEXT_PUBLIC_COINBASE_ONRAMP_ENABLED",
+  "NEXT_PUBLIC_STRIPE_ENABLED",
+  "NEXT_PUBLIC_USDC_PURCHASE_ENABLED",
+  "NEXT_PUBLIC_CCTP_ENABLED",
+  "NEXT_PUBLIC_SUI_PURCHASE_ENABLED",
+  "NEXT_PUBLIC_ZK_COMPRESSION_ENABLED",
+]){
+  const raw=(env[name]??"").trim();
+  if(raw&&!["0","1","true","false"].includes(raw)){
+    errors.push(`${name} must be 0, 1, true or false when configured`);
+  }
+}
+
+
+const publicPaymentFlagPairs = [
+  ["NEXT_PUBLIC_SOLANA_PAY_ENABLED", paymentFlags.solanaPay],
+  ["NEXT_PUBLIC_COINBASE_ONRAMP_ENABLED", paymentFlags.coinbaseOnramp],
+  ["NEXT_PUBLIC_STRIPE_ENABLED", paymentFlags.stripe],
+  ["NEXT_PUBLIC_USDC_PURCHASE_ENABLED", paymentFlags.usdc],
+  ["NEXT_PUBLIC_CCTP_ENABLED", paymentFlags.cctp],
+  ["NEXT_PUBLIC_SUI_PURCHASE_ENABLED", paymentFlags.sui],
+  ["NEXT_PUBLIC_ZK_COMPRESSION_ENABLED", paymentFlags.zkCompression],
+];
+
+for(const [name,serverEnabled] of publicPaymentFlagPairs){
+  const raw=(env[name]??"").trim();
+  if(!raw)continue;
+  const publicEnabled=raw==="1"||raw==="true";
+  if(publicEnabled!==serverEnabled){
+    errors.push(`${name} must match the corresponding POWERCHAIN_* server feature flag`);
+  }
+}
+
+if(paymentFlags.coinbaseOnramp && env.CDP_ONRAMP_ENABLED!=="true"){
+  errors.push("POWERCHAIN_COINBASE_ONRAMP_ENABLED=1 requires CDP_ONRAMP_ENABLED=true");
+}
+
+if(paymentFlags.stripe){
+  const raw=(env.STRIPE_HOSTED_CHECKOUT_URL??"").trim();
+  if(!raw){
+    errors.push("STRIPE_HOSTED_CHECKOUT_URL is required when POWERCHAIN_STRIPE_ENABLED=1");
+  }else{
+    try{
+      const u=new URL(raw);
+      if(u.protocol!=="https:")errors.push("STRIPE_HOSTED_CHECKOUT_URL must use HTTPS");
+    }catch{
+      errors.push("STRIPE_HOSTED_CHECKOUT_URL must be a valid absolute URL");
+    }
+  }
+}
+
+if(paymentFlags.zkCompression){
+  const raw=(env.ZK_COMPRESSION_RPC_URL??"").trim();
+  if(!raw){
+    errors.push("ZK_COMPRESSION_RPC_URL is required when POWERCHAIN_ZK_COMPRESSION_ENABLED=1");
+  }else{
+    try{
+      const u=new URL(raw);
+      if(u.protocol!=="https:")errors.push("ZK_COMPRESSION_RPC_URL must use HTTPS in production");
+    }catch{
+      errors.push("ZK_COMPRESSION_RPC_URL must be a valid absolute URL");
+    }
+  }
+}
+
+if(paymentFlags.cctp){
+  const environment=(env.CCTP_ENVIRONMENT??"mainnet").trim();
+  if(!["mainnet","testnet"].includes(environment)){
+    errors.push("CCTP_ENVIRONMENT must be mainnet or testnet");
+  }
+}
+
+const PYTH_SOLANA_PROGRAM_SETS = {
+  current: {
+    wormholeReceiver: "HDwcJBJXjL9FpJ7UBsYBtaDjsBUhuLCUYoz3zr8SWWaQ",
+    receiver: "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
+    priceFeed: "pythWSnswVUd12oZpeFP8e9CVaEqJg25g1Vtc2biRsT",
+  },
+  upgraded: {
+    wormholeReceiver: "HDw2E7P8X1SkCyjvoGsfBGAVUutKcj874bXjHrpVYrVL",
+    receiver: "rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp",
+    priceFeed: "pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou",
+  },
+};
+
+const pythGeneration=(env.PYTH_CORE_GENERATION??"upgraded").trim();
+if(!["current","upgraded"].includes(pythGeneration)){
+  errors.push("PYTH_CORE_GENERATION must be current or upgraded");
+}else{
+  const expected=PYTH_SOLANA_PROGRAM_SETS[pythGeneration];
+  for(const [name,key] of [
+    ["PYTH_SOLANA_WORMHOLE_RECEIVER_PROGRAM_ID","wormholeReceiver"],
+    ["PYTH_SOLANA_RECEIVER_PROGRAM_ID","receiver"],
+    ["PYTH_SOLANA_PRICE_FEED_PROGRAM_ID","priceFeed"],
+  ]){
+    const value=(env[name]??"").trim();
+    if(value&&!sol.test(value)){
+      errors.push(`${name} must be a valid Solana address`);
+    }
+    if(value&&value!==expected[key]){
+      errors.push(`${name} does not match PYTH_CORE_GENERATION=${pythGeneration}`);
+    }
+  }
+}
 
 if((env.POWERCHAIN_RUNTIME_PERSISTENCE??"").trim()!=="database"){
   errors.push("POWERCHAIN_RUNTIME_PERSISTENCE must be database in production");

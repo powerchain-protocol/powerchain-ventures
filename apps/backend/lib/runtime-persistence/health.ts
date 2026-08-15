@@ -23,22 +23,8 @@ export async function checkRuntimePersistenceHealth():
     null;
 
   try {
-    const result =
-      await persistence.rateLimit.consume(
-        {
-          bucket:
-            "__health__",
-          identityHash:
-            "health",
-          limit: 1000,
-          windowSeconds: 60,
-          now: new Date(),
-        },
-      );
-
-    rateLimitReady =
-      typeof result.allowed ===
-      "boolean";
+    await persistence.rateLimit.health();
+    rateLimitReady = true;
   } catch (error) {
     errors.push(
       `rate-limit persistence: ${
@@ -141,16 +127,7 @@ export async function checkRuntimePersistenceHealth():
   }
 
   try {
-    await persistence.audit.append(
-      {
-        event:
-          "runtime_persistence_health",
-        code:
-          "HEALTH_CHECK",
-        occurredAt:
-          new Date(),
-      },
-    );
+    await persistence.audit.health();
     auditReady = true;
   } catch (error) {
     errors.push(

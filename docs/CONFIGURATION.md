@@ -23,8 +23,6 @@ The following values intentionally have no production fallback in source control
 - `SOLANA_RPC_URL`
 - `SOLANA_RPC_FALLBACK_URL`
 - `NEXT_PUBLIC_SOLANA_RPC_URL`
-- `POWERCHAIN_TRANSACTION_BUILDER_URL`
-- `POWERCHAIN_TRANSACTION_BUILDER_API_KEY`
 - `POWERCHAIN_QUOTE_AUTHORITY_KEYPAIR_JSON`
 - `PYTH_API_KEY` + `PYTH_SOL_USD_FEED_ID` (when Pyth is the SOL/USD source)
 - `BIRDEYE_API_KEY` or `COINMARKETCAP_API_KEY` as configured market fallbacks
@@ -44,4 +42,14 @@ The configurable presale allocation remains `5,000,000,000` tokens by default. F
 
 Purchase construction is local to `apps/backend/lib/purchase-transaction-builder.ts`; it does not call `POWERCHAIN_TRANSACTION_BUILDER_URL`.
 
-The remote transaction-builder configuration remains for claim/creator operation classes that still use the generic builder boundary. Purchase readiness additionally requires a server-side quote-authority keypair and at least one configured SOL/USD source.
+Purchase, claim, pause/resume, update-timing and lifecycle actions are constructed locally. Creator-controlled vault activation is also local.
+
+An external transaction builder is optional and only required when delegated vault-authority activation is explicitly enabled:
+
+```env
+POWERCHAIN_DELEGATED_VAULT_ACTIVATION_ENABLED=1
+POWERCHAIN_TRANSACTION_BUILDER_URL=https://...
+POWERCHAIN_TRANSACTION_BUILDER_API_KEY=...
+```
+
+Purchase readiness requires the server-side quote-authority keypair and at least one configured SOL/USD source.

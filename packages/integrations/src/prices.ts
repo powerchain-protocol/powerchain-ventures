@@ -147,12 +147,21 @@ export async function fetchAggregatedPrice(
             config.pyth.feedId,
           apiKey:
             config.pyth.apiKey,
-          baseUrl:
-            config.pyth.baseUrl,
+          ...(config.pyth.baseUrl
+            ? {
+                baseUrl:
+                  config.pyth.baseUrl,
+              }
+            : {}),
         },
         {
-          timeoutMs:
-            options.timeoutMs,
+          ...(options.timeoutMs !==
+          undefined
+            ? {
+                timeoutMs:
+                  options.timeoutMs,
+              }
+            : {}),
         },
       ),
     });
@@ -174,14 +183,27 @@ export async function fetchAggregatedPrice(
             config.birdeye.apiKey,
           address:
             config.birdeye.address,
-          chain:
-            config.birdeye.chain,
-          baseUrl:
-            config.birdeye.baseUrl,
+          ...(config.birdeye.chain
+            ? {
+                chain:
+                  config.birdeye.chain,
+              }
+            : {}),
+          ...(config.birdeye.baseUrl
+            ? {
+                baseUrl:
+                  config.birdeye.baseUrl,
+              }
+            : {}),
         },
         {
-          timeoutMs:
-            options.timeoutMs,
+          ...(options.timeoutMs !==
+          undefined
+            ? {
+                timeoutMs:
+                  options.timeoutMs,
+              }
+            : {}),
         },
       ) as Promise<PriceObservation>,
     });
@@ -200,19 +222,36 @@ export async function fetchAggregatedPrice(
         coinMarketCapPrice(
           {
             asset,
-            symbol:
-              config.coinmarketcap
-                ?.symbol,
             apiKey:
               config.coinmarketcap
-                ?.apiKey,
-            baseUrl:
-              config.coinmarketcap
-                ?.baseUrl,
+                .apiKey,
+            ...(config.coinmarketcap
+              .symbol
+              ? {
+                  symbol:
+                    config
+                      .coinmarketcap
+                      .symbol,
+                }
+              : {}),
+            ...(config.coinmarketcap
+              .baseUrl
+              ? {
+                  baseUrl:
+                    config
+                      .coinmarketcap
+                      .baseUrl,
+                }
+              : {}),
           },
           {
-            timeoutMs:
-              options.timeoutMs,
+            ...(options.timeoutMs !==
+            undefined
+              ? {
+                  timeoutMs:
+                    options.timeoutMs,
+                }
+              : {}),
           },
         ),
     });

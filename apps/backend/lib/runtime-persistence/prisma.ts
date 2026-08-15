@@ -11,6 +11,12 @@ type PrismaLike = {
 
 export function createPrismaRateLimitPersistence(prisma: PrismaLike): RateLimitPersistence {
   return {
+    async health() {
+      await prisma.$queryRawUnsafe(
+        "SELECT 1 FROM powerchain_runtime_rate_limits LIMIT 1",
+      );
+    },
+
     async consume(input) {
       const rows = await prisma.$queryRawUnsafe<Array<{
         count: number;
@@ -98,6 +104,12 @@ export function createPrismaIdempotencyPersistence(prisma: PrismaLike): Idempote
 
 export function createPrismaAuditPersistence(prisma: PrismaLike): AuditPersistence {
   return {
+    async health() {
+      await prisma.$queryRawUnsafe(
+        "SELECT 1 FROM powerchain_runtime_audit LIMIT 1",
+      );
+    },
+
     async append(input) {
       await prisma.$executeRawUnsafe(
         `

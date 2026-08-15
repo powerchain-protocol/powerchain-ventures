@@ -38,10 +38,11 @@ Local port: `3002`.
 
 ## Payment methods
 
-- **SOL wallet purchase:** enabled. Backend builds the actual Launchpad program transaction.
-- **Coinbase Onramp:** optional wallet-funding rail. Funding SOL is not itself a token purchase.
-- **Card:** disabled until a provider-owned PCI/tokenization flow is configured.
-- **USDC/SUI sale payment:** not presented as active settlement until dedicated purchase verification adapters exist.
+- **SOL → PWRC:** enabled and the default purchase method.
+- **Solana Pay QR:** enabled by default as an alternate presentation of the exact prepared SOL → PWRC transaction.
+- **Coinbase Onramp:** disabled by default; optional wallet-funding rail. Funding SOL is not itself a token purchase.
+- **Stripe hosted funding:** disabled by default; no raw PAN/CVV/expiry fields exist in Checkout.
+- **USDC / CCTP / SUI / ZK compressed rails:** disabled by default and fail closed until their dedicated settlement adapters are intentionally enabled.
 
 ## Market data
 
@@ -73,3 +74,10 @@ pnpm --filter @powerchain/launchpad-checkout build
 Checkout persists the non-secret signed-purchase recovery tuple and polls the durable settlement returned by the backend. The success screen is shown only when the settlement reaches `reconciled` after Solana finalization.
 
 Recovery retries confirmation/finality reads only; it never automatically resubmits the financial transaction.
+
+
+## Solana Pay QR
+
+After the buyer prepares the exact purchase, Checkout can render a Solana Pay transaction-request QR. A wallet fetching that QR receives the same prepared serialized transaction, and the backend searches for a matching signed message without resubmitting anything.
+
+The QR path converges back into the normal PowerChain purchase confirmation and `reconciled` settlement boundary.

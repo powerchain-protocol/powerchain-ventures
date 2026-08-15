@@ -12,6 +12,8 @@ const read = rel =>
 
 for (const rel of [
   "apps/backend/lib/settlement/reconciliation-worker.ts",
+  "apps/backend/app/api/v1/runtime/settlements/[settlementId]/action/route.ts",
+  "apps/backend/lib/runtime-persistence/settlement-registration.ts",
   "apps/backend/lib/settlement/rpc-adapter.ts",
   "apps/backend/app/api/v1/runtime/settlements/reconcile/route.ts",
   "apps/backend/app/api/v1/settlements/[settlementId]/route.ts",
@@ -31,6 +33,8 @@ for (const rel of [
 const worker =
   read(
     "apps/backend/lib/settlement/reconciliation-worker.ts",
+  "apps/backend/app/api/v1/runtime/settlements/[settlementId]/action/route.ts",
+  "apps/backend/lib/runtime-persistence/settlement-registration.ts",
   );
 
 for (const guard of [

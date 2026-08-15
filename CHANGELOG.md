@@ -30,6 +30,19 @@
 
 ## 1.0.0
 
+### Monorepo, program and local-builder hardening
+
+- Enforced app/package workspace boundaries and continued removal of any `payload/` application layer.
+- Added program/client/IDL parity validation and expanded the deployment-neutral program IDL.
+- Hardened Token-2022 vault/destination ownership and stored fee/token-program identities on-chain.
+- Added Rust invariant tests and overflow-checked optimized release profile.
+- Added atomic PostgreSQL settlement + outbox registration.
+- Added read-only runtime health probes and manual-review operator actions.
+- Migrated claims and creator program/lifecycle transaction preparation to local reviewed/simulated builders.
+- Added local creator-controlled sale activation; external builder configuration is now optional and scoped to delegated vault activation.
+- Rejected vesting configurations where the cliff exceeds the vesting duration.
+
+
 ### Durable runtime persistence and reconciled purchase completion
 
 - Added production-fail-closed runtime persistence mode and Prisma 7 PostgreSQL adapter bootstrap.

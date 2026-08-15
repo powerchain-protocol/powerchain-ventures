@@ -37,6 +37,21 @@ Responsibilities:
 - server-only third-party integrations
 - production readiness and health checks
 
+### `apps/checkout`
+
+Dedicated Next.js payment and purchase application.
+
+Responsibilities:
+
+- payment-method presentation
+- authoritative quote retrieval
+- exact transaction review
+- connected-wallet signature
+- pending-signature recovery
+- durable settlement polling through `reconciled`
+
+Checkout does not own price authority, signing secrets, transaction construction or settlement writes.
+
 ### `apps/mobile`
 
 Expo / React Native companion.
@@ -109,3 +124,18 @@ Production requires:
 - migrated runtime tables
 - valid Solana RPC
 - verified program/token identifiers where required
+
+
+## Workspace boundaries
+
+```text
+apps/*     product/runtime boundaries
+packages/* reusable contracts, UI, transport and protocol clients
+programs/* Solana on-chain source
+database/* ordered migrations and schema snapshot
+deploy/*   deployment images/config
+```
+
+An app may import shared packages, but it may not reach into another app with a relative source import. Packages may not import application internals. The boundary is enforced by `scripts/check-workspace-boundaries.mjs`.
+
+There is no `payload/` application layer.

@@ -1,7 +1,7 @@
 import type {BuilderPlan} from "../transaction-builder";
 import {configuredLaunchpadProgramId} from "./config";
 
-export type ExpectedProgramOperation={operation:"initialize-sale"|"purchase"|"claim"|"cancel"|"complete"|"pause"|"resume"|"update-timing";salePda:string;participantPda?:string;requiredSigners?:string[]};
+export type ExpectedProgramOperation={operation:"initialize-sale"|"adopt-vault-authority"|"purchase"|"claim"|"cancel"|"complete"|"pause"|"resume"|"update-timing";salePda:string;participantPda?:string;requiredSigners?:string[]};
 
 export function assertBuilderUsesLaunchpadProgram(plan:BuilderPlan,expected:ExpectedProgramOperation){
  const programId=configuredLaunchpadProgramId();if(!programId)throw new Error("launchpad_program_not_configured");

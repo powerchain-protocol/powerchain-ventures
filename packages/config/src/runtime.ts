@@ -165,16 +165,47 @@ export function getServerRuntimeConfig(
   );
 
   const rpcUrls = resolveServerRpcUrls({
-    cluster: base.solanaCluster,
-    provider: rpcProvider,
-    heliusApiKey,
-    heliusRpcBaseUrl,
-    customPrimaryUrl,
-    customFallbackUrls,
-    legacyPrimaryUrl,
-    legacyFallbackUrl,
-    legacyFallbackUrls,
-    allowPublicFallback: !production,
+    cluster:
+      base.solanaCluster,
+    provider:
+      rpcProvider,
+    ...(heliusApiKey
+      ? {
+          heliusApiKey,
+        }
+      : {}),
+    ...(heliusRpcBaseUrl
+      ? {
+          heliusRpcBaseUrl,
+        }
+      : {}),
+    ...(customPrimaryUrl
+      ? {
+          customPrimaryUrl,
+        }
+      : {}),
+    ...(customFallbackUrls.length
+      ? {
+          customFallbackUrls,
+        }
+      : {}),
+    ...(legacyPrimaryUrl
+      ? {
+          legacyPrimaryUrl,
+        }
+      : {}),
+    ...(legacyFallbackUrl
+      ? {
+          legacyFallbackUrl,
+        }
+      : {}),
+    ...(legacyFallbackUrls.length
+      ? {
+          legacyFallbackUrls,
+        }
+      : {}),
+    allowPublicFallback:
+      !production,
   });
 
   for (const rpc of rpcUrls) {

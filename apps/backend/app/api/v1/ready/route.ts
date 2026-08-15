@@ -203,19 +203,7 @@ export async function GET() {
         "database",
     settlementOutbox:
       outboxOperational,
-    transactionBuilder:
-      Boolean(
-        process.env
-          .POWERCHAIN_TRANSACTION_BUILDER_URL,
-      ),
-    transactionBuilderKey:
-      Boolean(
-        (
-          process.env
-            .POWERCHAIN_TRANSACTION_BUILDER_API_KEY ??
-          ""
-        ).length >= 20,
-      ),
+
     solUsdPriceSource:
       Boolean(
         providers.pythConfigured ||
@@ -318,6 +306,35 @@ export async function GET() {
 
       integrations:
         providers,
+
+      capabilities: {
+        localTransactionBuilders: {
+          purchase: true,
+          claim: true,
+          creatorLifecycle: true,
+          creatorProgramOperations: true,
+          creatorControlledSaleActivation: true,
+        },
+        delegatedVaultActivation: {
+          enabled:
+            process.env
+              .POWERCHAIN_DELEGATED_VAULT_ACTIVATION_ENABLED ===
+            "1",
+          configured:
+            Boolean(
+              process.env
+                .POWERCHAIN_TRANSACTION_BUILDER_URL
+                ?.trim(),
+            ) &&
+            Boolean(
+              (
+                process.env
+                  .POWERCHAIN_TRANSACTION_BUILDER_API_KEY ??
+                ""
+              ).length >= 20,
+            ),
+        },
+      },
 
       analytics: {
         provider:

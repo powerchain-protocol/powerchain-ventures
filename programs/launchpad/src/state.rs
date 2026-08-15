@@ -64,6 +64,10 @@ impl SaleState {
     pub fn creator(&self) -> Pubkey { Pubkey::new_from_array(self.creator) }
     pub fn mint(&self) -> Pubkey { Pubkey::new_from_array(self.mint) }
     pub fn vault(&self) -> Pubkey { Pubkey::new_from_array(self.vault) }
+    pub fn payment_receiver(&self) -> Pubkey { Pubkey::new_from_array(self.payment_receiver) }
+    pub fn fee_wallet(&self) -> Pubkey { Pubkey::new_from_array(self.fee_wallet) }
+    pub fn token_program(&self) -> Pubkey { Pubkey::new_from_array(self.token_program) }
+    pub fn quote_authority(&self) -> Pubkey { Pubkey::new_from_array(self.quote_authority) }
     pub fn status(&self) -> Result<SaleStatus, ProgramError> { SaleStatus::from_u8(self.status) }
     pub fn assert_version(&self) -> Result<(), ProgramError> {
         if self.version != PROGRAM_VERSION { return Err(LaunchpadError::InvalidSaleState.into()); }

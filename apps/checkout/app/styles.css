@@ -106,7 +106,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 .pc-badge-dark{background:#111827;color:#fff}
 
 .pc-tabs{display:flex;gap:8px}
-.pc-tabs-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pc-tabs-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .pc-tab{
   min-width:0;border:1px solid var(--pc-border);border-radius:14px;background:#fff;
   padding:13px 14px;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;
@@ -267,3 +267,56 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 }
 
 .onramp-return-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+
+
+.solana-pay-card{
+  max-width:720px;
+  margin:24px auto;
+  display:grid;
+  gap:18px;
+}
+.solana-pay-heading h2{
+  margin:5px 0 7px;
+  letter-spacing:-.03em;
+}
+.solana-pay-heading p{
+  margin:0;
+  color:var(--pc-muted);
+  line-height:1.55;
+  max-width:620px;
+}
+.solana-pay-qr{
+  width:min(100%,336px);
+  min-height:320px;
+  margin:0 auto;
+  padding:16px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--pc-border);
+  border-radius:18px;
+  background:#fff;
+}
+.solana-pay-qr canvas{
+  width:100%!important;
+  height:auto!important;
+  max-width:296px;
+}
+.solana-pay-url{
+  border:1px solid var(--pc-border);
+  border-radius:12px;
+  padding:11px 13px;
+  background:#f9fafb;
+}
+.solana-pay-url summary{
+  cursor:pointer;
+  font-size:12px;
+  font-weight:750;
+}
+.solana-pay-url code{
+  display:block;
+  margin-top:9px;
+  overflow-wrap:anywhere;
+  color:#475467;
+  font-size:10px;
+  line-height:1.45;
+}

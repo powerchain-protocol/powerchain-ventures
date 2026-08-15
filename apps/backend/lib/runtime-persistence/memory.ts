@@ -8,6 +8,7 @@ import type {
   MutationLeasePersistence,
   MutationLease,
   SettlementPersistence,
+  SettlementRegistrationPersistence,
   SettlementRecord,
   OutboxPersistence,
   OutboxEvent,
@@ -43,6 +44,8 @@ const outbox =
   new Map<string, MemoryOutbox>();
 
 export const memoryRateLimitPersistence: RateLimitPersistence = {
+  async health() {},
+
   async consume(input) {
     const key = `${input.bucket}:${input.identityHash}`;
     const existing = rates.get(key);
@@ -149,6 +152,8 @@ export const memoryMutationReceiptPersistence: MutationReceiptPersistence = {
 };
 
 export const memoryAuditPersistence: AuditPersistence = {
+  async health() {},
+
   async append(input) {
     console.info(JSON.stringify({
       event: input.event,
@@ -249,6 +254,127 @@ export const memorySettlementPersistence: SettlementPersistence = {
       updatedAt: input.updatedAt,
     });
     return true;
+  },
+};
+
+
+export const memorySettlementRegistrationPersistence:
+  SettlementRegistrationPersistence = {
+  async registerSubmitted(
+    input,
+  ) {
+    let existing =
+      Array.from(
+        settlements.values(),
+      ).find(
+        value =>
+          value.mutationId ===
+          input.settlement
+            .mutationId,
+      );
+
+    if (!existing) {
+      existing = {
+        ...input.settlement,
+        state: "created",
+        transactionSignature:
+          undefined,
+        submittedAt:
+          undefined,
+      };
+      settlements.set(
+        existing.settlementId,
+        existing,
+      );
+    }
+
+    if (
+      existing
+        .transactionSignature &&
+      existing
+        .transactionSignature !==
+        input.signature
+    ) {
+      throw new Error(
+        "Settlement is already bound to a different transaction signature",
+      );
+    }
+
+    if (
+      existing.state ===
+      "failed"
+    ) {
+      throw new Error(
+        "Failed settlement cannot be resubmitted automatically",
+      );
+    }
+
+    const now =
+      new Date()
+        .toISOString();
+
+    if (
+      existing.state ===
+        "created" ||
+      existing.state ===
+        "manual-review"
+    ) {
+      existing = {
+        ...existing,
+        state:
+          "submitted",
+        transactionSignature:
+          input.signature,
+        submittedAt:
+          existing.submittedAt ??
+          now,
+        errorCode:
+          undefined,
+        updatedAt: now,
+      };
+    } else if (
+      !existing
+        .transactionSignature
+    ) {
+      existing = {
+        ...existing,
+        transactionSignature:
+          input.signature,
+        updatedAt: now,
+      };
+    }
+
+    settlements.set(
+      existing.settlementId,
+      existing,
+    );
+
+    const existingEvent =
+      outbox.get(
+        input.event.eventId,
+      );
+
+    if (
+      !existingEvent ||
+      existingEvent.state ===
+        "failed"
+    ) {
+      outbox.set(
+        input.event.eventId,
+        {
+          ...input.event,
+          aggregateId:
+            existing.settlementId,
+          state: "pending",
+          ownerId: undefined,
+          leaseUntil: undefined,
+          lastError: undefined,
+          failedAt: undefined,
+        },
+      );
+    }
+
+    return existing;
   },
 };
 

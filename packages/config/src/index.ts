@@ -98,8 +98,33 @@ export * from "./runtime.js";
 
 export * from "./deployment.js";
 
-export * from "./rpc.js";
+export {
+  SOLANA_PUBLIC_RPC,
+  HELIUS_RPC_BASE,
+  HELIUS_API_BASE,
+  parseRpcProvider,
+  heliusRpcUrl,
+  parseCsvUrls,
+  dedupeRpcUrls,
+  resolveServerRpcUrls,
+  type SolanaRpcProvider,
+} from "./rpc.js";
 
 export * from "./endpoints.js";
 
 export * from "./assets.js";
+
+export {
+  SOLANA_SYSTEM_PROGRAM_ID,
+  SOLANA_SPL_TOKEN_PROGRAM_ID,
+  SOLANA_ASSOCIATED_TOKEN_PROGRAM_ID,
+  SOLANA_MEMO_PROGRAM_ID,
+  SOLANA_USDC_MAINNET_MINT,
+  PYTH_SOLANA_PROGRAMS,
+  pythSolanaPrograms,
+  CCTP_V2_SOLANA,
+  LIGHT_NULLIFIER_PROGRAM_ID,
+  type PythCoreGeneration,
+} from "./solana-programs.js";
+export * from "./payments.js";
+export * from "./checkout.js";

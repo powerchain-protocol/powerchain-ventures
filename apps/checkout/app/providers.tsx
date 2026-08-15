@@ -13,6 +13,9 @@ import {
 import {
   checkoutConfig,
 } from "../lib/config";
+import {
+  PaymentProvider,
+} from "../context/payment-context";
 
 const WALLET_CONNECTORS = [
   "phantom",
@@ -92,7 +95,9 @@ export function Providers({
       }
       mobile={mobile}
     >
-      {children}
+      <PaymentProvider>
+        {children}
+      </PaymentProvider>
     </AppProvider>
   );
 }

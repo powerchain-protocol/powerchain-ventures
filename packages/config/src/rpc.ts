@@ -83,9 +83,16 @@ export function resolveServerRpcUrls(input: {
 }): string[] {
   const helius = input.heliusApiKey?.trim()
     ? heliusRpcUrl({
-        cluster: input.cluster,
-        apiKey: input.heliusApiKey,
-        baseUrl: input.heliusRpcBaseUrl,
+        cluster:
+          input.cluster,
+        apiKey:
+          input.heliusApiKey,
+        ...(input.heliusRpcBaseUrl
+          ? {
+              baseUrl:
+                input.heliusRpcBaseUrl,
+            }
+          : {}),
       })
     : undefined;
 

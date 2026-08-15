@@ -29,7 +29,7 @@ export function decimalToScaledBigInt(
     throw new Error("invalid_decimal_value");
   }
 
-  const [whole, fraction = ""] = raw.split(".");
+  const [whole = "0", fraction = ""] = raw.split(".");
   const decimals = scale.toString().length - 1;
   const padded =
     fraction.slice(0, decimals).padEnd(decimals, "0");

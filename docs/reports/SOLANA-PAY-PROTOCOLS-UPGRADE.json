@@ -1,0 +1,161 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "releaseLabel": "RC.1",
+  "upgrade": "solana-pay-token2022-protocols-fullstack",
+  "architecture": {
+    "apps": [
+      "apps/frontend",
+      "apps/backend",
+      "apps/checkout",
+      "apps/mobile"
+    ],
+    "payloadApplicationLayer": false,
+    "defaultPaymentMethod": "sol-pwrc",
+    "defaultPaymentDescription": "SOL -> PWRC through the PowerChain Launchpad program",
+    "checkoutOwner": "apps/checkout"
+  },
+  "solana": {
+    "web3Js": "1.98.4",
+    "splToken": "0.4.15",
+    "tokenPrograms": {
+      "splToken": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "token2022": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "associatedToken": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+    },
+    "launchpadProgramId": null,
+    "launchpadProgramIdentityPolicy": "deployment-owned; never fabricated",
+    "solanaPay": {
+      "enabledByDefault": true,
+      "transactionRequest": true,
+      "qr": true,
+      "buyerBound": true,
+      "exactPreparedMessageMatch": true,
+      "cors": true,
+      "checkoutProxyOptionsForwarding": true,
+      "pollingSubmitsTransaction": false
+    },
+    "settlement": {
+      "genericSignatureStatusEndpoint": "/api/v1/solana/settlement",
+      "durablePurchaseCompletion": "reconciled",
+      "automaticFinancialResubmission": false
+    }
+  },
+  "payments": {
+    "alwaysEnabled": [
+      "sol-pwrc"
+    ],
+    "enabledPresentationByDefault": [
+      "solana-pay"
+    ],
+    "disabledByDefault": [
+      "coinbase-onramp",
+      "stripe",
+      "usdc",
+      "cctp-v2",
+      "sui",
+      "zk-compression"
+    ],
+    "stripe": {
+      "providerHostedOnly": true,
+      "rawPanCvvExpiryCollected": false,
+      "settlementRole": "funding"
+    },
+    "coinbaseOnramp": {
+      "settlementRole": "funding",
+      "requiresPowerChainAndCdpFeatureFlags": true
+    }
+  },
+  "protocols": {
+    "pythCore": {
+      "upgradeDate": "2026-08-18T00:00:00Z",
+      "defaultGeneration": "upgraded",
+      "current": {
+        "wormholeReceiver": "HDwcJBJXjL9FpJ7UBsYBtaDjsBUhuLCUYoz3zr8SWWaQ",
+        "receiver": "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
+        "priceFeed": "pythWSnswVUd12oZpeFP8e9CVaEqJg25g1Vtc2biRsT"
+      },
+      "upgraded": {
+        "wormholeReceiver": "HDw2E7P8X1SkCyjvoGsfBGAVUutKcj874bXjHrpVYrVL",
+        "receiver": "rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp",
+        "priceFeed": "pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou"
+      },
+      "productionGenerationMismatchFailsPreflight": true
+    },
+    "cctpV2": {
+      "enabledByDefault": false,
+      "solanaDomain": 5,
+      "messageTransmitter": "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
+      "tokenMessengerMinter": "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe",
+      "irisMessageStatusEndpoint": "/api/v1/protocols/cctp/messages"
+    },
+    "zkCompression": {
+      "enabledByDefault": false,
+      "nullifierProgram": "NFLx5WGPrTHHvdRNsidcrNcLxRruMC92E4yv7zhZBoT",
+      "proofRpcRequiredWhenEnabled": true
+    }
+  },
+  "organization": {
+    "checkoutConfig": [
+      "apps/checkout/config/payments.ts",
+      "apps/checkout/config/checkout.ts"
+    ],
+    "checkoutCommon": "apps/checkout/common/index.ts",
+    "checkoutContext": "apps/checkout/context/payment-context.tsx",
+    "checkoutConstants": "apps/checkout/constants/index.ts",
+    "checkoutPowerChainApi": "apps/checkout/lib/powerchain/api.ts",
+    "checkoutUtils": [
+      "apps/checkout/lib/utils/utils.ts",
+      "apps/checkout/utils/util.ts",
+      "apps/checkout/lib/helpers.ts",
+      "apps/checkout/lib/errors.ts"
+    ],
+    "checkoutTypes": [
+      "apps/checkout/types/data.ts",
+      "apps/checkout/types/charts.ts",
+      "apps/checkout/types/messages.ts"
+    ],
+    "checkoutUi": [
+      "apps/checkout/ui/loading.tsx",
+      "apps/checkout/ui/alarms.tsx",
+      "apps/checkout/pages/not-found.tsx"
+    ],
+    "backendDb": "apps/backend/lib/db.ts"
+  },
+  "api": [
+    "GET /api/v1/payments/config",
+    "OPTIONS|GET|POST /api/v1/payments/solana-pay/transaction",
+    "GET /api/v1/payments/solana-pay/status",
+    "GET /api/v1/solana/settlement",
+    "GET /api/v1/protocols",
+    "GET /api/v1/protocols/cctp/messages"
+  ],
+  "validation": {
+    "sourceGates": "PASS",
+    "repositoryTests": {
+      "total": 204,
+      "passed": 202,
+      "failed": 0,
+      "skipped": 2
+    },
+    "routeInventoryCount": 128,
+    "typescriptSyntaxFiles": 576,
+    "typescriptSyntaxErrors": 0,
+    "semanticTypechecks": {
+      "packages/config": "PASS",
+      "packages/integrations": "PASS",
+      "packages/utils": "PASS",
+      "packages/domain": "PASS",
+      "packages/solana": "BLOCKED_BY_UNINSTALLED_DEPENDENCIES"
+    },
+    "jsonErrors": 0,
+    "nodeSyntaxErrors": 0,
+    "dependencyBackedNode24BuildExecuted": false,
+    "cargoBuildExecuted": false,
+    "pnpmAvailableInArtifactRuntime": false,
+    "cargoAvailableInArtifactRuntime": false,
+    "lockfileRegenerated": false,
+    "dependencyDoctor": "ACTION REQUIRED",
+    "dependencyDoctorAction": "Run pnpm install --no-frozen-lockfile under Node 24 to regenerate Better Auth, Web3 Icons, Mysten, @solana/spl-token 0.4.15, qrcode 1.5.4 and @types/qrcode 1.5.6 lockfile/workspace links; then run typecheck/test/build."
+  }
+}

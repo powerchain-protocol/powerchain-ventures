@@ -243,7 +243,7 @@ export class SolanaWebSocketClient {
   #resubscribe(): void {
     this.#serverToLogical.clear();
     for (const subscription of this.#subscriptions.values()) {
-      subscription.serverId = undefined;
+      delete subscription.serverId;
       this.#sendSubscription(subscription.logicalId);
     }
   }

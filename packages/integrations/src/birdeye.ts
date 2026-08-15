@@ -80,10 +80,21 @@ export async function birdeyePrice(input: {
   const result =
     await birdeyePriceRaw(
       {
-        apiKey: input.apiKey,
+        apiKey:
+          input.apiKey,
         address,
-        chain: input.chain,
-        baseUrl: input.baseUrl,
+        ...(input.chain
+          ? {
+              chain:
+                input.chain,
+            }
+          : {}),
+        ...(input.baseUrl
+          ? {
+              baseUrl:
+                input.baseUrl,
+            }
+          : {}),
       },
       options,
     );

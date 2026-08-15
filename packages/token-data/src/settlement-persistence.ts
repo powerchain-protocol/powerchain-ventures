@@ -49,3 +49,12 @@ export interface OutboxPersistence {
   ): Promise<number>;
   stats(now: Date): Promise<OutboxStats>;
 }
+
+
+export interface SettlementRegistrationPersistence {
+  registerSubmitted(input: {
+    settlement: SettlementRecord;
+    event: OutboxEvent;
+    signature: string;
+  }): Promise<SettlementRecord>;
+}

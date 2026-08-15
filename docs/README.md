@@ -32,6 +32,9 @@ This directory is the canonical documentation index for PowerChain Launchpad™ 
 ## Product surfaces
 
 - [Wallet and checkout](WALLET-CHECKOUT.md)
+- [Solana and payment protocols](PROTOCOLS.md)
+- [Solana Pay](SOLANA-PAY.md)
+- [Payments](PAYMENTS.md)
 - [Authentication and onboarding](AUTH-ONBOARDING.md)
 - [Integrations](INTEGRATIONS.md)
 - [Programs](PROGRAMS.md)

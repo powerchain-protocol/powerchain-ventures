@@ -158,7 +158,10 @@ impl Processor {
         require_signer(current_authority)?;
         require_token_program(token_program)?;
         let state = load_sale(program_id, sale)?;
-        if state.vault() != *vault.key { return Err(LaunchpadError::InvalidAccount.into()); }
+        if state.vault() != *vault.key || state.token_program() != *token_program.key {
+            return Err(LaunchpadError::InvalidAccount.into());
+        }
+        require_token_account_owner(vault, token_program, &state.mint(), current_authority.key)?;
         let (expected, _) = Pubkey::find_program_address(&[VAULT_AUTHORITY_SEED, sale.key.as_ref()], program_id);
         if expected != *vault_authority.key { return Err(LaunchpadError::InvalidPda.into()); }
         let ix = set_authority(
@@ -198,12 +201,28 @@ impl Processor {
 
         let mut sale_state = load_sale(program_id, sale)?;
         require_active_sale(&sale_state)?;
-        if Pubkey::new_from_array(sale_state.quote_authority) != *quote_authority.key { return Err(LaunchpadError::InvalidAuthority.into()); }
-        if sale_state.vault() != *vault.key || sale_state.mint() != *mint.key || Pubkey::new_from_array(sale_state.payment_receiver) != *payment_receiver.key {
+        if sale_state.quote_authority() != *quote_authority.key {
+            return Err(LaunchpadError::InvalidAuthority.into());
+        }
+        if sale_state.vault() != *vault.key
+            || sale_state.mint() != *mint.key
+            || sale_state.payment_receiver() != *payment_receiver.key
+            || sale_state.fee_wallet() != *fee_wallet.key
+            || sale_state.token_program() != *token_program.key
+        {
             return Err(LaunchpadError::InvalidAccount.into());
+        }
+        if !sale_state.delivery_on_claim {
+            require_token_account_owner(
+                buyer_token_account,
+                token_program,
+                mint.key,
+                buyer.key,
+            )?;
         }
         let (expected_vault_authority, vault_bump) = Pubkey::find_program_address(&[VAULT_AUTHORITY_SEED, sale.key.as_ref()], program_id);
         if expected_vault_authority != *vault_authority.key || vault_bump != sale_state.vault_authority_bump { return Err(LaunchpadError::InvalidPda.into()); }
+        require_token_account_owner(vault, token_program, mint.key, vault_authority.key)?;
         if args.token_amount_base_units == 0 || args.payment_lamports == 0 { return Err(LaunchpadError::InvalidInstruction.into()); }
         let expected_fee = ceil_bps(args.payment_lamports, SERVICE_FEE_BPS)?;
         if expected_fee != args.service_fee_lamports { return Err(LaunchpadError::InvalidServiceFee.into()); }
@@ -278,7 +297,23 @@ impl Processor {
         if Pubkey::new_from_array(participant_state.wallet) != *wallet.key || Pubkey::new_from_array(participant_state.sale) != *sale.key {
             return Err(LaunchpadError::InvalidAccount.into());
         }
-        if sale_state.vault() != *vault.key || sale_state.mint() != *mint.key { return Err(LaunchpadError::InvalidAccount.into()); }
+        if sale_state.vault() != *vault.key
+            || sale_state.mint() != *mint.key
+            || sale_state.token_program() != *token_program.key
+        {
+            return Err(LaunchpadError::InvalidAccount.into());
+        }
+        let (expected_vault_authority, vault_bump) = Pubkey::find_program_address(
+            &[VAULT_AUTHORITY_SEED, sale.key.as_ref()],
+            program_id,
+        );
+        if expected_vault_authority != *vault_authority.key
+            || vault_bump != sale_state.vault_authority_bump
+        {
+            return Err(LaunchpadError::InvalidPda.into());
+        }
+        require_token_account_owner(vault, token_program, mint.key, vault_authority.key)?;
+        require_token_account_owner(destination, token_program, mint.key, wallet.key)?;
         let now = Clock::get()?.unix_timestamp;
         let vested = vested_amount(&sale_state, participant_state.purchased_base_units, now)?;
         let available = vested.saturating_sub(participant_state.claimed_base_units);
@@ -342,7 +377,23 @@ fn require_token_mint_owner(mint: &AccountInfo, token_program: &AccountInfo) -> 
 fn require_token_account_mint(account: &AccountInfo, token_program: &AccountInfo, mint: &Pubkey) -> ProgramResult {
     if account.owner != token_program.key { return Err(LaunchpadError::InvalidTokenProgram.into()); }
     let data = account.try_borrow_data()?;
-    if data.len() < 32 || &data[..32] != mint.as_ref() { return Err(LaunchpadError::InvalidAccount.into()); }
+    if data.len() < 64 || &data[..32] != mint.as_ref() {
+        return Err(LaunchpadError::InvalidAccount.into());
+    }
+    Ok(())
+}
+
+fn require_token_account_owner(
+    account: &AccountInfo,
+    token_program: &AccountInfo,
+    mint: &Pubkey,
+    owner: &Pubkey,
+) -> ProgramResult {
+    require_token_account_mint(account, token_program, mint)?;
+    let data = account.try_borrow_data()?;
+    if &data[32..64] != owner.as_ref() {
+        return Err(LaunchpadError::InvalidAuthority.into());
+    }
     Ok(())
 }
 
@@ -456,4 +507,69 @@ fn vested_amount(state: &SaleState, total: u64, now: i64) -> Result<u64, Program
     let duration = state.vesting_ends_at.saturating_sub(state.claim_starts_at) as u128;
     let vested = (total as u128).checked_mul(elapsed).ok_or(LaunchpadError::ArithmeticOverflow)? / duration;
     u64::try_from(vested).map_err(|_| LaunchpadError::ArithmeticOverflow.into())
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fee_rounds_up_to_canonical_bps() {
+        assert_eq!(ceil_bps(1, SERVICE_FEE_BPS).unwrap(), 1);
+        assert_eq!(ceil_bps(40, SERVICE_FEE_BPS).unwrap(), 1);
+        assert_eq!(ceil_bps(41, SERVICE_FEE_BPS).unwrap(), 2);
+        assert_eq!(ceil_bps(10_000, SERVICE_FEE_BPS).unwrap(), 250);
+    }
+
+    #[test]
+    fn timing_requires_claim_after_sale_end() {
+        assert!(validate_timing_values(
+            10,
+            20,
+            20,
+            20,
+            20,
+            false,
+        ).is_ok());
+
+        assert!(validate_timing_values(
+            10,
+            20,
+            19,
+            20,
+            20,
+            false,
+        ).is_err());
+    }
+
+    #[test]
+    fn vesting_requires_cliff_and_end_order() {
+        assert!(validate_timing_values(
+            10,
+            20,
+            20,
+            25,
+            30,
+            true,
+        ).is_ok());
+
+        assert!(validate_timing_values(
+            10,
+            20,
+            20,
+            19,
+            30,
+            true,
+        ).is_err());
+
+        assert!(validate_timing_values(
+            10,
+            20,
+            20,
+            30,
+            29,
+            true,
+        ).is_err());
+    }
 }

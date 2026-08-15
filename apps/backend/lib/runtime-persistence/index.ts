@@ -5,6 +5,7 @@ import type {
   MutationReceiptPersistence,
   MutationLeasePersistence,
   SettlementPersistence,
+  SettlementRegistrationPersistence,
   OutboxPersistence,
   RateLimitPersistence,
 } from "@powerchain/token-data";
@@ -15,6 +16,7 @@ import {
   memoryMutationReceiptPersistence,
   memoryMutationLeasePersistence,
   memorySettlementPersistence,
+  memorySettlementRegistrationPersistence,
   memoryOutboxPersistence,
   memoryRateLimitPersistence,
 } from "./memory";
@@ -26,6 +28,7 @@ export type RuntimePersistence = {
   mutationReceipts: MutationReceiptPersistence;
   mutationLeases: MutationLeasePersistence;
   settlements: SettlementPersistence;
+  settlementRegistration: SettlementRegistrationPersistence;
   outbox: OutboxPersistence;
   audit: AuditPersistence;
   mode: "memory" | "database";
@@ -38,6 +41,7 @@ let current: RuntimePersistence = {
   mutationReceipts: memoryMutationReceiptPersistence,
   mutationLeases: memoryMutationLeasePersistence,
   settlements: memorySettlementPersistence,
+  settlementRegistration: memorySettlementRegistrationPersistence,
   outbox: memoryOutboxPersistence,
   audit: memoryAuditPersistence,
   mode: "memory",

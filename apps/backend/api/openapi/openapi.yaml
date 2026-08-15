@@ -252,6 +252,176 @@ paths:
         '503':
           description: Reconciliation or runtime persistence unavailable
 
+
+  /runtime/settlements/{settlementId}/action:
+    post:
+      tags: [Runtime, Settlement]
+      summary: Resolve a manual-review settlement without resubmitting a financial transaction
+      security:
+        - ReconciliationSecret: []
+      parameters:
+        - in: path
+          name: settlementId
+          required: true
+          schema:
+            type: string
+            pattern: '^set_[a-f0-9]{32}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action, reason]
+              properties:
+                action:
+                  type: string
+                  enum: [retry-observation, fail]
+                reason:
+                  type: string
+                  minLength: 1
+                  maxLength: 240
+      responses:
+        '200':
+          description: Operator action accepted
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Settlement not found
+        '409':
+          description: Settlement is not in manual-review
+        '500':
+          description: Operator action failed
+
+
+  /payments/config:
+    get:
+      tags: [Checkout, Payments]
+      summary: Get browser-safe payment rail and protocol feature status
+      responses:
+        '200':
+          description: Payment configuration
+
+  /payments/solana-pay/transaction:
+    options:
+      tags: [Payments, Solana]
+      summary: Solana Pay transaction-request CORS preflight
+      responses:
+        '204':
+          description: CORS preflight accepted
+    get:
+      tags: [Payments, Solana]
+      summary: Get Solana Pay merchant metadata for a prepared purchase
+      parameters:
+        - in: query
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Solana Pay label and icon
+        '404':
+          description: Prepared purchase unavailable
+    post:
+      tags: [Payments, Solana, Checkout]
+      summary: Return the exact prepared SOL to PWRC transaction to a matching Solana Pay wallet
+      parameters:
+        - in: query
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account]
+              properties:
+                account:
+                  type: string
+                  description: Solana buyer public key
+      responses:
+        '200':
+          description: Base64 serialized transaction request
+        '400':
+          description: Invalid request
+        '409':
+          description: Wallet mismatch, expiry or review conflict
+
+  /payments/solana-pay/status:
+    get:
+      tags: [Payments, Solana, Settlement]
+      summary: Find a signed transaction that exactly matches the prepared Solana Pay purchase
+      parameters:
+        - in: query
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Matching signature status or not-found state
+        '409':
+          description: Prepared review unavailable
+
+  /protocols:
+    get:
+      tags: [Platform, Solana, Payments]
+      summary: Get browser-safe Solana program, Pyth, CCTP and optional protocol inventory
+      responses:
+        '200':
+          description: Protocol and program inventory
+
+
+  /solana/settlement:
+    get:
+      tags: [Solana, Settlement]
+      summary: Read Solana signature settlement/finality state
+      parameters:
+        - in: query
+          name: signature
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Solana signature status
+        '400':
+          description: Invalid signature
+        '503':
+          description: Solana RPC unavailable
+
+  /protocols/cctp/messages:
+    get:
+      tags: [Payments, Protocols]
+      summary: Read Circle CCTP V2 message/attestation status when the integration is enabled
+      parameters:
+        - in: query
+          name: sourceDomain
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: transactionHash
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: CCTP V2 message status
+        '400':
+          description: Invalid source domain or transaction hash
+        '502':
+          description: Circle Iris unavailable
+        '503':
+          description: CCTP integration disabled
+
 components:
   securitySchemes:
     ReconciliationSecret:

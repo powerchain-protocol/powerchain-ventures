@@ -51,3 +51,21 @@ Additive optional fields are compatible.
 The canonical API contract is stored under the shared token-data package and mirrored/surfaced through the repository OpenAPI assets.
 
 Run the API contract validator before release.
+
+
+## Payments and protocol APIs
+
+```text
+GET     /api/v1/payments/config
+OPTIONS /api/v1/payments/solana-pay/transaction
+GET     /api/v1/payments/solana-pay/transaction?reviewId=...
+POST    /api/v1/payments/solana-pay/transaction?reviewId=...
+GET     /api/v1/payments/solana-pay/status?reviewId=...
+GET     /api/v1/solana/settlement?signature=...
+GET     /api/v1/protocols
+GET     /api/v1/protocols/cctp/messages?sourceDomain=...&transactionHash=...
+```
+
+The Solana Pay transaction request returns an already-prepared buyer-bound transaction. It does not create a second quote or bypass PowerChain settlement verification.
+
+CCTP and ZK protocol metadata are capability-gated; their presence in the protocol inventory is not equivalent to an active purchase adapter.

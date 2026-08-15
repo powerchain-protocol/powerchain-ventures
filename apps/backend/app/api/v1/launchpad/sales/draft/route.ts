@@ -5,6 +5,7 @@ import {isSolanaAddress} from "../../../../../../lib/policy";
 import {json,error,readJson} from "../../../../../../lib/http";
 import {databaseConfigured,insert,patch} from "../../../../../../lib/supabase-rest";
 import {buildTransaction,unavailablePlan} from "../../../../../../lib/transaction-builder";
+import {buildLocalSaleActivationTransaction} from "../../../../../../lib/local-program-transaction-builder";
 import {reviewPlanHash} from "../../../../../../lib/review-integrity";
 import {solanaRpc} from "../../../../../../lib/solana-rpc";
 import {deriveSaleProgramBinding} from "../../../../../../lib/program/operations";
@@ -40,7 +41,7 @@ export async function POST(req:Request){
   const starts=Date.parse(String(b.startsAt)),ends=Date.parse(String(b.endsAt)),claims=Date.parse(String(b.claimStartsAt));if(![starts,ends,claims].every(Number.isFinite)||!(starts<ends&&ends<=claims))return error("BAD_REQUEST","Invalid sale timing");if(ends-starts>180*24*60*60*1000)return error("BAD_REQUEST","Sale duration cannot exceed 180 days");
   const mode=String(b.eligibility);if(!MODES.has(mode))return error("BAD_REQUEST","Invalid eligibility mode");const wallets=[...new Set((Array.isArray(b.wallets)?b.wallets:[]).filter((w):w is string=>typeof w==="string"))];if(mode!=="public"&&wallets.length===0)return error("BAD_REQUEST","Restricted sale requires wallet entries");if(wallets.length>100_000)return error("BAD_REQUEST","Eligibility list exceeds 100,000 wallets");if(wallets.some(w=>!isSolanaAddress(w)))return error("BAD_REQUEST","Eligibility list contains an invalid wallet");
   if(!databaseConfigured())return error("CONFIGURATION_ERROR","Supabase is not configured; sale drafts are not persisted fail-open",503);
-  const vest=(b.vesting??{}) as Record<string,unknown>;const vestingEnabled=Boolean(vest.enabled),cliff=Number(vest.cliffDays??0),duration=Number(vest.durationDays??0);if(!Number.isInteger(cliff)||!Number.isInteger(duration)||cliff<0||duration<0||cliff>3650||duration>3650||vestingEnabled&&duration===0)return error("BAD_REQUEST","Invalid vesting configuration");
+  const vest=(b.vesting??{}) as Record<string,unknown>;const vestingEnabled=Boolean(vest.enabled),cliff=Number(vest.cliffDays??0),duration=Number(vest.durationDays??0);if(!Number.isInteger(cliff)||!Number.isInteger(duration)||cliff<0||duration<0||cliff>3650||duration>3650||vestingEnabled&&(duration===0||cliff>duration))return error("BAD_REQUEST","Invalid vesting configuration");
   const network=await verifyNetworkIdentity();
   if(network.cluster!=="mainnet-beta"&&process.env.NODE_ENV==="production")return error("CONFIGURATION_ERROR","Production sale creation requires Solana mainnet-beta",503);
   await validateMintVault(String(b.mint),String(b.sourceVaultTokenAccount),String(b.sourceVaultAuthority),decimals,allocation);
@@ -54,7 +55,19 @@ export async function POST(req:Request){
   const binding=deriveSaleProgramBinding({saleId:String(sale.id),creatorWallet:String(b.creatorWallet),mint:String(b.mint)});
   await patch("launchpad_sales",`id=eq.${encodeURIComponent(String(sale.id))}`,{sale_pda:binding.salePda,vault_authority_pda:binding.vaultAuthorityPda,program_state_version:binding.stateVersion,onchain_status:"pending-initialization"});
   if(mode!=="public")await insert("launchpad_wallets",wallets.map(wallet=>({sale_id:sale.id,wallet,kind:mode})));
-  let plan;try{plan=await buildTransaction("sale-activation",{saleId:sale.id,creatorWallet:b.creatorWallet,mint:b.mint,symbol,decimals,allocationBaseUnits:allocation,priceUsdMicros:price,minPurchaseUsdMicros:min,maxPurchaseUsdMicros:max,startsAt:new Date(starts).toISOString(),endsAt:new Date(ends).toISOString(),claimStartsAt:new Date(claims).toISOString(),vestingEnabled,vestingCliffDays:cliff,vestingDurationDays:duration,eligibility:mode,sourceVaultTokenAccount:b.sourceVaultTokenAccount,sourceVaultAuthority:b.sourceVaultAuthority,paymentReceiverWallet:paymentReceiver,quoteAuthorityWallet:quoteAuthorityWallet||undefined,powerchainFeeWallet:POWERCHAIN_FEE_WALLET_ADDRESS,launchpadProgramId:launchpadProgramId||undefined,salePda:binding.salePda,vaultAuthorityPda:binding.vaultAuthorityPda,deliveryMode});if(plan.feePayer!==b.creatorWallet)throw new Error("builder_fee_payer_mismatch");assertBuilderUsesLaunchpadProgram(plan,{operation:"initialize-sale",salePda:binding.salePda})}catch{plan=unavailablePlan("sale-activation",String(b.creatorWallet))}
+  const startsAt=new Date(starts).toISOString(),endsAt=new Date(ends).toISOString(),claimStartsAt=new Date(claims).toISOString();
+  const vestingCliffAt=new Date(claims+(vestingEnabled?cliff:0)*24*60*60*1000).toISOString();
+  const vestingEndsAt=new Date(claims+(vestingEnabled?duration:0)*24*60*60*1000).toISOString();
+  let plan;
+  try{
+    if(String(b.sourceVaultAuthority)===String(b.creatorWallet)&&launchpadProgramId&&quoteAuthorityWallet){
+      plan=await buildLocalSaleActivationTransaction({programId:launchpadProgramId,saleId:String(sale.id),creatorWallet:String(b.creatorWallet),mint:String(b.mint),sourceVaultTokenAccount:String(b.sourceVaultTokenAccount),sourceVaultAuthority:String(b.sourceVaultAuthority),paymentReceiverWallet:paymentReceiver,decimals,eligibility:mode as "public"|"allowlist"|"trusted",vestingEnabled,deliveryMode,quoteAuthorityWallet,startsAt,endsAt,claimStartsAt,vestingCliffAt,vestingEndsAt,allocationBaseUnits:allocation,priceUsdMicros:price,minPurchaseUsdMicros:min,maxPurchaseUsdMicros:max});
+    }else{
+      plan=await buildTransaction("sale-activation",{saleId:sale.id,creatorWallet:b.creatorWallet,mint:b.mint,symbol,decimals,allocationBaseUnits:allocation,priceUsdMicros:price,minPurchaseUsdMicros:min,maxPurchaseUsdMicros:max,startsAt,endsAt,claimStartsAt,vestingEnabled,vestingCliffDays:cliff,vestingDurationDays:duration,vestingCliffAt,vestingEndsAt,eligibility:mode,sourceVaultTokenAccount:b.sourceVaultTokenAccount,sourceVaultAuthority:b.sourceVaultAuthority,paymentReceiverWallet:paymentReceiver,quoteAuthorityWallet:quoteAuthorityWallet||undefined,powerchainFeeWallet:POWERCHAIN_FEE_WALLET_ADDRESS,launchpadProgramId:launchpadProgramId||undefined,salePda:binding.salePda,vaultAuthorityPda:binding.vaultAuthorityPda,deliveryMode});
+    }
+    if(plan.feePayer!==b.creatorWallet)throw new Error("builder_fee_payer_mismatch");
+    assertBuilderUsesLaunchpadProgram(plan,{operation:"initialize-sale",salePda:binding.salePda});
+  }catch{plan=unavailablePlan("sale-activation",String(b.creatorWallet))}
   const reviewId=crypto.randomUUID();plan.id=reviewId;const planHash=reviewPlanHash(plan);await insert("launchpad_transaction_reviews",{id:reviewId,wallet:b.creatorWallet,kind:"sale-activation",sale_id:sale.id,plan_hash:planHash,plan,expires_at:plan.expiresAt??null,status:"prepared",metadata:{mint:b.mint,allocationBaseUnits:allocation,sourceVaultTokenAccount:b.sourceVaultTokenAccount,sourceVaultAuthority:b.sourceVaultAuthority,paymentReceiverWallet:paymentReceiver,quoteAuthorityWallet:quoteAuthorityWallet||undefined,powerchainFeeWallet:POWERCHAIN_FEE_WALLET_ADDRESS,launchpadProgramId:launchpadProgramId||undefined,salePda:binding.salePda,vaultAuthorityPda:binding.vaultAuthorityPda,deliveryMode}});
   return json({sale:{id:String(sale.id),status:"draft",name,mint:b.mint,deliveryMode,cluster:network.cluster,genesisHash:network.genesisHash,salePda:binding.salePda,vaultAuthorityPda:binding.vaultAuthorityPda},plan},{status:201});
  }catch(e){return error("BAD_REQUEST",e instanceof Error?e.message:"Unable to create sale draft")}

@@ -85,7 +85,7 @@
     "docs:check": "node scripts/check-documentation.mjs",
     "test:repo": "node --test tests/*.test.mjs",
     "test:contracts": "pnpm --filter @powerchain/token-data test",
-    "quality:source": "node scripts/check-monorepo-layout.mjs && node scripts/check-documentation.mjs && node scripts/check-branding.mjs && node scripts/check-workspace.mjs && node scripts/check-pnpm-policy.mjs && node scripts/check-vercel-config.mjs && node scripts/check-env-example.mjs && node scripts/check-app-env-files.mjs && node scripts/check-mobile-env-example.mjs && node scripts/check-mobile-native.mjs && node scripts/check-runtime-module-resolution.mjs && node scripts/check-frontend-architecture.mjs && node scripts/check-api-transport.mjs && node scripts/sync-openapi.mjs --check && node --test tests/*.test.mjs && node scripts/check-auth-wallet-upgrade.mjs && node scripts/check-runtime-persistence-source.mjs && node scripts/check-settlement-worker.mjs",
+    "quality:source": "node scripts/check-monorepo-layout.mjs && node scripts/check-documentation.mjs && node scripts/check-branding.mjs && node scripts/check-workspace.mjs && node scripts/check-pnpm-policy.mjs && node scripts/check-vercel-config.mjs && node scripts/check-env-example.mjs && node scripts/check-app-env-files.mjs && node scripts/check-mobile-env-example.mjs && node scripts/check-mobile-native.mjs && node scripts/check-runtime-module-resolution.mjs && node scripts/check-frontend-architecture.mjs && node scripts/check-api-transport.mjs && node scripts/sync-openapi.mjs --check && node --test tests/*.test.mjs && node scripts/check-auth-wallet-upgrade.mjs && node scripts/check-runtime-persistence-source.mjs && node scripts/check-settlement-worker.mjs && node scripts/check-workspace-boundaries.mjs && node scripts/check-program-parity.mjs && node scripts/check-local-transaction-builders.mjs && node scripts/check-payment-protocols.mjs",
     "test:repo:source": "node --test tests/*.test.mjs",
     "doctor:runtime-resolution": "node scripts/check-runtime-module-resolution.mjs",
     "env:rpc:check": "node scripts/check-rpc-environment.mjs",
@@ -107,7 +107,11 @@
     "types:checkout": "pnpm --filter @powerchain/launchpad-checkout typecheck",
     "doctor:layout": "node scripts/check-monorepo-layout.mjs",
     "runtime:persistence:health": "node scripts/check-runtime-persistence-source.mjs",
-    "doctor:settlement-worker": "node scripts/check-settlement-worker.mjs"
+    "doctor:settlement-worker": "node scripts/check-settlement-worker.mjs",
+    "doctor:workspace-boundaries": "node scripts/check-workspace-boundaries.mjs",
+    "doctor:program-parity": "node scripts/check-program-parity.mjs",
+    "doctor:local-builders": "node scripts/check-local-transaction-builders.mjs",
+    "doctor:payment-protocols": "node scripts/check-payment-protocols.mjs"
   },
   "devDependencies": {
     "next": "16.2.12",

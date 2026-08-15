@@ -373,6 +373,36 @@
   },
   {
     "app": "backend",
+    "path": "/api/v1/payments/config",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/payments/config/route.ts"
+  },
+  {
+    "app": "backend",
+    "path": "/api/v1/payments/solana-pay/status",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/payments/solana-pay/status/route.ts"
+  },
+  {
+    "app": "backend",
+    "path": "/api/v1/payments/solana-pay/transaction",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/payments/solana-pay/transaction/route.ts"
+  },
+  {
+    "app": "backend",
+    "path": "/api/v1/protocols",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/protocols/route.ts"
+  },
+  {
+    "app": "backend",
+    "path": "/api/v1/protocols/cctp/messages",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/protocols/cctp/messages/route.ts"
+  },
+  {
+    "app": "backend",
     "path": "/api/v1/public-data",
     "kind": "route.ts",
     "file": "apps/backend/app/api/v1/public-data/route.ts"
@@ -427,6 +457,18 @@
   },
   {
     "app": "backend",
+    "path": "/api/v1/runtime/settlements/[settlementId]/action",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/runtime/settlements/[settlementId]/action/route.ts"
+  },
+  {
+    "app": "backend",
+    "path": "/api/v1/runtime/settlements/reconcile",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/runtime/settlements/reconcile/route.ts"
+  },
+  {
+    "app": "backend",
     "path": "/api/v1/settlements/[settlementId]",
     "kind": "route.ts",
     "file": "apps/backend/app/api/v1/settlements/[settlementId]/route.ts"
@@ -436,6 +478,12 @@
     "path": "/api/v1/solana/rpc",
     "kind": "route.ts",
     "file": "apps/backend/app/api/v1/solana/rpc/route.ts"
+  },
+  {
+    "app": "backend",
+    "path": "/api/v1/solana/settlement",
+    "kind": "route.ts",
+    "file": "apps/backend/app/api/v1/solana/settlement/route.ts"
   },
   {
     "app": "backend",

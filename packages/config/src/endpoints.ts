@@ -48,6 +48,7 @@ export const API_ENDPOINTS = Object.freeze({
   solana: {
     rpc: `${API_V1_PREFIX}/solana/rpc`,
     websocketStatus: `${API_V1_PREFIX}/solana/ws/status`,
+    settlement: `${API_V1_PREFIX}/solana/settlement`,
   },
 
   account: {
@@ -56,6 +57,16 @@ export const API_ENDPOINTS = Object.freeze({
   },
 
   checkout: `${API_V1_PREFIX}/checkout`,
+
+  payments: {
+    config: `${API_V1_PREFIX}/payments/config`,
+    solanaPayTransaction: `${API_V1_PREFIX}/payments/solana-pay/transaction`,
+    solanaPayStatus: `${API_V1_PREFIX}/payments/solana-pay/status`,
+  },
+
+  protocols: `${API_V1_PREFIX}/protocols`,
+  cctpMessages: `${API_V1_PREFIX}/protocols/cctp/messages`,
+
 
   market: {
     prices: `${API_V1_PREFIX}/market/prices`,
@@ -72,6 +83,8 @@ export const API_ENDPOINTS = Object.freeze({
       `${API_V1_PREFIX}/settlements/${encodeURIComponent(settlementId)}`,
     reconcile: `${API_V1_PREFIX}/runtime/settlements/reconcile`,
     runtimePersistenceHealth: `${API_V1_PREFIX}/runtime/persistence/health`,
+    settlementAction: (settlementId: string) =>
+      `${API_V1_PREFIX}/runtime/settlements/${encodeURIComponent(settlementId)}/action`,
   },
 
   contact: `${API_V1_PREFIX}/contact`,

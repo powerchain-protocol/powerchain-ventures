@@ -57,3 +57,16 @@ cargo test --workspace
 ```
 
 SBF deployment/build commands depend on the installed Solana toolchain and deployment environment. Do not treat a native `cargo check` as proof of a deployed or executable SBF program.
+
+
+## Program/client parity
+
+`programs/launchpad/idl/powerchain-launchpad.json`, the Rust Borsh enum, `@powerchain/launchpad-program-client`, canonical fee constants and transaction-review labels are checked together by:
+
+```bash
+pnpm doctor:program-parity
+```
+
+The IDL keeps `programId: null` until a real deployment is verified.
+
+The optimized release profile enables overflow checks and single-unit LTO. Native Rust tests cover fee rounding and sale/vesting timing invariants.

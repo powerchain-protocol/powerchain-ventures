@@ -15,6 +15,12 @@ const backend = JSON.parse(
     "utf8",
   ),
 );
+const checkout = JSON.parse(
+  fs.readFileSync(
+    path.join(root, "apps/checkout/package.json"),
+    "utf8",
+  ),
+);
 
 const expected = {
   frontend: {
@@ -25,6 +31,10 @@ const expected = {
   },
   backend: {
     "better-auth": "1.6.25",
+  },
+  checkout: {
+    "qrcode": "1.5.4",
+    "@powerchain/solana": "workspace:*",
   },
 };
 
@@ -38,6 +48,16 @@ for (const [name, version] of Object.entries(expected.backend)) {
   if (backend.dependencies?.[name] !== version) {
     failures.push(`backend ${name} must be ${version}`);
   }
+}
+
+for (const [name, version] of Object.entries(expected.checkout)) {
+  if (checkout.dependencies?.[name] !== version) {
+    failures.push(`checkout ${name} must be ${version}`);
+  }
+}
+
+if (checkout.devDependencies?.["@types/qrcode"] !== "1.5.6") {
+  failures.push("checkout @types/qrcode must be 1.5.6");
 }
 
 const lock = fs.readFileSync(
@@ -56,6 +76,25 @@ for (const name of [
       `pnpm-lock.yaml has not been regenerated for ${name}; run pnpm install --no-frozen-lockfile`,
     );
   }
+}
+
+
+if (!/@solana\/spl-token':?\s*\n\s+specifier:\s+0\.4\.15/m.test(lock)) {
+  failures.push(
+    "pnpm-lock.yaml still pins @solana/spl-token before 0.4.15; run pnpm install --no-frozen-lockfile",
+  );
+}
+
+if (!/qrcode:\s*\n\s+specifier:\s+1\.5\.4/m.test(lock)) {
+  failures.push(
+    "pnpm-lock.yaml has not been regenerated for checkout qrcode 1.5.4; run pnpm install --no-frozen-lockfile",
+  );
+}
+
+if (!/'@types\/qrcode':\s*\n\s+specifier:\s+1\.5\.6/m.test(lock)) {
+  failures.push(
+    "pnpm-lock.yaml has not been regenerated for @types/qrcode 1.5.6; run pnpm install --no-frozen-lockfile",
+  );
 }
 
 console.log(JSON.stringify({

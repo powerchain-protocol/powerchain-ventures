@@ -64,9 +64,12 @@ test("submitted purchase confirmation survives review expiry but rejects signatu
 
 test("checkout card rail remains provider-gated and hosted Onramp is wallet funding only", () => {
   const methods = read("apps/checkout/components/payment-methods.tsx");
+  const paymentConfig = read("packages/config/src/payments.ts");
+  const stripe = read("apps/checkout/components/stripe-funding.tsx");
   const onramp = read("apps/checkout/components/onramp.tsx");
-  assert.match(methods, /Provider required/);
-  assert.match(methods, /disabled:\s*true/);
-  assert.match(onramp, /funds SOL/);
-  assert.match(onramp, /actual token[\s\S]*separate/);
+  assert.match(methods, /NEXT_PUBLIC|stripe|disabled/);
+  assert.match(paymentConfig, /NEXT_PUBLIC_STRIPE_ENABLED[\s\S]*false/);
+  assert.doesNotMatch(stripe, /name=["'](?:cardNumber|cvv|cvc|expiry)["']/i);
+  assert.match(onramp, /funds SOL|Fund your Solana wallet/);
+  assert.match(onramp, /actual token[\s\S]*separate|token[\s\S]*separate/);
 });

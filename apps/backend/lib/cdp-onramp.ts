@@ -10,8 +10,15 @@ const V1_HOST = "api.developer.coinbase.com";
 function env(name:string){return (process.env[name]??"").trim()}
 function flag(name:string){return /^(1|true|yes)$/i.test(env(name))}
 
-export function cdpOnrampConfigured(){return flag("CDP_ONRAMP_ENABLED") && Boolean(env("CDP_API_KEY_ID")&&env("CDP_API_KEY_SECRET"))}
-export function cdpOnrampStatus(){return {enabled:flag("CDP_ONRAMP_ENABLED"),configured:cdpOnrampConfigured(),provider:"coinbase-hosted",network:"solana",asset:"SOL",guestCheckoutSupported:false,headlessRecommendedForCardAndApplePay:true}}
+export function cdpOnrampEnabled(){
+  return flag("POWERCHAIN_COINBASE_ONRAMP_ENABLED")
+    && flag("CDP_ONRAMP_ENABLED");
+}
+export function cdpOnrampConfigured(){
+  return cdpOnrampEnabled()
+    && Boolean(env("CDP_API_KEY_ID")&&env("CDP_API_KEY_SECRET"));
+}
+export function cdpOnrampStatus(){return {enabled:cdpOnrampEnabled(),configured:cdpOnrampConfigured(),provider:"coinbase-hosted",network:"solana",asset:"SOL",guestCheckoutSupported:false,headlessRecommendedForCardAndApplePay:true}}
 
 async function jwt(method:"GET"|"POST",host:string,path:string){
  const apiKeyId=env("CDP_API_KEY_ID"),apiKeySecret=env("CDP_API_KEY_SECRET");

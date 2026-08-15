@@ -1,4 +1,6 @@
 export interface RateLimitPersistence {
+  health(): Promise<void>;
+
   consume(input: {
     bucket: string;
     identityHash: string;
@@ -30,6 +32,8 @@ export interface IdempotencyPersistence {
 }
 
 export interface AuditPersistence {
+  health(): Promise<void>;
+
   append(input: {
     event: string;
     requestId?: string;

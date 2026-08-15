@@ -20,13 +20,16 @@
     "@powerchain/utils": "workspace:*",
     "@powerchain/integrations": "workspace:*",
     "@powerchain/ui": "workspace:*",
-    "@web3icons/react": "4.1.19"
+    "@web3icons/react": "4.1.19",
+    "@powerchain/solana": "workspace:*",
+    "qrcode": "1.5.4"
   },
   "devDependencies": {
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "@types/qrcode": "1.5.6"
   },
   "engines": {
     "node": ">=24 <25",

@@ -51,7 +51,6 @@ import {
 } from "./wallet-button";
 import {
   PaymentMethods,
-  type PaymentMethod,
 } from "./payment-methods";
 import {
   Onramp,
@@ -62,11 +61,21 @@ import {
 import {
   AssetIcon,
 } from "./asset-icon";
+import {
+  SolanaPayQr,
+} from "./solana-pay-qr";
+import {
+  StripeFunding,
+} from "./stripe-funding";
+import {
+  useCheckoutPayment,
+} from "../context/payment-context";
 
 type Stage =
   | "loading"
   | "recovering"
   | "amount"
+  | "qr"
   | "review"
   | "submitting"
   | "success"
@@ -193,13 +202,13 @@ export function PurchaseFlow({
     useState<Stage>(
       "loading",
     );
-  const [
-    paymentMethod,
-    setPaymentMethod,
-  ] =
-    useState<PaymentMethod>(
-      "wallet",
-    );
+  const {
+    value:
+      paymentMethod,
+    setValue:
+      setPaymentMethod,
+  } =
+    useCheckoutPayment();
   const [amount, setAmount] =
     useState("");
   const [
@@ -578,7 +587,10 @@ export function PurchaseFlow({
         result,
       );
       setStage(
-        "review",
+        paymentMethod ===
+          "qr"
+          ? "qr"
+          : "review",
       );
     } catch (cause) {
       setError(
@@ -732,6 +744,77 @@ export function PurchaseFlow({
     );
   }
 
+  async function completeExternalSignature(
+    signature: string,
+  ) {
+    if (
+      !prepared ||
+      !address
+    ) {
+      throw new Error(
+        "Purchase state is incomplete",
+      );
+    }
+
+    setStage(
+      "submitting",
+    );
+    setError(null);
+
+    savePendingPurchase({
+      saleId,
+      wallet:
+        address,
+      reviewId:
+        prepared.plan.id,
+      signature,
+      savedAt:
+        new Date()
+          .toISOString(),
+    });
+
+    try {
+      const confirmed =
+        await confirmUntilSettled(
+          signature,
+        );
+
+      setReceipt({
+        saleId,
+        reviewId:
+          prepared.plan.id,
+        signature,
+        wallet:
+          address,
+        cluster:
+          prepared.plan.cluster,
+        settledAt:
+          confirmed.reconciledAt ??
+          new Date()
+            .toISOString(),
+        slot:
+          confirmed.slot,
+      });
+
+      clearPendingPurchase();
+      setStage(
+        "success",
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Purchase settlement failed",
+      );
+      setStage(
+        paymentMethod ===
+          "qr"
+          ? "qr"
+          : "review",
+      );
+    }
+  }
+
   async function sign() {
     if (
       !prepared?.plan
@@ -753,40 +836,8 @@ export function PurchaseFlow({
             .serializedTransactionBase64,
         );
 
-      savePendingPurchase({
-        saleId,
-        wallet: address,
-        reviewId:
-          prepared.plan.id,
+      await completeExternalSignature(
         signature,
-        savedAt:
-          new Date().toISOString(),
-      });
-
-      const confirmed =
-        await confirmUntilSettled(
-          signature,
-        );
-
-      setReceipt({
-        saleId,
-        reviewId:
-          prepared.plan.id,
-        signature,
-        wallet:
-          address,
-        cluster:
-          prepared.plan.cluster,
-        settledAt:
-          confirmed.reconciledAt ??
-          new Date().toISOString(),
-        slot:
-          confirmed.slot,
-      });
-
-      clearPendingPurchase();
-      setStage(
-        "success",
       );
     } catch (cause) {
       setError(
@@ -842,6 +893,43 @@ export function PurchaseFlow({
     return (
       <PurchaseSuccess
         receipt={receipt}
+      />
+    );
+  }
+
+  if (
+    stage === "qr"
+  ) {
+    if (!prepared) {
+      return (
+        <ErrorState
+          title="Prepared transaction missing"
+          description="Return to the sale and prepare the purchase again."
+        />
+      );
+    }
+
+    return (
+      <SolanaPayQr
+        reviewId={
+          prepared.plan.id
+        }
+        onSignature={
+          signature => {
+            void completeExternalSignature(
+              signature,
+            );
+          }
+        }
+        onBack={() => {
+          setStage(
+            "amount",
+          );
+          setPrepared(
+            null,
+          );
+          setError(null);
+        }}
       />
     );
   }
@@ -939,8 +1027,14 @@ export function PurchaseFlow({
         />
 
         {paymentMethod ===
-        "wallet" ? (
-          <TabPanel value="wallet">
+          "wallet" ||
+        paymentMethod ===
+          "qr" ? (
+          <TabPanel
+            value={
+              paymentMethod
+            }
+          >
             <Card className="purchase-form-card">
               <div className="purchase-token-row">
                 <AssetIcon
@@ -1027,8 +1121,10 @@ export function PurchaseFlow({
                       !address
                     }
                   >
-                    Prepare exact
-                    transaction
+                    {paymentMethod ===
+                    "qr"
+                      ? "Prepare Solana Pay QR"
+                      : "Prepare exact transaction"}
                   </Button>
                 </FormActions>
               </Form>
@@ -1044,6 +1140,13 @@ export function PurchaseFlow({
                 sale.id
               }
             />
+          </TabPanel>
+        ) : null}
+
+        {paymentMethod ===
+        "card" ? (
+          <TabPanel value="card">
+            <StripeFunding />
           </TabPanel>
         ) : null}
       </section>

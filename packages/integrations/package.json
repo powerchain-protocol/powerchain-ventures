@@ -45,6 +45,21 @@
       "types": "./dist/prices.d.ts",
       "import": "./dist/prices.js",
       "default": "./dist/prices.js"
+    },
+    "./cctp": {
+      "types": "./dist/cctp.d.ts",
+      "import": "./dist/cctp.js",
+      "default": "./dist/cctp.js"
+    },
+    "./zk-compression": {
+      "types": "./dist/zk-compression.d.ts",
+      "import": "./dist/zk-compression.js",
+      "default": "./dist/zk-compression.js"
+    },
+    "./protocols": {
+      "types": "./dist/protocols.d.ts",
+      "import": "./dist/protocols.js",
+      "default": "./dist/protocols.js"
     }
   },
   "types": "./dist/index.d.ts",

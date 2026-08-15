@@ -77,7 +77,7 @@ for(const guard of ['payment_amount_base_units','service_fee_payment_base_units'
 const paymentSettlement=fs.readFileSync(path.join(root,'apps/backend/lib/payment-settlement.ts'),'utf8');
 for(const guard of ['builder_service_fee_payment_mismatch','builder_exact_payment_recipient_missing','verifyConfirmedNativeSolPayment','payment_amount_mismatch','service_fee_amount_mismatch']) if(!paymentSettlement.includes(guard))errors.push(`payment settlement guard missing: ${guard}`);
 for(const route of ['purchase/prepare/route.ts','purchase/confirm/route.ts']){const f=path.join(root,'apps/backend/app/api/v1/launchpad',route);const c=fs.readFileSync(f,'utf8');if(!c.includes('paymentSettlement')&&!c.includes('paymentVerified'))errors.push(`payment settlement flow missing: ${route}`)}
-const readyRoute=fs.readFileSync(path.join(root,'apps/backend/app/api/v1/ready/route.ts'),'utf8');for(const guard of ['dedicatedRpc','rpcRedundancy','transactionBuilderKey'])if(!readyRoute.includes(guard))errors.push(`readiness production guard missing: ${guard}`);
+const readyRoute=fs.readFileSync(path.join(root,'apps/backend/app/api/v1/ready/route.ts'),'utf8');for(const guard of ['dedicatedRpc','rpcRedundancy','delegatedVaultActivation'])if(!readyRoute.includes(guard))errors.push(`readiness production guard missing: ${guard}`);
 
 const recoveryMigration=fs.readFileSync(path.join(root,'database/migrations/018_confirmation_recovery_state.sql'),'utf8');
 for(const guard of ['settlement_stage','confirmation_attempts','next_confirmation_check_at','launchpad_mark_confirmation_attempt','security definer']) if(!recoveryMigration.includes(guard))errors.push(`confirmation recovery guard missing: ${guard}`);

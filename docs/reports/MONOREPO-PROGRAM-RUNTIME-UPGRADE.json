@@ -1,0 +1,83 @@
+{
+  "product": "PowerChain Launchpad",
+  "version": "1.0.0",
+  "releaseLabel": "RC.1",
+  "upgrade": "monorepo-program-runtime-local-builder-hardening",
+  "architecture": {
+    "applications": [
+      "apps/frontend",
+      "apps/backend",
+      "apps/checkout",
+      "apps/mobile"
+    ],
+    "payloadApplicationLayer": false,
+    "workspaceBoundaryEnforced": true,
+    "sharedUi": "packages/ui",
+    "programClient": "packages/program-client",
+    "solanaProgram": "programs/launchpad"
+  },
+  "program": {
+    "programId": "unset-until-verified-deployment",
+    "serviceFeeBps": 250,
+    "canonicalFeeWallet": "FeeszhrKKEsvxr1kg8LDtPx6BLcEbYHiAThYaxajNhqy",
+    "token2022": true,
+    "hardenedInvariants": [
+      "stored fee-wallet identity",
+      "stored Token-2022 program identity",
+      "vault Token-2022 owner must equal derived vault-authority PDA",
+      "immediate-purchase destination must belong to buyer",
+      "claim destination must belong to participant wallet",
+      "claim vault-authority PDA/bump validation",
+      "creator authority must own vault before authority adoption"
+    ],
+    "idlExpanded": true,
+    "programClientIdlParityDoctor": true,
+    "releaseOverflowChecks": true,
+    "nativeInvariantTestsAdded": true
+  },
+  "transactionBuilders": {
+    "purchase": "local-reviewed-simulated",
+    "claim": "local-reviewed-simulated",
+    "pauseResume": "local-reviewed-simulated",
+    "updateTiming": "local-reviewed-simulated",
+    "cancelComplete": "local-reviewed-simulated",
+    "creatorControlledSaleActivation": "local-reviewed-simulated",
+    "delegatedVaultSaleActivation": "optional-external-capability",
+    "delegatedVaultFeatureFlag": "POWERCHAIN_DELEGATED_VAULT_ACTIVATION_ENABLED"
+  },
+  "runtimePersistence": {
+    "productionMode": "database",
+    "adapter": "Prisma 7 + @prisma/adapter-pg",
+    "atomicSettlementAndOutboxRegistration": true,
+    "readOnlyHealthChecks": true,
+    "outboxLeaseRecovery": true,
+    "manualReviewOperatorEndpoint": "/api/v1/runtime/settlements/{settlementId}/action",
+    "manualRetryResubmitsFinancialTransaction": false,
+    "checkoutCompletionState": "reconciled"
+  },
+  "validation": {
+    "sourceGates": "PASS",
+    "repositoryTests": {
+      "total": 193,
+      "passed": 191,
+      "failed": 0,
+      "skipped": 2
+    },
+    "typescriptSyntaxFiles": 540,
+    "typescriptSyntaxErrors": 0,
+    "jsonErrors": 0,
+    "nodeSyntaxErrors": 0,
+    "cargoAvailableInArtifactRuntime": false,
+    "dependencyBackedNode24BuildExecuted": false,
+    "lockfileRegenerated": false,
+    "dependencyDoctorPassed": false,
+    "dependencyDoctorAction": "Run pnpm install --no-frozen-lockfile under Node 24 to regenerate Better Auth, Web3 Icons and Mysten lockfile entries, then run typecheck/test/build."
+  },
+  "qualityGates": [
+    "pnpm doctor:workspace-boundaries",
+    "pnpm doctor:program-parity",
+    "pnpm doctor:local-builders",
+    "pnpm runtime:persistence:health",
+    "pnpm doctor:settlement-worker"
+  ]
+}

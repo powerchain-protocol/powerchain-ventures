@@ -1,40 +1,391 @@
 {
   "name": "powerchain_launchpad",
   "version": "1.0.0",
+  "format": "powerchain-borsh-v1",
   "programId": null,
-  "notes": "Program ID intentionally unset until real deployment. Instruction order mirrors Borsh enum tags 0-7.",
+  "notes": "Program ID intentionally unset until a verified deployment. Instruction tags and account order are consensus-sensitive and mirrored by @powerchain/launchpad-program-client.",
+  "constants": {
+    "programVersion": 1,
+    "serviceFeeBps": 250,
+    "bpsDenominator": 10000,
+    "canonicalFeeWallet": "FeeszhrKKEsvxr1kg8LDtPx6BLcEbYHiAThYaxajNhqy",
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+  },
   "instructions": [
     {
       "tag": 0,
-      "name": "initializeSale"
+      "name": "initializeSale",
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "writable": true
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "mint",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "sourceVaultTokenAccount",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "vaultAuthority",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "paymentReceiverWallet",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "feeWallet",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "token2022Program",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "systemProgram",
+          "signer": false,
+          "writable": false
+        }
+      ],
+      "args": [
+        {
+          "name": "saleSeed",
+          "type": "bytes32"
+        },
+        {
+          "name": "decimals",
+          "type": "u8"
+        },
+        {
+          "name": "eligibility",
+          "type": "u8"
+        },
+        {
+          "name": "vestingEnabled",
+          "type": "bool"
+        },
+        {
+          "name": "deliveryOnClaim",
+          "type": "bool"
+        },
+        {
+          "name": "quoteAuthority",
+          "type": "bytes32"
+        },
+        {
+          "name": "startsAt",
+          "type": "i64"
+        },
+        {
+          "name": "endsAt",
+          "type": "i64"
+        },
+        {
+          "name": "claimStartsAt",
+          "type": "i64"
+        },
+        {
+          "name": "vestingCliffAt",
+          "type": "i64"
+        },
+        {
+          "name": "vestingEndsAt",
+          "type": "i64"
+        },
+        {
+          "name": "allocationBaseUnits",
+          "type": "u64"
+        },
+        {
+          "name": "priceUsdMicros",
+          "type": "u64"
+        },
+        {
+          "name": "minPurchaseUsdMicros",
+          "type": "u64"
+        },
+        {
+          "name": "maxPurchaseUsdMicros",
+          "type": "u64"
+        }
+      ]
     },
     {
       "tag": 1,
-      "name": "updateTiming"
+      "name": "updateTiming",
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "startsAt",
+          "type": "i64"
+        },
+        {
+          "name": "endsAt",
+          "type": "i64"
+        },
+        {
+          "name": "claimStartsAt",
+          "type": "i64"
+        },
+        {
+          "name": "vestingCliffAt",
+          "type": "i64"
+        },
+        {
+          "name": "vestingEndsAt",
+          "type": "i64"
+        }
+      ]
     },
     {
       "tag": 2,
-      "name": "setPaused"
+      "name": "setPaused",
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
     },
     {
       "tag": 3,
-      "name": "purchase"
+      "name": "purchase",
+      "accounts": [
+        {
+          "name": "buyer",
+          "signer": true,
+          "writable": true
+        },
+        {
+          "name": "quoteAuthority",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "participant",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "sourceVaultTokenAccount",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "vaultAuthority",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "buyerTokenAccount",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "mint",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "paymentReceiverWallet",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "feeWallet",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "token2022Program",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "systemProgram",
+          "signer": false,
+          "writable": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenAmountBaseUnits",
+          "type": "u64"
+        },
+        {
+          "name": "paymentLamports",
+          "type": "u64"
+        },
+        {
+          "name": "serviceFeeLamports",
+          "type": "u64"
+        },
+        {
+          "name": "purchaseNonce",
+          "type": "u64"
+        }
+      ]
     },
     {
       "tag": 4,
-      "name": "claim"
+      "name": "claim",
+      "accounts": [
+        {
+          "name": "wallet",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "participant",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "sourceVaultTokenAccount",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "vaultAuthority",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "destinationTokenAccount",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "mint",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "token2022Program",
+          "signer": false,
+          "writable": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amountBaseUnits",
+          "type": "u64"
+        }
+      ]
     },
     {
       "tag": 5,
-      "name": "cancelSale"
+      "name": "cancelSale",
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": true
+        }
+      ],
+      "args": []
     },
     {
       "tag": 6,
-      "name": "completeSale"
+      "name": "completeSale",
+      "accounts": [
+        {
+          "name": "creator",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": true
+        }
+      ],
+      "args": []
     },
     {
       "tag": 7,
-      "name": "adoptVaultAuthority"
+      "name": "adoptVaultAuthority",
+      "accounts": [
+        {
+          "name": "currentVaultAuthority",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "name": "sale",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "sourceVaultTokenAccount",
+          "signer": false,
+          "writable": true
+        },
+        {
+          "name": "vaultAuthority",
+          "signer": false,
+          "writable": false
+        },
+        {
+          "name": "token2022Program",
+          "signer": false,
+          "writable": false
+        }
+      ],
+      "args": []
     }
   ],
   "pdaSeeds": {
@@ -54,11 +405,21 @@
       "wallet"
     ]
   },
+  "state": {
+    "sale": "SaleState",
+    "participant": "ParticipantState"
+  },
   "metadata": {
     "version": "1.0.0",
     "deliveryModes": [
       "immediate",
       "claim"
-    ]
+    ],
+    "eligibilityModes": [
+      "public",
+      "allowlist",
+      "trusted"
+    ],
+    "deploymentStatus": "configuration-ready"
   }
 }

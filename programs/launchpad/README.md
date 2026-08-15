@@ -20,6 +20,9 @@ The crate intentionally does not compile a fabricated deployment ID. Deploy the 
 - Canonical fee wallet is compiled as protocol policy.
 - Quote authority co-signs purchases.
 - Token-2022 mint/vault binding is validated on-chain.
+- Stored fee-wallet and Token-2022 program identities must match the passed accounts.
+- Vault token-account ownership must match the derived vault-authority PDA before purchase/claim.
+- Immediate purchase and claim destination token accounts must belong to the buyer/participant.
 - Purchase nonce is monotonic per participant.
 - Sale allocation cannot be exceeded.
 - Claims cannot exceed entitlement/vesting state.
@@ -49,3 +52,17 @@ The program is not called directly from browser-authored instructions. `apps/bac
 - immediate Token-2022 delivery occurred when the sale is configured for immediate delivery.
 
 A transaction signature alone is not treated as a completed purchase.
+
+
+## Local transaction builders
+
+The backend constructs and simulates program operations from the shared program client:
+
+- purchases — `purchase-transaction-builder.ts`
+- claims — `local-program-transaction-builder.ts`
+- pause/resume — `local-program-transaction-builder.ts`
+- timing updates — `local-program-transaction-builder.ts`
+- cancel/complete — `local-program-transaction-builder.ts`
+- creator-controlled vault sale activation — `local-program-transaction-builder.ts`
+
+Delegated vault activation remains an explicit optional multi-signer/external-builder capability rather than a hidden global requirement.

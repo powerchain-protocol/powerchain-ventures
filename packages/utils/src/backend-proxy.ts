@@ -37,12 +37,27 @@ function normalizeOrigin(
   return url.origin;
 }
 
+export type BackendProxyEnvironment = {
+  BACKEND_ORIGIN?: string;
+  BACKEND_FALLBACK_ORIGINS?: string;
+  NODE_ENV?: string;
+};
+
+const runtimeEnvironment =
+  (
+    globalThis as
+      typeof globalThis & {
+        process?: {
+          env?: BackendProxyEnvironment;
+        };
+      }
+  ).process?.env ??
+  {};
+
 export function backendOrigins(
-  env: {
-    BACKEND_ORIGIN?: string;
-    BACKEND_FALLBACK_ORIGINS?: string;
-    NODE_ENV?: string;
-  } = process.env,
+  env:
+    BackendProxyEnvironment =
+      runtimeEnvironment,
 ) {
   const primary =
     env.BACKEND_ORIGIN?.trim() ||
@@ -150,7 +165,9 @@ function canFailOver(
     request.method ===
       "GET" ||
     request.method ===
-      "HEAD"
+      "HEAD" ||
+    request.method ===
+      "OPTIONS"
   ) {
     return true;
   }
@@ -186,7 +203,9 @@ export async function forwardBackendRequest(
     request.method ===
       "GET" ||
     request.method ===
-      "HEAD"
+      "HEAD" ||
+    request.method ===
+      "OPTIONS"
       ? undefined
       : await request.arrayBuffer();
 

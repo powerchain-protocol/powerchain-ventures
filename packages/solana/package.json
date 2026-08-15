@@ -20,6 +20,21 @@
       "types": "./dist/websocket.d.ts",
       "import": "./dist/websocket.js",
       "default": "./dist/websocket.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.js",
+      "default": "./dist/tokens.js"
+    },
+    "./pay": {
+      "types": "./dist/pay.d.ts",
+      "import": "./dist/pay.js",
+      "default": "./dist/pay.js"
+    },
+    "./settlement": {
+      "types": "./dist/settlement.d.ts",
+      "import": "./dist/settlement.js",
+      "default": "./dist/settlement.js"
     }
   },
   "types": "./dist/index.d.ts",
@@ -27,5 +42,9 @@
   "engines": {
     "node": ">=24 <25",
     "pnpm": ">=11.21.0 <12"
+  },
+  "dependencies": {
+    "@solana/web3.js": "1.98.4",
+    "@solana/spl-token": "0.4.15"
   }
 }

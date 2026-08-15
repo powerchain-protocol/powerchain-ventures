@@ -51,7 +51,10 @@ export function CheckoutShell({
               id="solana"
               size={18}
             />
-            Mainnet-beta
+            {config.solanaCluster ===
+            "mainnet-beta"
+              ? "Mainnet-beta"
+              : "Devnet"}
           </span>
         </div>
       </header>

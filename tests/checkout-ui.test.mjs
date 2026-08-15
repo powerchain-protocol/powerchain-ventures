@@ -21,18 +21,13 @@ test("checkout uses PowerChain branding only", () => {
   assert.doesNotMatch(text, /PowerPay Checkout|Powered by PowerPay/i);
 });
 
-test("card payment is disabled without rendering raw card secrets", () => {
-  const methods = readFileSync(
-    "apps/checkout/components/payment-methods.tsx",
-    "utf8",
-  );
-  const flow = readFileSync(
-    "apps/checkout/components/purchase-flow.tsx",
-    "utf8",
-  );
-  assert.match(methods, /disabled:\s*true/);
-  assert.match(methods, /Provider required/);
-  assert.doesNotMatch(`${methods}\n${flow}`, /name=["'](?:card|cvv|expiry|pan)["']/i);
+test("card payment is feature-gated and never renders raw card inputs", () => {
+  const methods = readFileSync("apps/checkout/components/payment-methods.tsx", "utf8");
+  const config = readFileSync("packages/config/src/payments.ts", "utf8");
+  const stripe = readFileSync("apps/checkout/components/stripe-funding.tsx", "utf8");
+  assert.match(methods, /disabled:\s*!stripe\?\.enabled/);
+  assert.match(config, /NEXT_PUBLIC_STRIPE_ENABLED[\s\S]*false/);
+  assert.doesNotMatch(stripe, /name=["'](?:cardNumber|cvv|cvc|expiry)["']/i);
 });
 
 test("checkout exposes verified completion receipt and transaction explorer", () => {

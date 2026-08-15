@@ -102,3 +102,27 @@ GET /api/v1/settlements/{settlementId}
 ```
 
 Runtime persistence health includes settlement reachability and outbox backlog/failure/lease statistics.
+
+
+## Atomic registration
+
+Settlement submission and creation of the corresponding observation outbox event are one PostgreSQL transaction. A process crash cannot leave a submitted settlement without its observation event.
+
+A failed observation event may be revived only when an operator explicitly retries a `manual-review` settlement. Completed observation events are never reopened.
+
+## Manual-review operations
+
+Protected operator endpoint:
+
+```text
+POST /api/v1/runtime/settlements/{settlementId}/action
+```
+
+Supported actions:
+
+```json
+{"action":"retry-observation","reason":"RPC outage resolved"}
+{"action":"fail","reason":"Transaction is permanently invalid"}
+```
+
+Only `manual-review` settlements accept these actions. Retry re-observes the existing signature and does not sign or submit another transaction. Every operator action is written to the runtime audit log.

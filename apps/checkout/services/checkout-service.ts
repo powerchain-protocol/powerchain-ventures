@@ -187,6 +187,88 @@ export const checkoutService = {
     );
   },
 
+
+  solanaPayStatus(
+    reviewId: string,
+  ) {
+    return getJson<{
+      found: boolean;
+      signature?: string;
+      slot?: number;
+      confirmationStatus?: string;
+    }>(
+      `/api/v1/payments/solana-pay/status?reviewId=${encodeURIComponent(
+        reviewId,
+      )}`,
+    );
+  },
+
+
+  paymentConfig() {
+    return getJson<{
+      defaultMethod:
+        "sol-pwrc";
+      methods: {
+        solPwrc: {
+          enabled: boolean;
+          settlement: string;
+        };
+        solanaPay: {
+          enabled: boolean;
+          settlement: string;
+        };
+        coinbaseOnramp: {
+          enabled: boolean;
+          settlement: string;
+        };
+        stripe: {
+          enabled: boolean;
+          configured: boolean;
+          settlement: string;
+          hostedUrl?: string;
+        };
+        usdc: {
+          enabled: boolean;
+          settlement: string;
+        };
+        cctp: {
+          enabled: boolean;
+          settlement: string;
+        };
+        sui: {
+          enabled: boolean;
+          settlement: string;
+        };
+        zkCompression: {
+          enabled: boolean;
+          settlement: string;
+        };
+      };
+    }>(
+      "/api/v1/payments/config",
+    );
+  },
+
+  protocols() {
+    return getJson<{
+      solana: {
+        cluster:
+          | "devnet"
+          | "mainnet-beta";
+        programs:
+          Record<
+            string,
+            string
+          >;
+      };
+      pyth: unknown;
+      cctp: unknown;
+      protocols: unknown;
+    }>(
+      "/api/v1/protocols",
+    );
+  },
+
   confirm(
     input: {
       saleId: string;
