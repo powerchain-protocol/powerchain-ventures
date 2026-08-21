@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.powerchain.ventures/transaction-simulation.schema.json",
+  "title": "PowerChain Transaction Simulation Request",
+  "type": "object",
+  "properties": {
+    "transactionBase64": { "type": "string", "minLength": 1, "maxLength": 750000 }
+  },
+  "additionalProperties": false
+}

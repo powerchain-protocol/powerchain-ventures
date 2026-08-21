@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorBoundary({reset}:{error:Error&{digest?:string};reset:()=>void}){return <main className="market-wrap market-not-found"><div><span className="eyebrow">PowerChain Marketplace</span><h1>Marketplace unavailable.</h1><p>We could not render this page. No wallet action or transaction was performed.</p><button className="button button-primary" onClick={reset}>Try again</button></div></main>}

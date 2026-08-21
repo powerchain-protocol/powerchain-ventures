@@ -1,26 +1,8 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-
-# Keep local PowerChain packages linked deterministically in pnpm 11.
-linkWorkspacePackages: true
-preferWorkspacePackages: true
-sharedWorkspaceLockfile: true
-
-# pnpm 11 supply-chain policy. These packages are reviewed runtime/build
-# dependencies used by the Solana/WebSocket/Next.js stack.
-strictDepBuilds: true
+  - apps/*
+  - packages/*
 
 allowBuilds:
-  "@prisma/engines": true
-  bigint-buffer: true
   bufferutil: true
-  prisma: true
-  sharp: true
+  esbuild: true
   utf-8-validate: true
-# Accepted legacy transitive UUID copies from @solana/web3.js 1.x.
-# The application may still use modern uuid directly; this only mutes these exact
-# upstream deprecation warnings and does not override dependency resolution.
-allowedDeprecatedVersions:
-  uuid: "7.0.3 || 8.3.2"
-

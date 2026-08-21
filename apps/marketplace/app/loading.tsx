@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="market-wrap" style={{padding:"80px 0"}}><div className="ui-skeleton" style={{height:34,width:220}}/><div className="market-grid" style={{marginTop:28}}>{[0,1,2,3,4,5].map(i=><div key={i} className="ui-skeleton" style={{height:360}}/>)}</div></main>}

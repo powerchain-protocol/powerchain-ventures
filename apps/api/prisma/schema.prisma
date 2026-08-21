@@ -1,0 +1,371 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum LaunchStatus {
+  DRAFT
+  REVIEW
+  SCHEDULED
+  LIVE
+  PAUSED
+  ENDED
+  CLAIMABLE
+  COMPLETED
+  CANCELLED
+}
+
+enum PhaseStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  PAUSED
+  ENDED
+}
+
+enum ParticipationStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REFUNDED
+}
+
+enum ClaimStatus {
+  LOCKED
+  AVAILABLE
+  SUBMITTED
+  CLAIMED
+  FAILED
+}
+
+enum AuthorityType {
+  TOKEN_MINT
+  TOKEN_FREEZE
+  SALE_CONFIGURATION
+  TREASURY
+  VESTING
+  PROGRAM_UPGRADE
+}
+
+enum EligibilityStatus {
+  PENDING
+  ELIGIBLE
+  INELIGIBLE
+  REVIEW
+}
+
+enum VestingStatus {
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum SettlementStatus {
+  PENDING
+  SUBMITTED
+  CONFIRMED
+  RECONCILED
+  FAILED
+}
+
+enum ChainTransactionStatus {
+  PREPARED
+  SIMULATED
+  AWAITING_SIGNATURE
+  SUBMITTED
+  CONFIRMED
+  FAILED
+  REJECTED
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  displayName   String?
+  wallets       Wallet[]
+  launches      Launch[]
+  sessions      Session[]
+  accounts      Account[]
+  preference    UserPreference?
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+}
+
+
+model UserPreference {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @unique @db.Uuid
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailAlerts        Boolean  @default(true)
+  launchAlerts       Boolean  @default(true)
+  transactionAlerts  Boolean  @default(true)
+  marketAlerts       Boolean  @default(false)
+  timezone           String   @default("UTC")
+  createdAt          DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  expiresAt DateTime @db.Timestamptz(3)
+  token     String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  ipAddress String?
+  userAgent String?
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Account {
+  id                    String    @id @default(uuid()) @db.Uuid
+  accountId             String
+  providerId            String
+  userId                String    @db.Uuid
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(3)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([identifier])
+}
+
+model Wallet {
+  id        String   @id @default(uuid()) @db.Uuid
+  address   String   @unique
+  chain     String   @default("SOLANA")
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([userId])
+}
+
+model Launch {
+  id               String       @id @default(uuid()) @db.Uuid
+  slug             String       @unique
+  name             String
+  description      String?
+  category         String?
+  status           LaunchStatus @default(DRAFT)
+  tokenMint        String?
+  treasuryWallet   String?
+  targetAmount     Decimal?     @db.Decimal(30, 9)
+  settlementAsset  String       @default("USDC")
+  startsAt         DateTime? @db.Timestamptz(3)
+  endsAt           DateTime? @db.Timestamptz(3)
+  creatorId        String?      @db.Uuid
+  creator          User?        @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  phases           SalePhase[]
+  participations   Participation[]
+  claims           Claim[]
+  authorities      LaunchAuthority[]
+  eligibility      EligibilityRecord[]
+  vestingSchedules VestingSchedule[]
+  settlements      Settlement[]
+  transactions     ChainTransaction[]
+  auditEvents      AuditEvent[]
+  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([creatorId])
+  @@index([status])
+  @@index([category])
+}
+
+model SalePhase {
+  id             String      @id @default(uuid()) @db.Uuid
+  launchId       String      @db.Uuid
+  launch         Launch      @relation(fields: [launchId], references: [id], onDelete: Cascade)
+  name           String
+  status         PhaseStatus @default(DRAFT)
+  price          Decimal     @db.Decimal(30, 12)
+  allocation     Decimal     @db.Decimal(30, 9)
+  settlementAsset String     @default("USDC")
+  minContribution Decimal?   @db.Decimal(30, 9)
+  maxContribution Decimal?   @db.Decimal(30, 9)
+  startsAt       DateTime? @db.Timestamptz(3)
+  endsAt         DateTime? @db.Timestamptz(3)
+  participations Participation[]
+  createdAt      DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([launchId, status])
+  @@index([startsAt, endsAt])
+}
+
+model Participation {
+  id              String              @id @default(uuid()) @db.Uuid
+  launchId        String              @db.Uuid
+  launch          Launch              @relation(fields: [launchId], references: [id], onDelete: Cascade)
+  phaseId         String?             @db.Uuid
+  phase           SalePhase?          @relation(fields: [phaseId], references: [id], onDelete: SetNull)
+  walletAddress   String
+  contribution    Decimal             @db.Decimal(30, 9)
+  allocation      Decimal             @db.Decimal(30, 9)
+  settlementAsset String              @default("USDC")
+  txSignature     String?             @unique
+  status          ParticipationStatus @default(PENDING)
+  createdAt       DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime            @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([launchId, walletAddress])
+  @@index([phaseId])
+  @@index([status, createdAt])
+}
+
+model Claim {
+  id            String      @id @default(uuid()) @db.Uuid
+  launchId      String      @db.Uuid
+  launch        Launch      @relation(fields: [launchId], references: [id], onDelete: Cascade)
+  walletAddress String
+  amount        Decimal     @db.Decimal(30, 9)
+  unlockAt      DateTime @db.Timestamptz(3)
+  txSignature   String?     @unique
+  status        ClaimStatus @default(LOCKED)
+  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([launchId, walletAddress, unlockAt])
+  @@index([status, unlockAt])
+}
+
+model LaunchAuthority {
+  id          String        @id @default(uuid()) @db.Uuid
+  launchId    String        @db.Uuid
+  launch      Launch        @relation(fields: [launchId], references: [id], onDelete: Cascade)
+  type        AuthorityType
+  address     String?
+  controlType String
+  revoked     Boolean       @default(false)
+  metadata    Json?
+  verifiedAt  DateTime? @db.Timestamptz(3)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([launchId, type])
+  @@index([address])
+}
+
+model EligibilityRecord {
+  id            String            @id @default(uuid()) @db.Uuid
+  launchId      String            @db.Uuid
+  launch        Launch            @relation(fields: [launchId], references: [id], onDelete: Cascade)
+  walletAddress String
+  status        EligibilityStatus @default(PENDING)
+  source        String?
+  reason        String?
+  metadata      Json?
+  checkedAt     DateTime? @db.Timestamptz(3)
+  createdAt     DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime          @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([launchId, walletAddress])
+  @@index([launchId, status])
+}
+
+model VestingSchedule {
+  id            String        @id @default(uuid()) @db.Uuid
+  launchId      String        @db.Uuid
+  launch        Launch        @relation(fields: [launchId], references: [id], onDelete: Cascade)
+  walletAddress String
+  totalAmount   Decimal       @db.Decimal(30, 9)
+  claimedAmount Decimal       @default(0) @db.Decimal(30, 9)
+  tgeBps        Int           @default(0)
+  cliffAt       DateTime? @db.Timestamptz(3)
+  startsAt      DateTime @db.Timestamptz(3)
+  endsAt        DateTime @db.Timestamptz(3)
+  status        VestingStatus @default(SCHEDULED)
+  provider      String?
+  externalId    String?
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime      @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([launchId, walletAddress])
+  @@index([status, startsAt])
+}
+
+model Settlement {
+  id             String           @id @default(uuid()) @db.Uuid
+  launchId       String           @db.Uuid
+  launch         Launch           @relation(fields: [launchId], references: [id], onDelete: Cascade)
+  asset          String
+  grossAmount    Decimal          @db.Decimal(30, 9)
+  feeAmount      Decimal          @default(0) @db.Decimal(30, 9)
+  netAmount      Decimal          @db.Decimal(30, 9)
+  treasuryWallet String
+  txSignature    String?          @unique
+  status         SettlementStatus @default(PENDING)
+  reconciledAt   DateTime? @db.Timestamptz(3)
+  createdAt      DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime         @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([launchId, status])
+}
+
+model ChainTransaction {
+  id            String                 @id @default(uuid()) @db.Uuid
+  launchId      String?                @db.Uuid
+  launch        Launch?                @relation(fields: [launchId], references: [id], onDelete: SetNull)
+  kind          String
+  walletAddress String?
+  signature     String?                @unique
+  status        ChainTransactionStatus @default(PREPARED)
+  feeLamports   BigInt?
+  slot          BigInt?
+  errorCode     String?
+  metadata      Json?
+  createdAt     DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime               @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([launchId, status])
+  @@index([walletAddress, createdAt])
+}
+
+model AuditEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  launchId   String?  @db.Uuid
+  launch     Launch?  @relation(fields: [launchId], references: [id], onDelete: SetNull)
+  requestId  String
+  actor      String?
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([launchId, createdAt])
+  @@index([requestId])
+  @@index([resource, resourceId])
+}

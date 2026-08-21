@@ -1,77 +1,9 @@
 {
-  "name": "@powerchain/launchpad-config",
-  "version": "1.0.0",
+  "name": "@powerchain/config",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "tsc -p tsconfig.json"
-  },
-  "devDependencies": {
-    "typescript": "5.9.3"
-  },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./constants": {
-      "types": "./dist/constants.d.ts",
-      "import": "./dist/constants.js",
-      "default": "./dist/constants.js"
-    },
-    "./public": {
-      "types": "./dist/public.d.ts",
-      "import": "./dist/public.js",
-      "default": "./dist/public.js"
-    },
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.js",
-      "default": "./dist/server.js"
-    },
-    "./runtime": {
-      "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.js",
-      "default": "./dist/runtime.js"
-    },
-    "./package.json": "./package.json",
-    "./rpc": {
-      "types": "./dist/rpc.d.ts",
-      "import": "./dist/rpc.js",
-      "default": "./dist/rpc.js"
-    },
-    "./endpoints": {
-      "types": "./dist/endpoints.d.ts",
-      "import": "./dist/endpoints.js",
-      "default": "./dist/endpoints.js"
-    },
-    "./assets": {
-      "types": "./dist/assets.d.ts",
-      "import": "./dist/assets.js",
-      "default": "./dist/assets.js"
-    },
-    "./solana-programs": {
-      "types": "./dist/solana-programs.d.ts",
-      "import": "./dist/solana-programs.js",
-      "default": "./dist/solana-programs.js"
-    },
-    "./payments": {
-      "types": "./dist/payments.d.ts",
-      "import": "./dist/payments.js",
-      "default": "./dist/payments.js"
-    },
-    "./checkout": {
-      "types": "./dist/checkout.d.ts",
-      "import": "./dist/checkout.js",
-      "default": "./dist/checkout.js"
-    }
-  },
-  "types": "./dist/index.d.ts",
-  "main": "./dist/index.js",
-  "engines": {
-    "node": ">=24 <25",
-    "pnpm": ">=11.21.0 <12"
+    ".": "./index.ts"
   }
 }

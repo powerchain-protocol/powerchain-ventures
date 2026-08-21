@@ -1,4 +1,0 @@
-import { useState } from "react";import { StyleSheet,Text,View } from "react-native";import { Button,Field } from "./ui";import { Brand } from "./brand";import { usePowerChainTheme } from "@/theme/use-theme";
-export function AuthShell({title,subtitle,children}:{title:string;subtitle:string;children:React.ReactNode}){const t=usePowerChainTheme();return <View style={styles.wrap}><Brand/><View style={{gap:8}}><Text style={[styles.title,{color:t.colors.text}]}>{title}</Text><Text style={[styles.subtitle,{color:t.colors.textMuted}]}>{subtitle}</Text></View>{children}<Text style={[styles.safety,{color:t.colors.textMuted}]}>PowerChain will never ask for your wallet seed phrase or private key.</Text></View>}
-export {Button,Field};
-const styles=StyleSheet.create({wrap:{padding:22,gap:20},title:{fontSize:30,fontWeight:"900",letterSpacing:-.8},subtitle:{fontSize:14,lineHeight:21},safety:{fontSize:11,lineHeight:17,textAlign:"center",marginTop:6}})

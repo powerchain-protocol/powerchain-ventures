@@ -1,1 +1,1 @@
-export { Information } from "@powerchain/ui";
+export * from "@powerchain/components/information";

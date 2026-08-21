@@ -1,0 +1,9 @@
+{
+  "name": "@powerchain/types",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  }
+}

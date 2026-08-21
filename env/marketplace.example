@@ -1,0 +1,5 @@
+NEXT_PUBLIC_MARKETPLACE_URL=http://localhost:3001
+NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_BACKEND_URL=http://localhost:4000 # deprecated compatibility alias
+NEXT_PUBLIC_APP_ENV=development

@@ -1,2 +1,1 @@
-export { Button, ButtonLink } from "@powerchain/ui";
-export type { ButtonVariant, ButtonSize } from "@powerchain/ui";
+export { Button, buttonVariants, type ButtonProps } from "@powerchain/components/button";

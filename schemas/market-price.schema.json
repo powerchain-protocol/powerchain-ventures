@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.powerchain.ventures/market-price.schema.json",
+  "title": "PowerChain Market Price Result",
+  "type": "object",
+  "required": ["price", "attemptedSources", "fallbackUsed"],
+  "properties": {
+    "price": {
+      "type": "object",
+      "required": ["symbol", "usd", "source", "publishTime", "stale"],
+      "properties": {
+        "symbol": { "type": "string" },
+        "usd": { "type": "number", "exclusiveMinimum": 0 },
+        "source": { "enum": ["pyth", "birdeye", "coingecko"] },
+        "confidence": { "type": ["number", "null"] },
+        "change24h": { "type": ["number", "null"] },
+        "liquidityUsd": { "type": ["number", "null"] },
+        "publishTime": { "type": "string", "format": "date-time" },
+        "stale": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "attemptedSources": { "type": "array", "items": { "enum": ["pyth", "birdeye", "coingecko"] } },
+    "fallbackUsed": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

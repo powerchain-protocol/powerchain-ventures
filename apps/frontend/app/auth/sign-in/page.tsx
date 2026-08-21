@@ -1,2 +1,0 @@
-import {Suspense} from "react";import {AuthShell} from "../../../components/auth/auth-shell";import {SignInForm} from "../../../components/auth/sign-in-form";
-export const metadata={title:"Sign in"};export default function SignInPage(){return <AuthShell title="Welcome back" subtitle="Sign in to manage your launches, activity and account preferences."><Suspense fallback={<div className="auth-form-loading"/>}><SignInForm/></Suspense></AuthShell>}

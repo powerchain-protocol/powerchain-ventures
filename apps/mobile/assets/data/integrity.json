@@ -1,9 +1,0 @@
-{
-  "schemaVersion": 1,
-  "algorithm": "sha256",
-  "files": {
-    "pwrc.json": "5c84df673dd4654580ed6c7ab89ff7269d6b520c0cc6e894b3a15c66a49ed906",
-    "public-registry.json": "5c535800000ddcd895efb8b85705b6bdbd1abf726080def42b0b214677e6e4ed"
-  },
-  "generatedAt": "2026-08-15T00:00:00.000Z"
-}

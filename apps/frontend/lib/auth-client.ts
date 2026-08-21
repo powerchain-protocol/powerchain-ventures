@@ -1,14 +1,15 @@
-"use client";
+import { createAuthClient } from "better-auth/react";
 
-import {
-  createAuthClient,
-} from "better-auth/react";
+const baseURL = process.env.NEXT_PUBLIC_AUTH_URL || process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
 
-export const betterAuthClient =
-  createAuthClient({
-    baseURL:
-      typeof window !== "undefined"
-        ? window.location.origin
-        : undefined,
-    basePath: "/api/auth",
-  });
+export const authClient = createAuthClient({
+  baseURL,
+  fetchOptions: {
+    credentials: "include"
+  },
+  sessionOptions: {
+    refetchInterval: 0,
+    refetchOnWindowFocus: true,
+    refetchWhenOffline: false
+  }
+});

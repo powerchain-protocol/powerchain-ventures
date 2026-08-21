@@ -1,0 +1,26 @@
+"use client";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import * as React from "react";
+import { CheckIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { cn } from "../lib/utils";
+
+export const DropdownMenu = DropdownMenuPrimitive.Root;
+export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+export const DropdownMenuGroup = DropdownMenuPrimitive.Group;
+export const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
+export const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+export const DropdownMenuSubTrigger = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>, React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger>>(({ className, children, ...props }, ref) => <DropdownMenuPrimitive.SubTrigger ref={ref} className={cn("ui-dropdown-item", className)} {...props}>{children}<ChevronRightIcon className="ui-dropdown-chevron" /></DropdownMenuPrimitive.SubTrigger>);
+DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger";
+export const DropdownMenuSubContent = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.SubContent>, React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>>(({ className, ...props }, ref) => <DropdownMenuPrimitive.SubContent ref={ref} className={cn("ui-dropdown-content", className)} {...props} />);
+DropdownMenuSubContent.displayName = "DropdownMenuSubContent";
+export const DropdownMenuContent = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Content>, React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>>(({ className, sideOffset = 7, ...props }, ref) => <DropdownMenuPrimitive.Portal><DropdownMenuPrimitive.Content ref={ref} sideOffset={sideOffset} className={cn("ui-dropdown-content", className)} {...props} /></DropdownMenuPrimitive.Portal>);
+DropdownMenuContent.displayName = "DropdownMenuContent";
+export const DropdownMenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Item>, React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item>>(({ className, ...props }, ref) => <DropdownMenuPrimitive.Item ref={ref} className={cn("ui-dropdown-item", className)} {...props} />);
+DropdownMenuItem.displayName = "DropdownMenuItem";
+export const DropdownMenuCheckboxItem = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>, React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>>(({ className, children, checked, ...props }, ref) => <DropdownMenuPrimitive.CheckboxItem ref={ref} checked={checked} className={cn("ui-dropdown-item", className)} {...props}><span className="ui-dropdown-indicator"><DropdownMenuPrimitive.ItemIndicator><CheckIcon /></DropdownMenuPrimitive.ItemIndicator></span>{children}</DropdownMenuPrimitive.CheckboxItem>);
+DropdownMenuCheckboxItem.displayName = "DropdownMenuCheckboxItem";
+export const DropdownMenuLabel = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Label>, React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label>>(({ className, ...props }, ref) => <DropdownMenuPrimitive.Label ref={ref} className={cn("ui-dropdown-label", className)} {...props} />);
+DropdownMenuLabel.displayName = "DropdownMenuLabel";
+export const DropdownMenuSeparator = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Separator>, React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>>(({ className, ...props }, ref) => <DropdownMenuPrimitive.Separator ref={ref} className={cn("ui-dropdown-separator", className)} {...props} />);
+DropdownMenuSeparator.displayName = "DropdownMenuSeparator";

@@ -1,205 +1,111 @@
-# PowerChain Launchpad™
+# PowerChain Ventures v1.7.0
 
-**Version:** `1.0.0`  
-**Network:** Solana `mainnet-beta`  
-**Token standard:** SPL Token-2022  
-**Workspace:** pnpm `11.21.0` + Turborepo
+PowerChain Ventures is a modular **Tokenized Capital Launch OS** for creating, validating, launching, monitoring, settling and reporting wallet-controlled real-world capital launches on Solana.
 
-PowerChain Launchpad is a full-stack platform for creating, operating, participating in, and settling Token-2022 token sales on Solana. Wallet custody and transaction approval remain with the user; server-side services own authoritative quote, eligibility, persistence, reconciliation, and release checks.
+> **Launch with intelligence. Execute with control. Settle on-chain.**
 
-## Monorepo
+AI may analyze, prepare and coordinate. PowerChain may validate, simulate and orchestrate. **Only an authorized wallet can sign and execute consequential on-chain actions.**
 
-```text
-apps/
-├── frontend/    Next.js Launchpad, creator console, wallet/account UI
-├── backend/     Next.js API v1, pricing, transaction building and settlement
-├── checkout/    Next.js dedicated payment and token-purchase application
-└── mobile/      Expo / React Native companion
+## v1.7.0 UI/UX upgrade
 
-packages/
-├── config/      network, runtime and deployment configuration
-├── domain/      sale, quote, claim and settlement domain logic
-├── integrations/ provider clients, prices, rates and amount conversion
-├── program-client/ Launchpad instruction/PDA client
-├── solana/      shared Solana transport
-├── token-data/  settlement/finality contracts
-├── ui/          shared web UI primitives
-└── utils/       cross-app helpers and transport
+PowerChain Ventures v1.7.0 focuses on product clarity and operator efficiency:
 
-database/        Prisma schema and SQL migrations
-programs/        Solana program source and clients
-env/             environment profile examples
-docs/            architecture, API, security and operations
-scripts/         workspace/release doctors and validators
-tests/           repository regression tests
-```
+- refined marketing header with network/trust announcement and dedicated Create Launch action
+- stronger globe hero with proof points, execution boundaries and live context cards
+- new 11-stage Launch Lifecycle rail from Discover through Report
+- improved project cards, hierarchy, spacing, responsive behavior and light/dark surfaces
+- dedicated application-style Launchpad dashboard shell with sidebar navigation, selected-launch context, command search, notifications, account menu, theme and wallet controls
+- improved mobile dashboard drawer and compact top bar
+- marketplace hero upgraded with search, trust indicators and lifecycle metrics
+- improved marketplace launch-card hover/focus feedback
+- consistent wallet-controlled execution language across public and operator surfaces
 
-There is no `payload/` application layer. Source files live directly in their canonical workspace locations.
 
-## Dedicated Checkout
-
-Token purchase UI lives only in `apps/checkout/`. The Launchpad frontend shows sale information and redirects buyers to:
+## Workspace
 
 ```text
-NEXT_PUBLIC_CHECKOUT_URL/checkout/<saleId>
+powerchain-ventures/
+├── apps/
+│   ├── frontend/              Next.js website + Launch OS + auth + wallets
+│   ├── marketplace/           independent public discovery surface
+│   └── api/                   Express API v1 + Better Auth + Prisma + RPC/data adapters
+├── packages/
+│   ├── components/            shared brand + shadcn/Radix UI primitives
+│   ├── types/                 domain, RPC, market, launch-ops and realtime contracts
+│   ├── config/                browser-safe shared configuration
+│   └── api-client/            typed HTTP client
+├── programs/                  Solana launch lifecycle program scaffold
+├── schemas/                   portable JSON Schema contracts
+├── env/                       environment profiles
+├── ARCHITECTURE.md
+├── SECURITY.md
+├── DATABASE.md
+├── SOLANA.md
+└── CLOUDFLARE.md
 ```
 
-The checkout never authorizes its own price or payment. `apps/backend` reloads sale state, calculates the quote, obtains a bounded SOL/USD market observation, builds and simulates the exact Solana Launchpad transaction, applies the canonical **2.5%** purchase fee, and partially signs with the configured quote authority. The buyer wallet supplies the final signature after reviewing the exact transaction.
+## What v1.6 adds
 
-There is no `apps/payload/` or root `payload/` application layer; `pnpm doctor:layout` enforces this.
+- canonical `apps/api/` backend with `/api/v1/` HTTP contracts and `/api/v1/ws`
+- launch control-plane endpoints for readiness, health, treasury, authorities and lifecycle timeline
+- a launch-specific operator dashboard at `/dashboard/launch/[id]`
+- market price normalization through Pyth, Birdeye and CoinGecko with ordered fallback
+- batch market-price endpoint for dashboard/ticker use
+- primary/fallback Solana RPC routing with an in-process circuit breaker and sanitized diagnostics
+- Helius RPC/DAS/history support with server-only credentials
+- protected realtime `launch:<id>` WebSocket channels and public `market:<SYMBOL>` channels
+- embedded Solana wallets through Privy plus external Phantom/Solflare flows
+- Better Auth + Prisma sessions, optional Cloudflare Turnstile, profile and settings surfaces
+- campaign flow: configure → validate → prepare → simulate → wallet approval → chain verification → LIVE
+- hardened Solana program instruction parsing and lifecycle transition tests
+- request IDs in successful and error API envelopes
 
-### Transaction construction ownership
+## Stack
 
-PowerChain owns reviewed Solana transaction construction inside the monorepo:
+Node 24.x, pnpm 11.22, Next.js 16, React 19, Tailwind CSS 4, Radix UI, shadcn-compatible primitives, Express 5, Better Auth, Prisma/PostgreSQL, Supabase optional integrations, `@solana/web3.js`, Helius, Pyth, Birdeye, CoinGecko, Privy embedded wallets, WebSockets and Cloudflare Workers/OpenNext for the two Next.js surfaces.
 
-```text
-purchase                         apps/backend/lib/purchase-transaction-builder.ts
-claim/lifecycle/program actions  apps/backend/lib/local-program-transaction-builder.ts
-sale activation                  local when creator controls vault
-delegated vault activation       optional external builder capability
-```
-
-The optional delegated-vault path is enabled only with `POWERCHAIN_DELEGATED_VAULT_ACTIVATION_ENABLED=1`.
-
-### Durable purchase finality
-
-Production uses Prisma/PostgreSQL runtime persistence and a leased outbox worker for settlement observation. A purchase moves through `submitted → observed/confirmed → finalized → reconciled`; Checkout shows success only at `reconciled`.
-
-`pnpm runtime:persistence:health` and `pnpm doctor:settlement-worker` protect this architecture at source level.
-
-## Branding
-
-The application brand uses one canonical PowerChain mark:
-
-```text
-apps/frontend/public/assets/brand/powerchain-mark-dark.png
-```
-
-The reusable web component is:
-
-```text
-apps/frontend/components/logo.tsx
-```
-
-`PowerChainLogo` and `PowerChainMark` support dark and light surface tones without maintaining duplicate application-logo artwork. PWRC token artwork remains separate from application branding.
-
-Generated app assets include favicon, Apple touch icon, PWA icons, Expo app icon, adaptive icon, splash icon, and notification icon.
-
-See [`docs/BRANDING.md`](docs/BRANDING.md).
-
-## Network and RPC
-
-The runtime is mainnet-beta first. Browser clients use the PowerChain backend RPC proxy so provider credentials remain server-only:
-
-```text
-POST /api/v1/solana/rpc
-```
-
-Production frontend example:
-
-```env
-NEXT_PUBLIC_SOLANA_CLUSTER=mainnet-beta
-NEXT_PUBLIC_SOLANA_RPC_URL=https://backend.powerchain.energy/api/v1/solana/rpc
-```
-
-Backend providers support `auto`, `helius`, `custom`, and `solana` selection. Keep `HELIUS_API_KEY` and other provider secrets out of `NEXT_PUBLIC_*` and `EXPO_PUBLIC_*` variables.
-
-See [`env/README.md`](env/README.md) and [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
-
-## Install
-
-Requirements:
-
-- Node.js 24
-- pnpm 11.21.0
-- PostgreSQL/Supabase for persistent production state
-- Solana/Rust toolchain when building the on-chain program
+## Local development
 
 ```bash
 corepack enable
-corepack prepare pnpm@11.21.0 --activate
+corepack prepare pnpm@11.22.0 --activate
 pnpm install
-pnpm prisma:generate
+pnpm env:setup
+pnpm db:generate
+pnpm db:migrate
+pnpm dev
 ```
 
-## Development
-
-```bash
-pnpm dev:backend     # http://localhost:3001
-pnpm dev:frontend    # http://localhost:3000
-pnpm dev:checkout    # http://localhost:3002
-pnpm dev:mobile
-```
-
-Local app environment files are intentionally easy to edit:
+Local defaults:
 
 ```text
-.env.local
-apps/frontend/.env.local
-apps/backend/.env.local
-apps/checkout/.env.local
+Frontend     http://localhost:3000
+Marketplace  http://localhost:3001
+API          http://localhost:4000
+Auth         http://localhost:4000/api/auth/*
+API v1       http://localhost:4000/api/v1
+WebSocket    ws://localhost:4000/api/v1/ws
 ```
 
-Never place real private keys, seed phrases, signing material, service-role credentials, or provider API secrets in browser/mobile environment files.
-
-## Quality gates
+For a production Better Auth secret:
 
 ```bash
-pnpm doctor:workspace
-pnpm doctor:workspace-boundaries
-pnpm doctor:program-parity
-pnpm doctor:local-builders
-pnpm doctor:payment-protocols
-pnpm doctor:settlement-worker
-pnpm doctor:env
-pnpm doctor:runtime-resolution
-pnpm openapi:check
-pnpm validate
+openssl rand -base64 48
+```
+
+## Validation
+
+```bash
 pnpm typecheck
-pnpm test
 pnpm build
+pnpm program:check
+pnpm program:test
 ```
 
-Production-sensitive runtime gates are documented in [`docs/RELEASE-CHECKLIST.md`](docs/RELEASE-CHECKLIST.md).
+The Rust program is intentionally separated from JavaScript workspace packages. Set `POWERCHAIN_LAUNCHPAD_PROGRAM_ID` only after deploying the intended program to the selected cluster.
 
-## API
+## Production boundaries
 
-The backend owns the single canonical API contract:
+The API may read chain state and construct/simulate unsigned transactions. It must never receive seed phrases or private keys. Helius, Birdeye, CoinGecko, database, Better Auth, Turnstile and Cloudflare secrets are server-only. Browser wallet RPC variables must not contain raw provider API keys.
 
-```text
-apps/backend/api/openapi/openapi.yaml
-```
-
-Routes:
-
-```text
-GET  /api/v1/openapi
-GET  /api/v1/swagger
-POST /api/v1/solana/rpc
-```
-
-Human developer documentation is available at `/docs/api` in the frontend.
-
-## Security and settlement
-
-Financial mutation safety is layered:
-
-```text
-request validation
-→ request ID
-→ CORS/origin policy
-→ rate limiting
-→ atomic idempotency reservation
-→ mutation receipt
-→ mutation lease / heartbeat
-→ transaction submission
-→ settlement record
-→ Solana finality observation
-→ reconciliation
-```
-
-A transaction signature alone is not treated as completed settlement. Production completion requires finalized and reconciled settlement state.
-
-## Documentation
-
-Start with [`docs/README.md`](docs/README.md).
+Read [ARCHITECTURE.md](./ARCHITECTURE.md), [SECURITY.md](./SECURITY.md), [DATABASE.md](./DATABASE.md), [SOLANA.md](./SOLANA.md) and [CLOUDFLARE.md](./CLOUDFLARE.md) before enabling production writes.

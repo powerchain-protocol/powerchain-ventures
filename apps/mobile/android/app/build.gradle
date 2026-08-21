@@ -1,8 +1,0 @@
-apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
-react { entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", rootDir.getAbsolutePath(), "android", "absolute"].execute(null, rootDir).text.trim()); autolinkLibrariesWithApp() }
-android { namespace "com.powerchain.launchpad"; compileSdk 36
-  defaultConfig { applicationId "com.powerchain.launchpad"; minSdk 24; targetSdk 36; versionCode 1; versionName "1.0.0" }
-}
-dependencies { implementation("com.facebook.react:react-android"); if (hermesEnabled.toBoolean()) implementation("com.facebook.react:hermes-android") }

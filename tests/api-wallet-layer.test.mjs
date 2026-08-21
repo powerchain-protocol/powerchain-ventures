@@ -1,7 +1,0 @@
-import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs';
-const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
-test('v1 API surface includes cors tokens transactions and checkout',()=>{for(const p of ['apps/backend/app/api/v1/cors/route.ts','apps/backend/app/api/v1/tokens/route.ts','apps/backend/app/api/v1/transactions/route.ts','apps/backend/app/api/v1/checkout/route.ts'])assert.ok(fs.existsSync(new URL(`../${p}`,import.meta.url)));});
-test('checkout requires wallet validation and idempotency',()=>{const s=read('apps/backend/app/api/v1/checkout/route.ts');assert.match(s,/safeActionContext/);assert.match(s,/requireIdempotency:true/);assert.match(s,/launchpad\/purchase\/prepare/);});
-test('wallet modal states non-custodial secret policy',()=>{const s=read('apps/frontend/components/wallet/wallet-connect-modal.tsx');assert.match(s,/never requests private keys or recovery phrases/i);assert.match(s,/PowerChain review screen/);});
-test('embedded wallet adapter rejects secret material',()=>{const s=read('apps/frontend/lib/embedded-wallets.ts');assert.match(s,/assertNoSecretMaterial/);assert.match(s,/private\[_ -\]\?key/);});
-test('backend proxy applies centralized CORS policy to all v1 API responses',()=>{const proxy=read('apps/backend/proxy.ts');const cors=read('apps/backend/lib/cors.ts');assert.match(proxy,/corsHeadersFor/);assert.match(proxy,/request\.method === "OPTIONS"/);assert.match(cors,/access-control-allow-origin/);assert.match(cors,/ALLOWED_ORIGINS/);});

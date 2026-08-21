@@ -1,0 +1,2 @@
+const script = `(() => { try { const saved = localStorage.getItem('powerchain-theme'); const theme = saved === 'dark' || saved === 'light' ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; } catch {} })();`;
+export function ThemeScript(){return <script dangerouslySetInnerHTML={{__html:script}}/>}

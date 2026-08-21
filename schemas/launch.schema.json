@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://powerchain.ventures/schemas/launch.schema.json",
+  "title": "PowerChain Launch",
+  "type": "object",
+  "required": ["name", "slug", "settlementAsset"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string", "minLength": 3, "maxLength": 120 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "description": { "type": "string", "maxLength": 4000 },
+    "category": { "type": "string", "maxLength": 80 },
+    "tokenMint": { "type": "string", "minLength": 32, "maxLength": 44 },
+    "treasuryWallet": { "type": "string", "minLength": 32, "maxLength": 44 },
+    "targetAmount": { "type": "number", "exclusiveMinimum": 0 },
+    "settlementAsset": { "enum": ["USDC", "SOL"] }
+  },
+  "additionalProperties": false
+}

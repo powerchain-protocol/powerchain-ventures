@@ -1,5 +1,0 @@
-import { applySessionCookies, authEnabled, signInWithPassword, toPublicUser } from "../../../../../lib/auth";
-import { errorFromUnknown, json, readJson, requestId } from "../../../../../lib/http";
-import { enforceRateLimit } from "../../../../../lib/rate-limit-response";
-import { validateEmail, validatePassword } from "../../../../../lib/validate";
-export async function POST(request:Request){const id=requestId(request);try{if(!authEnabled())return json({ok:false,error:{code:"CONFIGURATION_ERROR",message:"Account authentication is not configured"}},{status:503},id);const limited=await enforceRateLimit(request,"auth-sign-in",12);if(limited)return limited;const body=await readJson<{email?:string;password?:string}>(request);const email=validateEmail(body.email);const password=validatePassword(body.password);const session=await signInWithPassword(email,password);const headers=applySessionCookies(session);return json({ok:true,user:toPublicUser(session.user)},{headers},id)}catch(error){return errorFromUnknown(error,id)}}

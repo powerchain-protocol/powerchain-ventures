@@ -1,0 +1,47 @@
+{
+  "name": "@powerchain/components",
+  "version": "1.7.0",
+  "private": true,
+  "exports": {
+    ".": "./ui/index.ts",
+    "./logo": "./ui/logo.tsx",
+    "./icons": "./ui/icons.tsx",
+    "./button": "./ui/button.tsx",
+    "./card": "./ui/card.tsx",
+    "./dialog": "./ui/dialog.tsx",
+    "./utils": "./lib/utils.ts",
+    "./badge": "./ui/badge.tsx",
+    "./input": "./ui/input.tsx",
+    "./progress": "./ui/progress.tsx",
+    "./skeleton": "./ui/skeleton.tsx",
+    "./separator": "./ui/separator.tsx",
+    "./dropdown-menu": "./ui/dropdown-menu.tsx",
+    "./tooltip": "./ui/tooltip.tsx",
+    "./tabs": "./ui/tabs.tsx",
+    "./avatar": "./ui/avatar.tsx",
+    "./textarea": "./ui/textarea.tsx",
+    "./select": "./ui/select.tsx",
+    "./pagination": "./ui/pagination.tsx",
+    "./form": "./ui/form.tsx",
+    "./table": "./ui/table.tsx",
+    "./alarms": "./ui/alarms.tsx",
+    "./information": "./ui/information.tsx",
+    "./bells": "./ui/bells.tsx"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-slot": "^1.1.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-select": "^2.2.6"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  }
+}

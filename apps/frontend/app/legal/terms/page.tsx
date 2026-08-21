@@ -1,27 +1,5 @@
-import { InfoPage } from "../../../components/content/info-page";
-
-export const metadata = { title: "Terms of use" };
-
-export default function Page() {
-  return (
-    <InfoPage
-      eyebrow={"Legal"}
-      title={"Terms of use"}
-      intro={"Using PowerChain Launchpad means you are responsible for reviewing the sale, network, wallet and transaction details before signing."}
-      sections={[
-        {
-                "title": "No custody",
-                "body": "PowerChain does not take custody of your wallet credentials. You remain responsible for wallet access and approvals."
-        },
-        {
-                "title": "Token-sale risk",
-                "body": "Token sales and digital assets can be volatile and may carry technical, market and regulatory risk. Verify each project independently."
-        },
-        {
-                "title": "Transaction finality",
-                "body": "A submitted signature is not treated as settlement by PowerChain until required Solana and backend verification succeeds."
-        }
-]}
-    />
-  );
-}
+import type { Metadata } from "next";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+export const metadata: Metadata = { title: "Terms of Service" };
+export default function Page(){return <><Header/><main><section className="page-hero center"><div className="container"><span className="eyebrow">Legal</span><h1 className="section-title">Terms of Service</h1><p className="section-copy">Last updated August 20, 2026.</p></div></section><section className="section"><article className="container legal-copy"><p>These draft terms are provided as implementation content and require legal review before deployment.</p><h2>Software access</h2><p>PowerChain provides software for configuring, reviewing, monitoring, and interacting with tokenized launch workflows. Availability of a feature does not constitute an offer of securities, investment advice, or a guarantee that a launch is lawful in any jurisdiction.</p><h2>Wallet authorization</h2><p>Users are responsible for reviewing wallet requests and verifying transaction details before signing. PowerChain does not control the user's wallet or private keys.</p><h2>Project responsibility</h2><p>Launch creators remain responsible for project information, eligibility rules, required disclosures, legal compliance, treasury policies, and authorized actions.</p><h2>Availability</h2><p>Blockchain networks, RPC providers, wallets, and third-party integrations may experience outages, delays, reorganizations, or other failures outside PowerChain's control.</p></article></section></main><Footer/></>}

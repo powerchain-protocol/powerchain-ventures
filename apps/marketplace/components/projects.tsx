@@ -1,0 +1,14 @@
+"use client";
+import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { ArrowRightIcon } from "@radix-ui/react-icons";
+const projects=[
+{name:"Solar Energy Alpha",cat:"Renewable Energy",raised:"$428,500",target:"$750,000",pct:57,status:"LIVE",art:"solar"},
+{name:"Wind Power Network",cat:"Energy Infrastructure",raised:"$210,000",target:"$500,000",pct:42,status:"LIVE",art:"wind"},
+{name:"HydroGrid Initiative",cat:"Renewable Energy",raised:"$0",target:"$900,000",pct:0,status:"UPCOMING",art:"hydro"},
+{name:"Green Industrial Fund",cat:"Infrastructure",raised:"$0",target:"$1,200,000",pct:0,status:"REVIEW",art:"industry"},
+{name:"Community Impact Fund",cat:"Community",raised:"$62,000",target:"$250,000",pct:25,status:"LIVE",art:"community"},
+{name:"Clean Mobility Series A",cat:"Infrastructure",raised:"$301,000",target:"$650,000",pct:46,status:"LIVE",art:"mobility"}
+];
+const filters=["All","Renewables","Infrastructure","Community"] as const;
+export function Projects(){const params=useSearchParams();const[filter,setFilter]=useState<(typeof filters)[number]>("All");const q=(params.get("q")||"").trim().toLowerCase();const visible=useMemo(()=>projects.filter(project=>{const categoryOk=filter==="All"||(filter==="Renewables"?project.cat.toLowerCase().includes("renewable"):project.cat===filter);const queryOk=!q||`${project.name} ${project.cat} ${project.status}`.toLowerCase().includes(q);return categoryOk&&queryOk}),[filter,q]);return <section id="projects" className="market-section"><div className="market-wrap"><div className="market-section-heading"><div><span className="eyebrow">Explore launches</span><h2>{q?`Results for “${q}”`:"Projects building measurable real-world impact."}</h2></div><div className="market-filters">{filters.map(item=><button key={item} className={`filter ${filter===item?"active":""}`} onClick={()=>setFilter(item)}>{item}</button>)}</div></div>{visible.length?<div className="market-grid">{visible.map(project=><article className="launch-card" key={project.name}><div className={`launch-art ${project.art}`}><span>{project.status}</span></div><div className="launch-card-body"><small>{project.cat}</small><h3>{project.name}</h3><div className="launch-progress" role="progressbar" aria-valuenow={project.pct} aria-valuemin={0} aria-valuemax={100}><i style={{width:`${project.pct}%`}}/></div><div className="launch-money"><div><span>Raised</span><strong>{project.raised}</strong></div><div><span>Target</span><strong>{project.target}</strong></div></div><button className="button button-outline">View project <ArrowRightIcon/></button></div></article>)}</div>:<div className="market-empty"><strong>No launches match your filters.</strong><p>Try another category or clear the search query.</p><button className="button button-outline" onClick={()=>setFilter("All")}>Show all categories</button></div>}</div></section>}

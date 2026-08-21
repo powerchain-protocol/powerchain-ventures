@@ -1,2 +1,1 @@
-export { Tabs, TabPanel } from "@powerchain/ui";
-export type { TabItem } from "@powerchain/ui";
+export * from "@powerchain/components/tabs";

@@ -1,4 +1,0 @@
-import {analyticsBounds,mintTransfersSql,mintVolumeSql,runCdpSql,transferContextSql} from "../../../../../../lib/cdp-sql";
-import {errorFromUnknown,json,requestId} from "../../../../../../lib/http";
-export const runtime="nodejs";
-export async function GET(request:Request){const id=requestId(request);try{const url=new URL(request.url),mint=url.searchParams.get("mint")??"",{days,limit}=analyticsBounds(url);const [transfers,volume,context]=await Promise.all([runCdpSql(mintTransfersSql(mint,days,limit),5000),runCdpSql(mintVolumeSql(mint,days),15000),runCdpSql(transferContextSql(mint,days,Math.min(limit,100)),5000)]);return json({ok:true,beta:true,network:"solana-mainnet",retention:"approximately-3-months",mint,days,transfers:transfers.result,volume:volume.result,instructionContext:context.result,metadata:{transfers:transfers.metadata,volume:volume.metadata,context:context.metadata}}, {}, id)}catch(e){return errorFromUnknown(e,id)}}

@@ -1,0 +1,2 @@
+import Link from "next/link";import { Header } from "@/components/header";import { Footer } from "@/components/footer";
+export default function NotFound(){return <><Header/><main className="market-not-found"><div className="market-wrap market-center"><span className="eyebrow">404</span><h1>Project route not found.</h1><p>The page may have moved or the project identifier may be incomplete.</p><Link className="button button-primary" href="/">Explore Marketplace</Link></div></main><Footer/></>}

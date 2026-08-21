@@ -1,9 +1,0 @@
-import test from "node:test";import assert from "node:assert/strict";import fs from "node:fs";import path from "node:path";const root=process.cwd();
-const read=p=>fs.readFileSync(path.join(root,p),"utf8");
-test("mobile workspace and native shells exist",()=>{for(const p of ["apps/mobile/package.json","apps/mobile/app.config.ts","apps/mobile/ios/PowerChainLaunchpad/AppDelegate.swift","apps/mobile/android/app/src/main/java/com/powerchain/launchpad/MainActivity.kt","docs/MOBILE-APP.md"])assert.equal(fs.existsSync(path.join(root,p)),true,p)});
-test("mobile env never documents server secrets",()=>{const env=read("apps/mobile/.env.example");for(const secret of ["SUPABASE_SERVICE_ROLE_KEY=","HELIUS_API_KEY=","BIRDEYE_API_KEY=","CDP_API_KEY_SECRET=","POWERCHAIN_TRANSACTION_BUILDER_API_KEY="])assert.equal(env.includes(secret),false,secret)});
-test("mobile auth uses secure store and backend accepts bearer auth",()=>{assert.match(read("apps/mobile/src/lib/supabase.ts"),/secureStorage/);assert.match(read("apps/backend/lib/auth.ts"),/authorization.*bearer/is)});
-test("mobile signing fails closed without approved native adapter",()=>{const wallet=read("apps/mobile/src/services/wallet.ts");assert.match(wallet,/Native Solana signing adapter is not configured/);assert.equal(/private.?key|seed.?phrase/i.test(wallet),false)});
-
-test("mobile auth handles PKCE deep links",()=>{const a=read("apps/mobile/src/context/auth-context.tsx");assert.match(a,/exchangeCodeForSession/);assert.match(a,/powerchain:\/\/callback/);assert.match(a,/powerchain:\/\/update-password/)});
-test("native requests are not rejected solely for missing browser Origin",()=>{const proxy=read("apps/backend/proxy.ts");const cors=read("apps/backend/lib/cors.ts");assert.match(proxy,/origin &&\s*!isCorsOriginAllowed/s);assert.match(cors,/if \(!origin\) return true/)});

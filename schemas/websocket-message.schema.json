@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.powerchain.ventures/websocket-message.schema.json",
+  "title": "PowerChain WebSocket Client Message",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["type", "channels"],
+      "properties": {
+        "type": { "enum": ["subscribe", "unsubscribe"] },
+        "channels": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "pattern": "^(market:[A-Z0-9_-]{2,12}|launch:[a-zA-Z0-9_-]{1,80})$" } }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": { "type": { "const": "ping" } },
+      "additionalProperties": false
+    }
+  ]
+}

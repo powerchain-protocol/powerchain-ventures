@@ -1,72 +1,14 @@
-# PowerChain Solana Programs
+# PowerChain Launchpad Solana Program v1.6.0
 
-PowerChain Launchpad™ `1.0.0` on-chain source lives under this Rust workspace.
+`programs/src/` contains the low-level wallet-authorized launch lifecycle scaffold used by the API transaction builder.
 
-```text
-programs/
-├── Cargo.toml
-└── launchpad/
-    ├── Cargo.toml
-    ├── README.md
-    ├── idl/
-    │   └── powerchain-launchpad.json
-    ├── src/
-    │   ├── instruction.rs
-    │   ├── lib.rs
-    │   ├── processor.rs
-    │   └── state.rs
-    └── tests/
-```
+Current instructions: `Initialize`, `Configure`, `MoveToReview`, `Activate`, `Pause`, and `Finalize`.
 
-## Deployment identity
-
-The repository deliberately does **not** compile a fabricated Launchpad Program ID. After a verified SBF deployment, provide the actual address through:
-
-```text
-POWERCHAIN_LAUNCHPAD_PROGRAM_ID
-```
-
-The client/backend validate that sale PDAs and the executable program account match that deployment.
-
-## Purchase invariant
-
-The `Purchase` operation requires both:
-
-- buyer signature;
-- configured quote-authority signature.
-
-It enforces the canonical PowerChain fee wallet:
-
-```text
-FeeszhrKKEsvxr1kg8LDtPx6BLcEbYHiAThYaxajNhqy
-```
-
-and the fixed purchase service fee of **250 bps**.
-
-The off-chain backend constructs the exact transaction in `apps/backend/lib/purchase-transaction-builder.ts`, partially signs it with the configured quote authority, simulates it, and hands the serialized transaction to `apps/checkout` for the buyer's wallet signature.
-
-## Build and tests
-
-With a Rust/Solana toolchain installed:
+The program verifies PDA seeds, account ownership and authority signatures, rejects reinitialization, rejects malformed/trailing instruction data and enforces explicit lifecycle transitions.
 
 ```bash
-cd programs
-cargo fmt --all -- --check
-cargo check --workspace
-cargo test --workspace
+pnpm program:check
+pnpm program:test
 ```
 
-SBF deployment/build commands depend on the installed Solana toolchain and deployment environment. Do not treat a native `cargo check` as proof of a deployed or executable SBF program.
-
-
-## Program/client parity
-
-`programs/launchpad/idl/powerchain-launchpad.json`, the Rust Borsh enum, `@powerchain/launchpad-program-client`, canonical fee constants and transaction-review labels are checked together by:
-
-```bash
-pnpm doctor:program-parity
-```
-
-The IDL keeps `programId: null` until a real deployment is verified.
-
-The optimized release profile enables overflow checks and single-unit LTO. Native Rust tests cover fee rounding and sale/vesting timing invariants.
+Set `POWERCHAIN_LAUNCHPAD_PROGRAM_ID` to the deployed program ID for the selected cluster. Do not use a placeholder program ID for production transaction preparation.

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.powerchain.ventures/campaign.schema.json",
+  "title": "PowerChain Campaign Draft",
+  "type": "object",
+  "required": ["name", "slug", "description", "category", "tokenMint", "treasuryWallet", "targetAmount", "settlementAsset", "phase"],
+  "properties": {
+    "name": { "type": "string", "minLength": 3, "maxLength": 120 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "description": { "type": "string", "minLength": 20, "maxLength": 4000 },
+    "category": { "type": "string", "minLength": 2, "maxLength": 80 },
+    "tokenMint": { "type": "string", "minLength": 32, "maxLength": 44 },
+    "treasuryWallet": { "type": "string", "minLength": 32, "maxLength": 44 },
+    "targetAmount": { "type": "number", "exclusiveMinimum": 0 },
+    "settlementAsset": { "enum": ["USDC", "SOL"] },
+    "phase": {
+      "type": "object",
+      "required": ["name", "price", "allocation"],
+      "properties": {
+        "name": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "price": { "type": "number", "exclusiveMinimum": 0 },
+        "allocation": { "type": "number", "exclusiveMinimum": 0 },
+        "minContribution": { "type": "number", "exclusiveMinimum": 0 },
+        "maxContribution": { "type": "number", "exclusiveMinimum": 0 },
+        "startsAt": { "type": "string", "format": "date-time" },
+        "endsAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

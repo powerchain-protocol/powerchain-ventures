@@ -1,22 +1,17 @@
-[workspace]
-members = ["launchpad"]
-resolver = "2"
-
-[workspace.package]
-version = "1.0.0"
+[package]
+name = "powerchain-launchpad-program"
+version = "1.6.0"
 edition = "2021"
+description = "PowerChain Ventures wallet-controlled launch lifecycle program scaffold"
 license = "Apache-2.0"
 
-[workspace.dependencies]
-solana-program = "4.1.0"
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+default = []
+
+[dependencies]
 borsh = { version = "1.5", features = ["derive"] }
-spl-token-2022 = { version = "11.0.0", features = ["no-entrypoint"] }
-thiserror = "2.0"
-
-
-[profile.release]
-opt-level = "s"
-lto = "fat"
-codegen-units = 1
-overflow-checks = true
-panic = "abort"
+solana-program = "2.3"

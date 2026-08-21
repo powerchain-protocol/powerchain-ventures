@@ -1,0 +1,315 @@
+openapi: 3.1.0
+info:
+  title: PowerChain Ventures API
+  version: 1.6.0
+  description: >-
+    API for campaign configuration, wallet-controlled launch preparation, Solana verification,
+    market-data fallbacks, lifecycle data, account settings, and realtime metadata. The API never signs transactions.
+servers:
+  - url: https://api.powerchain.ventures/api/v1
+  - url: http://localhost:4000/api/v1
+paths:
+  /health:
+    get:
+      summary: Service health
+      responses:
+        "200": { description: Healthy }
+  /health/live:
+    get:
+      summary: Liveness probe
+      responses:
+        "200": { description: Process is live }
+  /health/ready:
+    get:
+      summary: Readiness probe
+      responses:
+        "200": { description: Dependencies are ready }
+        "503": { description: A required dependency is unavailable }
+  /account/me:
+    get:
+      summary: Current authenticated account
+      security: [{ cookieSession: [] }]
+      responses:
+        "200": { description: Authenticated account }
+        "401": { description: Authentication required }
+  /account/profile:
+    patch:
+      summary: Update account profile
+      security: [{ cookieSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, minLength: 2, maxLength: 80 }
+                image: { type: [string, "null"], format: uri }
+      responses:
+        "200": { description: Updated profile }
+  /account/settings:
+    get:
+      summary: Get account preferences
+      security: [{ cookieSession: [] }]
+      responses:
+        "200": { description: Account settings }
+    patch:
+      summary: Update account preferences
+      security: [{ cookieSession: [] }]
+      responses:
+        "200": { description: Updated settings }
+  /launches:
+    get:
+      summary: List launches
+      responses:
+        "200": { description: Launches }
+  /launches/{id}:
+    get:
+      summary: Get launch
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Launch }
+        "404": { description: Not found }
+  /launches/{id}/readiness:
+    get:
+      summary: Get dynamic launch readiness
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Readiness }
+  /launches/{id}/health:
+    get:
+      summary: Get dynamic launch health signals
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Launch health }
+  /launches/{id}/overview:
+    get:
+      summary: Get authenticated launch operator snapshot
+      security: [{ cookieSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Readiness, health, treasury, authorities and timeline }
+        "403": { description: Launch management denied }
+  /launches/{id}/timeline:
+    get:
+      summary: Get authenticated launch timeline
+      security: [{ cookieSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Timeline }
+  /launches/{id}/treasury:
+    get:
+      summary: Get authenticated launch treasury state
+      security: [{ cookieSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Treasury summary }
+  /launches/{id}/authorities:
+    get:
+      summary: Get authenticated launch authority state
+      security: [{ cookieSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      responses:
+        "200": { description: Authorities }
+  /campaigns:
+    post:
+      summary: Create a campaign draft and initial sale phase
+      security: [{ cookieSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CampaignDraft" }
+      responses:
+        "201": { description: Campaign created }
+        "400": { description: Invalid campaign }
+  /campaigns/{id}/prepare-launch:
+    post:
+      summary: Validate readiness, build and simulate unsigned activation
+      security: [{ cookieSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [authority]
+              properties:
+                authority: { type: string }
+                simulate: { type: boolean, default: true }
+      responses:
+        "200": { description: Transaction review object }
+        "403": { description: Management denied }
+        "409": { description: Launch not ready }
+  /campaigns/{id}/confirm-launch:
+    post:
+      summary: Verify a confirmed Solana activation transaction and mark campaign live
+      security: [{ cookieSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewId, signature, authority]
+              properties:
+                reviewId: { type: string, format: uuid }
+                signature: { type: string, minLength: 64, maxLength: 128 }
+                authority: { type: string }
+      responses:
+        "200": { description: Live campaign }
+        "409": { description: Chain verification failed or transaction not yet visible }
+  /transactions/simulate:
+    post:
+      summary: Simulate an unsigned serialized Solana transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionBase64: { type: string, maxLength: 750000 }
+      responses:
+        "200": { description: Simulation result }
+  /solana/status:
+    get:
+      summary: Solana RPC status with sanitized provider metadata
+      responses:
+        "200": { description: Solana status }
+  /solana/wallets/{address}/balance:
+    get:
+      summary: Wallet SOL balance
+      parameters: [{ $ref: "#/components/parameters/address" }]
+      responses:
+        "200": { description: Balance }
+  /solana/wallets/{address}/assets:
+    get:
+      summary: Helius DAS assets by owner
+      parameters: [{ $ref: "#/components/parameters/address" }]
+      responses:
+        "200": { description: Asset page }
+  /solana/wallets/{address}/transactions:
+    get:
+      summary: Helius transaction history
+      parameters: [{ $ref: "#/components/parameters/address" }]
+      responses:
+        "200": { description: Transaction page }
+  /solana/wallets/{address}/transfers:
+    get:
+      summary: Helius normalized transfer history
+      parameters: [{ $ref: "#/components/parameters/address" }]
+      responses:
+        "200": { description: Transfer page }
+  /market/price:
+    get:
+      summary: Fetch a normalized price with provider fallback
+      parameters:
+        - { name: symbol, in: query, schema: { type: string, default: SOL } }
+        - { name: source, in: query, schema: { enum: [pyth, birdeye, coingecko] } }
+        - { name: fallback, in: query, schema: { enum: ["true", "false"] } }
+        - { name: refresh, in: query, schema: { enum: ["true", "false"] } }
+      responses:
+        "200": { description: Normalized price }
+        "503": { description: No provider returned a price }
+  /market/prices:
+    get:
+      summary: Fetch up to 12 normalized prices with provider fallback
+      parameters:
+        - { name: symbols, in: query, required: true, schema: { type: string, example: "SOL,USDC,PWRC" } }
+        - { name: source, in: query, schema: { enum: [pyth, birdeye, coingecko] } }
+        - { name: fallback, in: query, schema: { enum: ["true", "false"] } }
+        - { name: refresh, in: query, schema: { enum: ["true", "false"] } }
+      responses:
+        "200": { description: Available prices plus unavailable symbols }
+  /market/providers:
+    get:
+      summary: Provider configuration and health
+      responses:
+        "200": { description: Provider health }
+  /lifecycle/participants:
+    get:
+      summary: Paginated launch participants
+      parameters: [{ $ref: "#/components/parameters/launchId" }]
+      responses:
+        "200": { description: Participants }
+  /lifecycle/claims:
+    get:
+      summary: Paginated claims
+      parameters: [{ $ref: "#/components/parameters/launchId" }]
+      responses:
+        "200": { description: Claims }
+  /lifecycle/settlements:
+    get:
+      summary: Paginated settlements
+      parameters: [{ $ref: "#/components/parameters/launchId" }]
+      responses:
+        "200": { description: Settlements }
+  /lifecycle/activity:
+    get:
+      summary: Paginated audit activity
+      parameters: [{ $ref: "#/components/parameters/launchId" }]
+      responses:
+        "200": { description: Activity }
+  /system/runtime:
+    get:
+      summary: Sanitized runtime configuration
+      responses:
+        "200": { description: Runtime metadata }
+  /system/fallbacks:
+    get:
+      summary: Sanitized Solana, market and realtime fallback topology
+      responses:
+        "200": { description: Fallback status }
+  /system/realtime:
+    get:
+      summary: Realtime WebSocket status and counters
+      responses:
+        "200": { description: Realtime status }
+components:
+  securitySchemes:
+    cookieSession:
+      type: apiKey
+      in: cookie
+      name: powerchain.session_token
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    address:
+      name: address
+      in: path
+      required: true
+      schema: { type: string, minLength: 32, maxLength: 44 }
+    launchId:
+      name: launchId
+      in: query
+      required: true
+      schema: { type: string }
+  schemas:
+    CampaignDraft:
+      type: object
+      required: [name, slug, description, category, tokenMint, treasuryWallet, targetAmount, settlementAsset, phase]
+      properties:
+        name: { type: string, minLength: 3, maxLength: 120 }
+        slug: { type: string, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
+        description: { type: string, minLength: 20, maxLength: 4000 }
+        category: { type: string }
+        tokenMint: { type: string }
+        treasuryWallet: { type: string }
+        targetAmount: { type: number, exclusiveMinimum: 0 }
+        settlementAsset: { enum: [USDC, SOL] }
+        phase:
+          type: object
+          required: [name, price, allocation]
+          properties:
+            name: { type: string }
+            price: { type: number, exclusiveMinimum: 0 }
+            allocation: { type: number, exclusiveMinimum: 0 }
+            minContribution: { type: number, exclusiveMinimum: 0 }
+            maxContribution: { type: number, exclusiveMinimum: 0 }
+            startsAt: { type: string, format: date-time }
+            endsAt: { type: string, format: date-time }

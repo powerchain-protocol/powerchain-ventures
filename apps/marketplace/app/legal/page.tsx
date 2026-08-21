@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+export default function Page(){return <><Header/><main><section className="market-page-hero"><div className="market-wrap market-center"><span className="eyebrow">Legal center</span><h1>Marketplace legal information.</h1><p>Policies and disclosures for browsing and interacting with PowerChain Marketplace.</p></div></section><section className="market-section"><div className="market-wrap market-legal-grid"><Link href="/legal/privacy"><h2>Privacy</h2><p>Information processing and wallet-address data.</p></Link><Link href="/legal/terms"><h2>Terms</h2><p>Conditions for using Marketplace.</p></Link><Link href="/legal/risk-disclosure"><h2>Risk Disclosure</h2><p>Project, token, blockchain, market, and regulatory risk.</p></Link></div></section></main><Footer/></>}
